@@ -1,0 +1,10 @@
+include LICENSE
+include python-ligo-lw.spec
+include setup.py
+recursive-include bin *
+recursive-include db2 *
+recursive-include debian *
+recursive-include etc *
+recursive-include ligo *
+include test/Makefile
+include test/*.py test/*.sh test/*.xml*

@@ -1,3 +1,0 @@
-#!/usr/bin/make -f
-CONFIGUREARGS = --enable-swig --enable-openmp
-include debian/lalsuite.mk

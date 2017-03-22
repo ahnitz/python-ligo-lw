@@ -1,0 +1,54 @@
+Source: python-ligo-lw
+Section: python
+Priority: optional
+Maintainer: Steffen Grunewald <steffen.grunewald@aei.mpg.de>
+Build-Depends:
+ debhelper (>= 9),
+ python-dev,
+ python3-dev,
+ python-six,
+ python3-six,
+ dh-python
+X-Python-Version: >= 2.7
+X-Python3-Version: >= 3.4
+Standards-Version: 3.9.3
+
+Package: python-ligo-lw
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ ${python:Depends},
+ lal-python,
+ python-glue,
+ python-glue-segments,
+ python-numpy,
+ python-six
+Conflicts:
+ python-glue-ligolw-tools
+Replaces:
+ python-glue-ligolw-tools
+Provides:
+ python-glue-ligolw-tools
+Description: LIGO Light-Weight XML I/O library
+ The LIGO Light-Weight XML format is used extensively by compact object
+ detection pipelines and associate tool sets.  This package provides a
+ Python I/O library for reading, writing, and interacting with documents in
+ this format.
+
+Package: python3-ligo-lw
+Architecture: any
+Depends:
+ ${shlibs:Depends},
+ ${misc:Depends},
+ ${python3:Depends},
+ lal-python3,
+ python3-glue,
+ python3-glue-segments,
+ python3-numpy,
+ python3-six
+Description: LIGO Light-Weight XML I/O library
+ The LIGO Light-Weight XML format is used extensively by compact object
+ detection pipelines and associate tool sets.  This package provides a
+ Python I/O library for reading, writing, and interacting with documents in
+ this format.
