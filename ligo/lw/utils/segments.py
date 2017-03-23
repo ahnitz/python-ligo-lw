@@ -32,17 +32,12 @@ Ask Kipp to document this!
 import itertools
 
 
-from glue import git_version
 from glue import iterutils
 from glue import segments
 from glue import segmentsUtils
+from .. import __author__, __date__, __version__
 from .. import ligolw
 from .. import lsctables
-
-
-__author__ = "Kipp Cannon <kipp.cannon@ligo.org>"
-__version__ = "git id %s" % git_version.id
-__date__ = git_version.date
 
 
 #
@@ -350,10 +345,10 @@ class LigolwSegments(set):
 	>>> import sys
 	>>> from glue.segments import *
 	>>> from lal import LIGOTimeGPS
-	>>> from glue.ligolw import ligolw, lsctables
+	>>> from ligo.lw import ligolw, lsctables
 	>>> xmldoc = ligolw.Document()
 	>>> xmldoc.appendChild(ligolw.LIGO_LW())	# doctest: +ELLIPSIS
-	<glue.ligolw.ligolw.LIGO_LW object at ...>
+	<ligo.lw.ligolw.LIGO_LW object at ...>
 	>>> process = lsctables.Process(process_id = lsctables.ProcessTable.get_next_id())
 	>>> with LigolwSegments(xmldoc, process) as xmlsegments:
 	...	h1segs = segmentlist([segment(LIGOTimeGPS(0), LIGOTimeGPS(10))])

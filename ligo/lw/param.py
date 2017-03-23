@@ -204,12 +204,12 @@ class Param(ligolw.Param):
 def use_in(ContentHandler):
 	"""
 	Modify ContentHandler, a sub-class of
-	glue.ligolw.LIGOLWContentHandler, to cause it to use the Param
+	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the Param
 	class defined in this module when parsing XML documents.
 
 	Example:
 
-	>>> from glue.ligolw import ligolw
+	>>> from ligo.lw import ligolw
 	>>> def MyContentHandler(ligolw.LIGOLWContentHandler):
 	...	pass
 	...

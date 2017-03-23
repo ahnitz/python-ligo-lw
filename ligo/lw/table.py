@@ -74,8 +74,8 @@ def get_table(xmldoc, name):
 
 	NOTE:  if a Table sub-class has its .tableName attribute set, then
 	its .get_table() class method can be used instead.  This is true
-	for all Table classes in the glue.ligolw.lsctables module, and it
-	is recommended to always use the .get_table() class method of those
+	for all Table classes in the ligo.lw.lsctables module, and it is
+	recommended to always use the .get_table() class method of those
 	classes to retrieve those standard tables instead of calling this
 	function and passing the .tableName attribute.  The example below
 	shows both techniques.
@@ -155,7 +155,7 @@ class Column(ligolw.Column):
 	>>> tbl = Table(AttributesImpl({u"Name": u"test"}))
 	>>> col = tbl.appendChild(Column(AttributesImpl({u"Name": u"test:snr", u"Type": u"real_8"})))
 	>>> tbl.appendChild(TableStream(AttributesImpl({u"Name": u"test"})))	# doctest: +ELLIPSIS
-	<glue.ligolw.table.TableStream object at ...>
+	<ligo.lw.table.TableStream object at ...>
 	>>> tbl._update_column_info()
 	>>> col.Name
 	u'snr'
@@ -957,18 +957,18 @@ class Table(ligolw.Table, list):
 def use_in(ContentHandler):
 	"""
 	Modify ContentHandler, a sub-class of
-	glue.ligolw.LIGOLWContentHandler, to cause it to use the Table,
+	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the Table,
 	Column, and Stream classes defined in this module when parsing XML
 	documents.
 
 	Example:
 
-	>>> from glue.ligolw import ligolw
+	>>> from ligo.lw import ligolw
 	>>> class LIGOLWContentHandler(ligolw.LIGOLWContentHandler):
 	...	pass
 	...
 	>>> use_in(LIGOLWContentHandler)
-	<class 'glue.ligolw.table.LIGOLWContentHandler'>
+	<class 'ligo.lw.table.LIGOLWContentHandler'>
 	"""
 	def startColumn(self, parent, attrs):
 		return Column(attrs)

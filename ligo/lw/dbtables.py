@@ -636,13 +636,13 @@ class DBTable(table.Table):
 	the use_in() function defined in this module for information on how
 	to create such a content handler
 
-	If a custom glue.ligolw.Table subclass is defined in
-	glue.ligolw.lsctables whose name matches the name of the DBTable
-	being constructed, the lsctables class is added to the list of
-	parent classes.  This allows the lsctables class' methods to be
-	used with the DBTable instances but not all of the methods will
-	necessarily work with the database-backed version of the class.
-	Your mileage may vary.
+	If a custom ligo.lw.Table subclass is defined in ligo.lw.lsctables
+	whose name matches the name of the DBTable being constructed, the
+	lsctables class is added to the list of parent classes.  This
+	allows the lsctables class' methods to be used with the DBTable
+	instances but not all of the methods will necessarily work with the
+	database-backed version of the class.  Your mileage may vary.
+
 	"""
 	def __new__(cls, *args, **kwargs):
 		# does this class already have table-specific metadata?
@@ -690,8 +690,8 @@ class DBTable(table.Table):
 
 	def copy(self, *args, **kwargs):
 		"""
-		This method is not implemented.  See
-		glue.ligolw.table.Table for more information.
+		This method is not implemented.  See ligo.lw.table.Table
+		for more information.
 		"""
 		raise NotImplemented
 
@@ -1007,7 +1007,7 @@ TableByName = {
 def use_in(ContentHandler):
 	"""
 	Modify ContentHandler, a sub-class of
-	glue.ligolw.LIGOLWContentHandler, to cause it to use the DBTable
+	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the DBTable
 	class defined in this module when parsing XML documents.  Instances
 	of the class must provide a connection attribute.  When a document
 	is parsed, the value of this attribute will be passed to the
@@ -1018,7 +1018,7 @@ def use_in(ContentHandler):
 	Example:
 
 	>>> import sqlite3
-	>>> from glue.ligolw import ligolw
+	>>> from ligo.lw import ligolw
 	>>> class MyContentHandler(ligolw.LIGOLWContentHandler):
 	...	def __init__(self, *args):
 	...		super(MyContentHandler, self).__init__(*args)

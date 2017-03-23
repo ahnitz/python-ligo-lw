@@ -2,7 +2,7 @@
 
 import doctest
 import sys
-from glue.ligolw import utils
+from ligo.lw import utils
 
 if __name__ == '__main__':
 	failures = doctest.testmod(utils)[0]

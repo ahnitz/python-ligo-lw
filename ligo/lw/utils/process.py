@@ -36,7 +36,7 @@ from six import StringIO
 import time
 
 
-from glue import git_version
+from .. import __author__, __date__, __version__
 from .. import ligolw
 from .. import lsctables
 from .. import types as ligolwtypes
@@ -50,11 +50,6 @@ except ImportError:
 	# FIXME:  make it not optional
 	from glue import gpstime
 	_UTCToGPS = lambda utc: int(gpstime.GpsSecondsFromPyUTC(time.mktime(utc)))
-
-
-__author__ = "Kipp Cannon <kipp.cannon@ligo.org>, Larne Pekowsky <lppekows@physics.syr.edu>"
-__version__ = "git id %s" % git_version.id
-__date__ = git_version.date
 
 
 #

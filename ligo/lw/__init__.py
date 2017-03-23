@@ -38,9 +38,9 @@ functions, and methods shown below for more information.
 Example:
 
 >>> # import modules
->>> from glue.ligolw import ligolw
->>> from glue.ligolw import lsctables
->>> from glue.ligolw import utils as ligolw_utils
+>>> from ligo.lw import ligolw
+>>> from ligo.lw import lsctables
+>>> from ligo.lw import utils as ligolw_utils
 >>>
 >>> # define a content handler
 >>> class LIGOLWContentHandler(ligolw.LIGOLWContentHandler):

@@ -2,7 +2,7 @@
 
 import doctest
 import sys
-from glue.ligolw import tokenizer
+from ligo.lw import tokenizer
 
 if __name__ == '__main__':
 	failures = doctest.testmod(tokenizer)[0]

@@ -256,18 +256,18 @@ class Array(ligolw.Array):
 def use_in(ContentHandler):
 	"""
 	Modify ContentHandler, a sub-class of
-	glue.ligolw.LIGOLWContentHandler, to cause it to use the Array and
-	ArrayStream classes defined in this module when parsing XML
+	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the Array
+	and ArrayStream classes defined in this module when parsing XML
 	documents.
 
 	Example:
 
-	>>> from glue.ligolw import ligolw
+	>>> from ligo.lw import ligolw
 	>>> class MyContentHandler(ligolw.LIGOLWContentHandler):
 	...	pass
 	...
 	>>> use_in(MyContentHandler)
-	<class 'glue.ligolw.array.MyContentHandler'>
+	<class 'ligo.lw.array.MyContentHandler'>
 	"""
 	def startStream(self, parent, attrs, __orig_startStream = ContentHandler.startStream):
 		if parent.tagName == ligolw.Array.tagName:

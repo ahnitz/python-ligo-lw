@@ -2,7 +2,7 @@
 
 import doctest
 import sys
-from glue.ligolw.utils import segments as ligolw_segments
+from ligo.lw.utils import segments as ligolw_segments
 
 if __name__ == '__main__':
 	failures = doctest.testmod(ligolw_segments)[0]

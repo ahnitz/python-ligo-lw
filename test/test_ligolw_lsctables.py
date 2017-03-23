@@ -2,7 +2,7 @@
 
 import doctest
 import sys
-from glue.ligolw import lsctables
+from ligo.lw import lsctables
 
 if __name__ == '__main__':
 	failures = doctest.testmod(lsctables)[0]

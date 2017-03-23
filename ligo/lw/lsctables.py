@@ -3609,7 +3609,7 @@ class Segment(table.Table.RowType):
 	False
 	>>> # make sure results are segment table row objects
 	>>> segments.segmentlist(map(Segment, x & y))	# doctest: +ELLIPSIS
-	[<glue.ligolw.lsctables.Segment object at 0x...>, <glue.ligolw.lsctables.Segment object at 0x...>]
+	[<ligo.lw.lsctables.Segment object at 0x...>, <ligo.lw.lsctables.Segment object at 0x...>]
 
 	This implementation uses a non-standard extension to encode
 	infinite values for boundaries:  the second and nanosecond
@@ -4356,17 +4356,17 @@ def reset_next_ids(classes):
 def use_in(ContentHandler):
 	"""
 	Modify ContentHandler, a sub-class of
-	glue.ligolw.LIGOLWContentHandler, to cause it to use the Table
+	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the Table
 	classes defined in this module when parsing XML documents.
 
 	Example:
 
-	>>> from glue.ligolw import ligolw
+	>>> from ligo.lw import ligolw
 	>>> class MyContentHandler(ligolw.LIGOLWContentHandler):
 	...	pass
 	...
 	>>> use_in(MyContentHandler)
-	<class 'glue.ligolw.lsctables.MyContentHandler'>
+	<class 'ligo.lw.lsctables.MyContentHandler'>
 	"""
 	ContentHandler = table.use_in(ContentHandler)
 

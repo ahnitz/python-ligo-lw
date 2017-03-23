@@ -714,7 +714,7 @@ class Time(Element):
 		else:
 			# unsupported time type.  not impossible that
 			# calling code has overridden TimeTypes set in
-			# glue.ligolw.types;  just accept it as a string
+			# ligo.lw.types;  just accept it as a string
 			pass
 
 	def write(self, fileobj = sys.stdout, indent = u""):
@@ -816,8 +816,8 @@ class LIGOLWContentHandler(sax.handler.ContentHandler, object):
 	>>> xmldoc.write()
 
 	NOTE:  this example is for illustration only.  Most users will wish
-	to use the .load_*() functions in the glue.ligolw.utils subpackage
-	to load documents, and the .write_*() functions to write documents.
+	to use the .load_*() functions in the ligo.lw.utils subpackage to
+	load documents, and the .write_*() functions to write documents.
 	Those functions provide additional features such as support for
 	gzip'ed documents, MD5 hash computation, and Condor eviction
 	trapping to avoid writing broken documents to disk.
@@ -924,7 +924,7 @@ class PartialLIGOLWContentHandler(LIGOLWContentHandler):
 
 	Example:
 
-	>>> from glue.ligolw import utils as ligolw_utils
+	>>> from ligo.lw import utils as ligolw_utils
 	>>> def contenthandler(document):
 	...	return PartialLIGOLWContentHandler(document, lambda name, attrs: name == Table.tagName)
 	...
@@ -968,7 +968,7 @@ class FilteringLIGOLWContentHandler(LIGOLWContentHandler):
 
 	Example:
 
-	>>> from glue.ligolw import utils as ligolw_utils
+	>>> from ligo.lw import utils as ligolw_utils
 	>>> def contenthandler(document):
 	...	return FilteringLIGOLWContentHandler(document, lambda name, attrs: name != Table.tagName)
 	...
