@@ -320,7 +320,7 @@ class Column(ligolw.Column):
 		"""
 		# most codes don't use this feature, this is the only place
 		# numpy is used here, and importing numpy can be
-		# time-consuming, so we derfer the import until needed.
+		# time-consuming, so we defer the import until needed.
 		import numpy
 		try:
 			dtype = ligolwtypes.ToNumPyType[self.Type]
@@ -663,6 +663,7 @@ class Table(ligolw.Table, list):
 	# Column access
 	#
 
+
 	def getColumnByName(self, name):
 		"""
 		Retrieve and return the Column child element named name.
@@ -824,9 +825,11 @@ class Table(ligolw.Table, list):
 			self._end_of_columns()
 			self._end_of_rows()
 
+
 	#
 	# Row ID manipulation
 	#
+
 
 	@classmethod
 	def get_next_id(cls):
