@@ -4111,48 +4111,6 @@ DQSpecListTable.RowType = DQSpec
 #
 # =============================================================================
 #
-#                               ligolw_mon:table
-#
-# =============================================================================
-#
-
-
-LIGOLWMonID = ilwd.get_ilwdchar_class(u"ligolw_mon", u"event_id")
-
-
-class LIGOLWMonTable(table.Table):
-	tableName = "ligolw_mon"
-	validcolumns = {
-		"creator_db": "int_4s",
-		"process_id": "ilwd:char",
-		"time": "int_4s",
-		"time_ns": "int_4s",
-		"amplitude": "real_8",
-		"confidence": "real_8",
-		"frequency": "real_8",
-		"event_id": "ilwd:char",
-		"insertion_time": "int_4s"
-	}
-	constraints = "PRIMARY KEY (event_id)"
-	next_id = LIGOLWMonID(0)
-
-
-class LIGOLWMon(table.Table.RowType):
-	__slots__ = tuple(LIGOLWMonTable.validcolumns.keys())
-
-	def get_time(self):
-		return LIGOTimeGPS(self.time, self.time_ns)
-
-	def set_time(self, gps):
-		self.time, self.time_ns = gps.seconds, gps.nanoseconds
-
-
-LIGOLWMonTable.RowType = LIGOLWMon
-
-
-#
-# =============================================================================
-#
 #                            veto_definer:table
 #
 # =============================================================================
@@ -4291,7 +4249,6 @@ TableByName = {
 	FilterTable.tableName: FilterTable,
 	GDSTriggerTable.tableName: GDSTriggerTable,
 	LfnTable.tableName: LfnTable,
-	LIGOLWMonTable.tableName: LIGOLWMonTable,
 	MultiBurstTable.tableName: MultiBurstTable,
 	MultiInspiralTable.tableName: MultiInspiralTable,
 	ProcessParamsTable.tableName: ProcessParamsTable,
