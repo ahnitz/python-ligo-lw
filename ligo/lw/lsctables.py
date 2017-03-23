@@ -1540,10 +1540,7 @@ class SnglInspiralTable(table.Table):
 		"event_id": "ilwd:char"
 	}
 	constraints = "PRIMARY KEY (event_id)"
-	# FIXME:  lal uses an ID of 0 to indicate "no valid ID has been
-	# set", so we start at 1 for safety, but eventually that should be
-	# fixed in LAL and then this can be put back to 0 for cleanliness.
-	next_id = SnglInspiralID(1)
+	next_id = SnglInspiralID(0)
 	interncolumns = ("process_id", "ifo", "search", "channel")
 
 	def get_column(self,column,fac=250.,index=6.):
@@ -1693,15 +1690,6 @@ class SnglInspiralTable(table.Table):
 				keep.append(row)
 		return vetoed
 	
-	def getslide(self,slide_num):
-		"""
-		Return the triggers with a specific slide number.
-		@param slide_num: the slide number to recover (contained in the event_id)
-		"""
-		slideTrigs = self.copy()
-		slideTrigs.extend(row for row in self if row.get_slide_number() == slide_num)
-		return slideTrigs
-
 
 class SnglInspiral(table.Table.RowType):
 	__slots__ = tuple(SnglInspiralTable.validcolumns.keys())
@@ -1928,16 +1916,6 @@ class SnglRingdown(table.Table.RowType):
 	__slots__ = tuple(SnglRingdownTable.validcolumns.keys())
 
 	start = gpsproperty_with_gmst("start_time", "start_time_ns", "start_time_gmst")
-
-	def get_id_parts(self):
-		"""
-		Return the three pieces of the int_8s-style event_id.
-		"""
-		int_event_id = int(self.event_id)
-		a = int_event_id // 1000000000
-		slidenum = (int_event_id % 1000000000) // 100000
-		b = int_event_id % 100000
-		return int(a), int(slidenum), int(b)
 
 
 SnglRingdownTable.RowType = SnglRingdown
@@ -2538,25 +2516,6 @@ class MultiInspiral(table.Table.RowType):
 		"""
 		return dict((ifo, self.get_sngl_chisq(ifo)) for ifo in
                             instrument_set_from_ifos(self.ifos))
-
-	def get_id_parts(self):
-		"""
-		Return the three pieces of the int_8s-style event_id.
-		"""
-		int_event_id = int(self.event_id)
-		a = int_event_id // 1000000000
-		slidenum = (int_event_id % 1000000000) // 100000
-		b = int_event_id % 100000
-		return int(a), int(slidenum), int(b)
-
-	def get_slide_number(self):
-		"""
-		Return the slide-number for this trigger
-		"""
-		a, slide_number, b = self.get_id_parts()
-		if slide_number > 5000:
-			slide_number = 5000 - slide_number
-		return slide_number
 
 	def get_bestnr(self, index=4.0, nhigh=3.0, null_snr_threshold=4.25,\
 		           null_grad_thresh=20., null_grad_val = 1./5.):
