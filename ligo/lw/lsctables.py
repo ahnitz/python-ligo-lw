@@ -409,20 +409,6 @@ class Process(table.Table.RowType):
 
 	instruments = instrumentsproperty("ifos")
 
-	def get_ifos(self):
-		"""
-		Return a set of the instruments for this row.
-		"""
-		return self.instruments
-
-	def set_ifos(self, instruments):
-		"""
-		Serialize a sequence of instruments into the ifos
-		attribute.  The instrument names must not contain the ","
-		character.
-		"""
-		self.instruments = instruments
-
 
 ProcessTable.RowType = Process
 
@@ -677,44 +663,6 @@ class SearchSummary(table.Table.RowType):
 	in_segment = segmentproperty("in_start", "in_end")
 	out_segment = segmentproperty("out_start", "out_end")
 
-	def get_ifos(self):
-		"""
-		Return a set of the instruments for this row.
-		"""
-		return self.instruments
-
-	def set_ifos(self, instruments):
-		"""
-		Serialize a sequence of instruments into the ifos
-		attribute.  The instrument names must not contain the ","
-		character.
-		"""
-		self.instruments = instruments
-
-	def get_in(self):
-		"""
-		Get the input segment.
-		"""
-		return self.in_segment
-
-	def set_in(self, seg):
-		"""
-		Set the input segment.
-		"""
-		self.in_segment = seg
-
-	def get_out(self):
-		"""
-		Get the output segment.
-		"""
-		return self.out_segment
-
-	def set_out(self, seg):
-		"""
-		Set the output segment.
-		"""
-		self.out_segment = seg
-
 
 SearchSummaryTable.RowType = SearchSummary
 
@@ -852,19 +800,7 @@ class ExperimentTable(table.Table):
 class Experiment(table.Table.RowType):
 	__slots__ = tuple(ExperimentTable.validcolumns.keys())
 
-	def get_instruments(self):
-		"""
-		Return a set of the instruments for this row.
-		"""
-		return instrument_set_from_ifos(self.instruments)
-
-	def set_instruments(self, instruments):
-		"""
-		Serialize a sequence of instruments into the ifos
-		attribute.  The instrument names must not contain the ","
-		character.
-		"""
-		self.instruments = ifos_from_instrument_set(instruments)
+	insts = instrumentsproperty("instruments")
 
 
 ExperimentTable.RowType = Experiment
@@ -1125,40 +1061,8 @@ class GDSTriggerTable(table.Table):
 class GDSTrigger(table.Table.RowType):
 	__slots__ = tuple(GDSTriggerTable.validcolumns.keys())
 
-	#
-	# Tile properties
-	#
+	start = gpsproperty("start_time", "start_time_ns")
 
-	def get_start(self):
-		return LIGOTimeGPS(self.start_time, self.start_time_ns)
-
-	def set_start(self, gps):
-		self.start_time, self.start_time_ns = gps.seconds, gps.nanoseconds
-
-	def get_stop(self):
-		return LIGOTimeGPS(self.start_time, self.start_time_ns) + self.duration
-
-	def get_peak(self):
-		return LIGOTimeGPS(self.time_peak, self.time_peak)
-
-	def set_peak(self, gps):
-		self.time_peak, self.peak_time_ns = gps.seconds, gps.nanoseconds
-
-	def get_period(self):
-		start = LIGOTimeGPS(self.start_time, self.start_time_ns)
-		return segments.segment(start, start + self.duration)
-
-	def set_period(self, period):
-		self.start_time, self.start_time_ns = period[0].seconds, period[0].nanoseconds
-		self.duration = float(abs(period))
-
-	def get_band(self):
-		low = self.frequency
-		return segments.segment(low, low + self.bandwidth)
-
-	def set_band(self, band):
-		self.frequency = band[0]
-		self.bandwidth = abs(band)
 
 GDSTriggerTable.RowType = GDSTrigger
 
@@ -1451,62 +1355,6 @@ class SnglBurst(table.Table.RowType):
 			self.ms_flow, self.ms_fhigh = seg
 			self.ms_bandwidth = abs(seg)
 
-	# legacy compatibility.  DO NOT USE
-
-	def get_start(self):
-		return self.start
-
-	def set_start(self, gps):
-		self.start = gps
-
-	def get_stop(self):
-		return self.stop
-
-	def set_stop(self, gps):
-		self.stop = gps
-
-	def get_peak(self):
-		return self.peak
-
-	def set_peak(self, gps):
-		self.peak = gps
-
-	def get_period(self):
-		return self.period
-
-	def set_period(self, period):
-		self.period = period
-
-	def get_band(self):
-		return self.band
-
-	def set_band(self, band):
-		self.band = band
-
-	def get_ms_start(self):
-		return self.ms_start
-
-	def set_ms_start(self, gps):
-		self.ms_start = gps
-
-	def get_ms_stop(self):
-		return self.ms_stop
-
-	def set_ms_stop(self, gps):
-		self.ms_stop = gps
-
-	def get_ms_period(self):
-		return self.ms_period
-
-	def set_ms_period(self, period):
-		self.ms_period = period
-
-	def get_ms_band(self):
-		return self.ms_band
-
-	def set_ms_band(self, band):
-		self.ms_band = band
-
 	#
 	# Omega-Pipeline properties
 	#
@@ -1606,20 +1454,6 @@ class MultiBurst(table.Table.RowType):
 		else:
 			self.central_freq = sum(seg) / 2.
 			self.bandwidth = abs(seg)
-
-	# legacy compatibility.  DO NOT USE
-
-	def get_ifos(self):
-		return self.instruments
-
-	def set_ifos(self, instruments):
-		self.instruments = instruments
-
-	def get_peak(self):
-		return self.peak
-
-	def set_peak(self, gps):
-		self.peak = gps
 
 
 MultiBurstTable.RowType = MultiBurst
@@ -1977,16 +1811,6 @@ class SnglInspiral(table.Table.RowType):
 			cmp(self.search, other.search)
 		)
 
-	#
-	# Legacy
-	#
-
-	def get_end(self):
-		return self.end
-
-	def set_end(self, gps):
-		self.end = gps
-
 
 SnglInspiralTable.RowType = SnglInspiral
 
@@ -2048,18 +1872,6 @@ class CoincInspiral(table.Table.RowType):
 
 	end = gpsproperty("end_time", "end_time_ns")
 
-	def get_end(self):
-		return self.end
-
-	def set_end(self, gps):
-		self.end = gps
-
-	def get_ifos(self):
-		return self.instruments
-
-	def set_ifos(self, ifos):
-		self.instruments = ifos
-
 
 CoincInspiralTable.RowType = CoincInspiral
 
@@ -2115,11 +1927,7 @@ class SnglRingdownTable(table.Table):
 class SnglRingdown(table.Table.RowType):
 	__slots__ = tuple(SnglRingdownTable.validcolumns.keys())
 
-	def get_start(self):
-		return LIGOTimeGPS(self.start_time, self.start_time_ns)
-
-	def set_start(self, gps):
-		self.start_time, self.start_time_ns = gps.seconds, gps.nanoseconds
+	start = gpsproperty_with_gmst("start_time", "start_time_ns", "start_time_gmst")
 
 	def get_id_parts(self):
 		"""
@@ -2175,17 +1983,9 @@ class CoincRingdownTable(table.Table):
 class CoincRingdown(table.Table.RowType):
 	__slots__ = tuple(CoincRingdownTable.validcolumns.keys())
 
-	def get_start(self):
-		return LIGOTimeGPS(self.start_time, self.start_time_ns)
+	instruments = instrumentsproperty("ifos")
 
-	def set_start(self, gps):
-		self.start_time, self.start_time_ns = gps.seconds, gps.nanoseconds
-
-	def set_ifos(self, ifos):
-		self.ifos = ifos_from_instrument_set(ifos)
-
-	def get_ifos(self):
-		return instrument_set_from_ifos(self.ifos)
+	start = gpsproperty("start_time", "start_time_ns")
 
 
 CoincRingdownTable.RowType = CoincRingdown
@@ -2603,6 +2403,11 @@ class MultiInspiral(table.Table.RowType):
 	__slots__ = tuple(MultiInspiralTable.validcolumns.keys())
 	instrument_id = MultiInspiralTable.instrument_id
 
+	instruments = instrumentsproperty("ifos")
+
+	end = gpsproperty_with_gmst("end_time", "end_time_ns", "end_time_gmst")
+	impulse = gpsproperty("impulse_time", "impulse_time_ns")
+
 	def get_reduced_chisq(self):
 		return self.chisq / self.chisq_dof
 
@@ -2626,16 +2431,6 @@ class MultiInspiral(table.Table.RowType):
 		return (getattr(self, ("cont_chisq_%s"
 		                       % self.instrument_id[instrument.upper()])) /
 				getattr(self, "sngl_bank_chisq_dof"))
-
-
-	def get_end(self):
-		return LIGOTimeGPS(self.end_time, self.end_time_ns)
-
-	def get_ifos(self):
-		"""
-		Return a set of the instruments for this row.
-		"""
-		return instrument_set_from_ifos(self.ifos)
 
 	def get_coinc_snr(self):
 		"""
@@ -2743,14 +2538,6 @@ class MultiInspiral(table.Table.RowType):
 		"""
 		return dict((ifo, self.get_sngl_chisq(ifo)) for ifo in
                             instrument_set_from_ifos(self.ifos))
-
-	def set_ifos(self, instruments):
-		"""
-		Serialize a sequence of instruments into the ifos
-		attribute.  The instrument names must not contain the ","
-		character.
-		"""
-		self.ifos = ifos_from_instrument_set(instruments)
 
 	def get_id_parts(self):
 		"""
@@ -3032,29 +2819,6 @@ class SimInspiral(table.Table.RowType):
 		ra, dec = self.ra_dec
 		return t_geocent + lal.TimeDelayFromEarthCenter(lal.cached_detector_by_prefix[instrument].location, ra, dec, t_geocent)
 
-	def get_time_geocent(self):
-		# FIXME:  delete this method
-		warnings.warn("SimInspiral.get_time_geocent() is deprecated.  use SimInspiral.time_geocent instead", DeprecationWarning)
-		return self.time_geocent
-
-	def set_time_geocent(self, gps):
-		# FIXME:  delete this method
-		warnings.warn("SimInspiral.set_time_geocent() is deprecated.  use SimInspiral.time_geocent instead", DeprecationWarning)
-		self.time_geocent = gps
-
-	def get_ra_dec(self):
-		# FIXME:  delete this method
-		warnings.warn("SimInspiral.get_ra_dec() is deprecated.  use SimInspiral.ra_dec instead", DeprecationWarning)
-		return self.ra_dec
-
-	def get_end(self, site = None):
-		# FIXME:  delete this method
-		warnings.warn("SimInspiral.get_end() is deprecated.  use SimInspiral.time_geocent or SimInspiral.time_at_instrument() instead", DeprecationWarning)
-		if site is None:
-			return self.time_geocent
-		else:
-			return LIGOTimeGPS(getattr(self, "%s_end_time" % site.lower()), getattr(self, "%s_end_time_ns" % site.lower()))
-
 	def get_eff_dist(self, instrument):
 		return getattr(self, "eff_dist_%s" % instrument[0].lower())
 
@@ -3176,25 +2940,6 @@ class SimBurst(table.Table.RowType):
 		ra, dec = self.ra_dec
 		return t_geocent + lal.TimeDelayFromEarthCenter(lal.cached_detector_by_prefix[instrument].location, ra, dec, t_geocent)
 
-	def get_time_geocent(self):
-		return self.time_geocent
-
-	def set_time_geocent(self, gps):
-		self.time_geocent = gps
-
-	def get_ra_dec(self):
-		return self.ra_dec
-
-	def get_end(self, site = None):
-		"""
-		Do not use this method:  use .time_at_instrument() if that's what you want, or use .time_geocent if that's what you want.
-
-		Also ... this doesn't return the *end time*, it returns the *PEAK TIME*.  You've been warned.
-		"""
-		if site is None:
-			return self.time_geocent
-		instrument = site + "1"	# ugh ...
-		return self.time_at_instrument(instrument, {instrument: 0.0})
 
 SimBurstTable.RowType = SimBurst
 
@@ -3255,12 +3000,49 @@ class SimRingdownTable(table.Table):
 class SimRingdown(table.Table.RowType):
 	__slots__ = tuple(SimRingdownTable.validcolumns.keys())
 
-	def get_start(self, site = None):
-		if not site:
-			return LIGOTimeGPS(self.geocent_start_time, self.geocent_start_time_ns)
+	geocent_start = gpsproperty_with_gmst("geocent_start_time", "geocent_start_time_ns", "start_time_gmst")
+
+	@property
+	def ra_dec(self):
+		if self.longitude is None and self.latitude is None:
+			return None
+		return self.longitude, self.latitude
+
+	@ra_dec.setter
+	def ra_dec(self, radec):
+		if radec is None:
+			self.longitude = self.latitude = None
 		else:
-			site = site[0].lower()
-			return LIGOTimeGPS(getattr(self, site + '_start_time'), getattr(self, site + '_start_time_ns'))
+			self.longitude, self.latitude = radec
+
+	def time_at_instrument(self, instrument, offsetvector):
+		"""
+		Return the start time of the injection, delay corrected for
+		the displacement from the geocentre to the given
+		instrument.
+
+		NOTE:  this method does not account for the rotation of the
+		Earth that occurs during the transit of the plane wave from
+		the detector to the geocentre.  That is, it is assumed the
+		Earth is in the same orientation with respect to the
+		celestial sphere when the wave passes through the detector
+		as when it passes through the geocentre.  The Earth rotates
+		by about 1.5 urad during the 21 ms it takes light to travel
+		the radius of the Earth, which corresponds to 10 m of
+		displacement at the equator, or 33 light-ns.  Therefore,
+		the failure to do a proper retarded time calculation here
+		results in errors as large as 33 ns.  This is insignificant
+		for ring-down searches, but be aware that this
+		approximation is being made if the return value is used in
+		other contexts.
+		"""
+		# the offset is subtracted from the time of the injection.
+		# injections are done this way so that when the triggers
+		# that result from an injection have the offset vector
+		# added to their times the triggers will form a coinc
+		t_geocent = self.geocent_start - offsetvector[instrument]
+		ra, dec = self.ra_dec
+		return t_geocent + lal.TimeDelayFromEarthCenter(lal.cached_detector_by_prefix[instrument].location, ra, dec, t_geocent)
 
 
 SimRingdownTable.RowType = SimRingdown
@@ -3393,6 +3175,9 @@ class StochasticTable(table.Table):
 class Stochastic(table.Table.RowType):
 	__slots__ = tuple(StochasticTable.validcolumns.keys())
 
+	start = gpsproperty("start_time", "start_time_ns")
+	dur = gpsproperty("duration", "duration_ns")
+
 
 StochasticTable.RowType = Stochastic
 
@@ -3427,6 +3212,10 @@ class StochSummTable(table.Table):
 
 class StochSumm(table.Table.RowType):
 	__slots__ = tuple(StochSummTable.validcolumns.keys())
+
+	start = gpsproperty("start_time", "start_time_ns")
+	end = gpsproperty("end_time", "end_time_ns")
+	segment = segmentproperty("start", "end")
 
 
 StochSummTable.RowType = StochSumm
@@ -3640,18 +3429,6 @@ class Segment(table.Table.RowType):
 	end = gpsproperty("end_time", "end_time_ns")
 	segment = segmentproperty("start", "end")
 
-	def get(self):
-		"""
-		Return the segment described by this row.
-		"""
-		return self.segment
-
-	def set(self, segment):
-		"""
-		Set the segment described by this row.
-		"""
-		self.segment = segment
-
 	# emulate a glue.segments.segment object
 
 	def __abs__(self):
@@ -3728,20 +3505,6 @@ class SegmentDef(table.Table.RowType):
 	__slots__ = tuple(SegmentDefTable.validcolumns.keys())
 
 	instruments = instrumentsproperty("ifos")
-
-	def get_ifos(self):
-		"""
-		Return a set of the instruments for this row.
-		"""
-		return self.instruments
-
-	def set_ifos(self, instruments):
-		"""
-		Serialize a sequence of instruments into the ifos
-		attribute.  The instrument names must not contain the ","
-		character.
-		"""
-		self.instruments = instruments
 
 
 SegmentDefTable.RowType = SegmentDef
@@ -4026,12 +3789,6 @@ class Coinc(table.Table.RowType):
 
 	insts = instrumentsproperty("instruments")
 
-	def get_instruments(self):
-		return self.insts
-
-	def set_instruments(self, instruments):
-		self.insts = instruments
-
 
 CoincTable.RowType = Coinc
 
@@ -4181,17 +3938,9 @@ class SummMimeTable(table.Table):
 class SummMime(table.Table.RowType):
 	__slots__ = tuple(SummMimeTable.validcolumns.keys())
 
-	def get_start(self):
-		return LIGOTimeGPS(self.start_time, self.start_time_ns)
-
-	def set_start(self, gps):
-		self.start_time, self.start_time_ns = gps.seconds, gps.nanoseconds
-
-	def get_end(self):
-		return LIGOTimeGPS(self.end_time, self.end_time_ns)
-
-	def set_end(self, gps):
-		self.end_time, self.end_time_ns = gps.seconds, gps.nanoseconds
+	start = gpsproperty("start_time", "start_time_ns")
+	end = gpsproperty("end_time", "end_time_ns")
+	segment = segmentproperty("start", "end")
 
 
 SummMimeTable.RowType = SummMime
