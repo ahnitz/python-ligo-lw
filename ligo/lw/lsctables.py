@@ -572,26 +572,6 @@ class SearchSummaryTable(table.Table):
 		"ss_pi_index": ("process_id",),
 	}
 
-	def get_inlist(self):
-		"""
-		Return a segmentlist object describing the times spanned by
-		the input segments of all rows in the table.
-
-		Note:  the result is not coalesced, the segmentlist
-		contains the segments as they appear in the table.
-		"""
-		return segments.segmentlist(row.in_segment for row in self)
-
-	def get_outlist(self):
-		"""
-		Return a segmentlist object describing the times spanned by
-		the output segments of all rows in the table.
-
-		Note:  the result is not coalesced, the segmentlist
-		contains the segments as they appear in the table.
-		"""
-		return segments.segmentlist(row.out_segment for row in self)
-
 	def get_in_segmentlistdict(self, process_ids = None):
 		"""
 		Return a segmentlistdict mapping instrument to in segment
