@@ -2417,72 +2417,6 @@ SummValueTable.RowType = SummValue
 #
 # =============================================================================
 #
-#                            external_trigger:table
-#
-# =============================================================================
-#
-
-
-# FIXME: this table is completely different from the official definition.
-# Someone *HAS* to sort this out.
-
-
-class ExtTriggersTable(table.Table):
-	tableName = "external_trigger"
-	validcolumns = {
-		"process_id": "ilwd:char",
-		"det_alts": "lstring",
-		"det_band": "lstring",
-		"det_fluence": "lstring",
-		"det_fluence_int": "lstring",
-		"det_name": "lstring",
-		"det_peak": "lstring",
-		"det_peak_int": "lstring",
-		"det_snr": "lstring",
-		"email_time": "int_4s",
-		"event_dec": "real_4",
-		"event_dec_err": "real_4",
-		"event_epoch": "lstring",
-		"event_err_type": "lstring",
-		"event_ra": "real_4",
-		"event_ra_err": "real_4",
-		"start_time": "int_4s",
-		"start_time_ns": "int_4s",
-		"event_type": "lstring",
-		"event_z": "real_4",
-		"event_z_err": "real_4",
-		"notice_comments": "lstring",
-		"notice_id": "lstring",
-		"notice_sequence": "lstring",
-		"notice_time": "int_4s",
-		"notice_type": "lstring",
-		"notice_url": "lstring",
-		"obs_fov_dec": "real_4",
-		"obs_fov_dec_width": "real_4",
-		"obs_fov_ra": "real_4",
-		"obs_fov_ra_width": "real_4",
-		"obs_loc_ele": "real_4",
-		"obs_loc_lat": "real_4",
-		"obs_loc_long": "real_4",
-		"ligo_fave_lho": "real_4",
-		"ligo_fave_llo": "real_4",
-		"ligo_delay": "real_4",
-		"event_number_gcn": "int_4s",
-		"event_number_grb": "lstring",
-		"event_status": "int_4s"
-	}
-
-
-class ExtTriggers(table.Table.RowType):
-	__slots__ = tuple(ExtTriggersTable.validcolumns.keys())
-
-
-ExtTriggersTable.RowType = ExtTriggers
-
-
-#
-# =============================================================================
-#
 #                                segment:table
 #
 # =============================================================================
@@ -3153,7 +3087,6 @@ TableByName = {
 	ExperimentMapTable.tableName: ExperimentMapTable,
 	ExperimentSummaryTable.tableName: ExperimentSummaryTable,
 	ExperimentTable.tableName: ExperimentTable,
-	ExtTriggersTable.tableName: ExtTriggersTable,
 	GDSTriggerTable.tableName: GDSTriggerTable,
 	LfnTable.tableName: LfnTable,
 	ProcessParamsTable.tableName: ProcessParamsTable,
