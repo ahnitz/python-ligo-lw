@@ -1373,96 +1373,6 @@ SnglBurstTable.RowType = SnglBurst
 #
 # =============================================================================
 #
-#                              multi_burst:table
-#
-# =============================================================================
-#
-
-
-#
-# FIXME:  I think extra columns have been added here that aren't in other
-# places where this table is defined.
-#
-
-
-class MultiBurstTable(table.Table):
-	tableName = "multi_burst"
-	validcolumns = {
-		"creator_db": "int_4s",
-		"process_id": "ilwd:char",
-		"filter_id": "ilwd:char",
-		"ifos": "lstring",
-		"start_time": "int_4s",
-		"start_time_ns": "int_4s",
-		"duration": "real_4",
-		"peak_time": "int_4s",
-		"peak_time_ns": "int_4s",
-		"central_freq": "real_4",
-		"bandwidth": "real_4",
-		"amplitude": "real_4",
-		"snr": "real_4",
-		"confidence": "real_4",
-		"false_alarm_rate": "real_4",
-		"ligo_axis_ra": "real_4",
-		"ligo_axis_dec": "real_4",
-		"ligo_angle": "real_4",
-		"ligo_angle_sig": "real_4",
-		"coinc_event_id": "ilwd:char"
-	}
-	# FIXME:  like some other tables here, this table should have the
-	# constraint that the coinc_event_id column is a primary key.  this
-	# breaks ID reassignment in ligolw_sqlite, so until that is fixed
-	# the constraint is being replaced with an index.
-	#constraints = "PRIMARY KEY (coinc_event_id)"
-	how_to_index = {
-		"mb_cei_index": ("coinc_event_id",)
-	}
-
-
-class MultiBurst(table.Table.RowType):
-	__slots__ = tuple(MultiBurstTable.validcolumns.keys())
-
-	instruments = instrumentsproperty("ifos")
-
-	start = gpsproperty("start_time", "start_time_ns")
-	peak = gpsproperty("peak_time", "peak_time_ns")
-
-	@property
-	def period(self):
-		start = self.start
-		if start is None and self.duration is None:
-			return None
-		return segments.segment(start, start + self.duration)
-
-	@period.setter
-	def period(self, seg):
-		if seg is None:
-			self.start = self.duration = None
-		else:
-			self.start = seg[0]
-			self.duration = float(abs(seg))
-
-	@property
-	def band(self):
-		if self.central_freq is None and self.bandwidth is None:
-			return None
-		return segments.segment(self.central_freq - self.bandwidth / 2., self.central_freq + self.bandwidth / 2.)
-
-	@band.setter
-	def band(self, seg):
-		if seg is None:
-			self.central_freq = self.bandwidth = None
-		else:
-			self.central_freq = sum(seg) / 2.
-			self.bandwidth = abs(seg)
-
-
-MultiBurstTable.RowType = MultiBurst
-
-
-#
-# =============================================================================
-#
 #                             sngl_inspiral:table
 #
 # =============================================================================
@@ -3923,7 +3833,6 @@ TableByName = {
 	ExtTriggersTable.tableName: ExtTriggersTable,
 	GDSTriggerTable.tableName: GDSTriggerTable,
 	LfnTable.tableName: LfnTable,
-	MultiBurstTable.tableName: MultiBurstTable,
 	MultiInspiralTable.tableName: MultiInspiralTable,
 	ProcessParamsTable.tableName: ProcessParamsTable,
 	ProcessTable.tableName: ProcessTable,
