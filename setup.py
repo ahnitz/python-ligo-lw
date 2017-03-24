@@ -10,7 +10,8 @@ setup(
 	url = "https://git.ligo.org/kipp.cannon/python-ligo-lw",
 	license = "GPL",
 	packages = [
-		"ligo.lw"
+		"ligo.lw",
+		"ligo.lw.utils"
 	],
 	ext_modules = [
 		Extension(
