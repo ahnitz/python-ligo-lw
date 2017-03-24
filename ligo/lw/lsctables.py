@@ -1365,50 +1365,6 @@ class SnglInspiral(table.Table.RowType):
 	def get_reduced_cont_chisq(self):
 		return float(self.cont_chisq)/ self.cont_chisq_dof
 
-	def get_effective_snr(self,fac=250.0):
-		return self.snr/ (1 + self.snr**2/fac)**(0.25)/ self.get_reduced_chisq()**0.25
-	
-	def get_bank_effective_snr(self,fac=250.0):
-		return self.snr/ (1 + self.snr**2/fac)**(0.25)/ self.get_reduced_bank_chisq()**0.25
-
-	def get_cont_effective_snr(self,fac=250.0):
-		return self.snr/ (1 + self.snr**2/fac)**(0.25)/ self.get_reduced_cont_chisq()**0.25
-
-	def get_new_snr(self,index=6.0):
-		rchisq = self.get_reduced_chisq()
-		nhigh = 2.
-		if rchisq > 1.:
-			return self.snr/ ((1+rchisq**(index/nhigh))/2)**(1./index)
-		else:
-			return self.snr
-
-	def get_bank_new_snr(self,index=6.0):
-		rchisq = self.get_reduced_bank_chisq()
-		nhigh = 2.
-		if rchisq > 1.:
-			return self.snr/ ((1+rchisq**(index/nhigh))/2)**(1./index)
-		else:
-			return self.snr
-
-	def get_cont_new_snr(self,index=6.0):
-		rchisq = self.get_reduced_cont_chisq()
-		nhigh = 2.
-		if rchisq > 1.:
-			return self.snr/ ((1+rchisq**(index/nhigh))/2)**(1./index)
-		else:
-			return self.snr
-
-	def get_far(self):
-		return self.alpha
-
-	def get_ifar(self):
-		if self.alpha < 0.000000001:
-			self.alpha = 0.000000001
-		return 1./self.alpha
-
-	def get_lvS5stat(self):
-		return self.beta
-
 	# FIXME: how are two inspiral events defined to be the same?
 	def __eq__(self, other):
 		return not (
