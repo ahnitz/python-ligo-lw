@@ -2994,54 +2994,6 @@ VetoDefTable.RowType = VetoDef
 #
 # =============================================================================
 #
-#                               summ_mime:table
-#
-# =============================================================================
-#
-
-
-SummMimeID = ilwd.get_ilwdchar_class(u"summ_mime", u"summ_mime_id")
-
-
-class SummMimeTable(table.Table):
-	tableName = "summ_mime"
-	validcolumns = {
-		"origin": "lstring",
-		"process_id": "ilwd:char",
-		"filename": "lstring",
-		"submitter": "lstring",
-		"frameset_group": "lstring",
-		"segment_def_id": "ilwd:char",
-		"start_time": "int_4s",
-		"start_time_ns": "int_4s",
-		"end_time": "int_4s",
-		"end_time_ns": "int_4s",
-		"channel": "lstring",
-		"descrip": "lstring",
-		"mimedata": "blob",
-		"mimedata_length": "int_4s",
-		"mimetype": "lstring",
-		"comment": "lstring",
-		"summ_mime_id": "ilwd:char"
-	}
-	constraints = "PRIMARY KEY (summ_mime_id)"
-	next_id = SummMimeID(0)
-
-
-class SummMime(table.Table.RowType):
-	__slots__ = tuple(SummMimeTable.validcolumns.keys())
-
-	start = gpsproperty("start_time", "start_time_ns")
-	end = gpsproperty("end_time", "end_time_ns")
-	segment = segmentproperty("start", "end")
-
-
-SummMimeTable.RowType = SummMime
-
-
-#
-# =============================================================================
-#
 #                            time_slide_segment_map:table
 #
 # =============================================================================
@@ -3103,7 +3055,6 @@ TableByName = {
 	SnglInspiralTable.tableName: SnglInspiralTable,
 	SnglRingdownTable.tableName: SnglRingdownTable,
 	SummValueTable.tableName: SummValueTable,
-	SummMimeTable.tableName: SummMimeTable,
 	TimeSlideSegmentMapTable.tableName: TimeSlideSegmentMapTable,
 	TimeSlideTable.tableName: TimeSlideTable,
 	VetoDefTable.tableName: VetoDefTable
