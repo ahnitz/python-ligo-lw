@@ -1762,12 +1762,6 @@ class SimInspiral(table.Table.RowType):
 		ra, dec = self.ra_dec
 		return t_geocent + lal.TimeDelayFromEarthCenter(lal.cached_detector_by_prefix[instrument].location, ra, dec, t_geocent)
 
-	def get_eff_dist(self, instrument):
-		return getattr(self, "eff_dist_%s" % instrument[0].lower())
-
-	def get_chirp_eff_dist(self, instrument, ref_mass = 1.4):
-		return SnglInspiral.chirp_distance(self.get_eff_dist(instrument), self.mchirp, ref_mass)
-
 	def get_spin_mag(self, objectnumber):
 		s = getattr(self, "spin%d" % objectnumber)
 		return math.sqrt(numpy.dot(s, s))
