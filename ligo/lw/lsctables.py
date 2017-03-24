@@ -1021,6 +1021,7 @@ ExperimentMapTable.RowType = ExperimentMap
 
 GDSTriggerID = ilwd.get_ilwdchar_class(u"gds_trigger", u"event_id")
 
+
 class GDSTriggerTable(table.Table):
 	tableName = "gds_trigger"
 	validcolumns = {
