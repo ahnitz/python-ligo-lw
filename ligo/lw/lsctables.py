@@ -2447,45 +2447,6 @@ SimInstParamsTable.RowType = SimInstParams
 #
 # =============================================================================
 #
-#                               stochsumm:table
-#
-# =============================================================================
-#
-
-
-class StochSummTable(table.Table):
-	tableName = "stochsumm"
-	validcolumns = {
-		"process_id": "ilwd:char",
-		"ifo_one": "lstring",
-		"ifo_two": "lstring",
-		"channel_one": "lstring",
-		"channel_two": "lstring",
-		"start_time": "int_4s",
-		"start_time_ns": "int_4s",
-		"end_time": "int_4s",
-		"end_time_ns": "int_4s",
-		"f_min": "real_8",
-		"f_max": "real_8",
-		"y_opt": "real_8",
-		"error": "real_8"
-	}
-
-
-class StochSumm(table.Table.RowType):
-	__slots__ = tuple(StochSummTable.validcolumns.keys())
-
-	start = gpsproperty("start_time", "start_time_ns")
-	end = gpsproperty("end_time", "end_time_ns")
-	segment = segmentproperty("start", "end")
-
-
-StochSummTable.RowType = StochSumm
-
-
-#
-# =============================================================================
-#
 #                            external_trigger:table
 #
 # =============================================================================
@@ -3239,7 +3200,6 @@ TableByName = {
 	SnglBurstTable.tableName: SnglBurstTable,
 	SnglInspiralTable.tableName: SnglInspiralTable,
 	SnglRingdownTable.tableName: SnglRingdownTable,
-	StochSummTable.tableName: StochSummTable,
 	SummValueTable.tableName: SummValueTable,
 	SummMimeTable.tableName: SummMimeTable,
 	TimeSlideSegmentMapTable.tableName: TimeSlideSegmentMapTable,
