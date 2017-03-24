@@ -43,13 +43,7 @@ from .. import types as ligolwtypes
 import six
 
 
-try:
-	from lal import UTCToGPS as _UTCToGPS
-except ImportError:
-	# lal is optional
-	# FIXME:  make it not optional
-	from glue import gpstime
-	_UTCToGPS = lambda utc: int(gpstime.GpsSecondsFromPyUTC(time.mktime(utc)))
+from lal import UTCToGPS
 
 
 #
@@ -113,10 +107,10 @@ def append_process(xmldoc, program = None, version = None, cvs_repository = None
 	if cvs_entry_time is not None and cvs_entry_time != "":
 		try:
 			# try the git_version format first
-			process.cvs_entry_time = _UTCToGPS(time.strptime(cvs_entry_time, "%Y-%m-%d %H:%M:%S +0000"))
+			process.cvs_entry_time = UTCToGPS(time.strptime(cvs_entry_time, "%Y-%m-%d %H:%M:%S +0000"))
 		except ValueError:
 			# fall back to the old cvs format
-			process.cvs_entry_time = _UTCToGPS(time.strptime(cvs_entry_time, "%Y/%m/%d %H:%M:%S"))
+			process.cvs_entry_time = UTCToGPS(time.strptime(cvs_entry_time, "%Y/%m/%d %H:%M:%S"))
 	else:
 		process.cvs_entry_time = None
 	process.comment = comment
@@ -127,7 +121,7 @@ def append_process(xmldoc, program = None, version = None, cvs_repository = None
 	except KeyError:
 		process.username = None
 	process.unix_procid = os.getpid()
-	process.start_time = _UTCToGPS(time.gmtime())
+	process.start_time = UTCToGPS(time.gmtime())
 	process.end_time = None
 	process.jobid = jobid
 	process.domain = domain
@@ -141,7 +135,7 @@ def set_process_end_time(process):
 	"""
 	Set the end time in a row in a process table to the current time.
 	"""
-	process.end_time = _UTCToGPS(time.gmtime())
+	process.end_time = UTCToGPS(time.gmtime())
 	return process
 
 
