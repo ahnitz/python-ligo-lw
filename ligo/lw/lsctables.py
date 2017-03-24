@@ -3250,40 +3250,6 @@ ExtTriggersTable.RowType = ExtTriggers
 #
 # =============================================================================
 #
-#                                 filter:table
-#
-# =============================================================================
-#
-
-
-FilterID = ilwd.get_ilwdchar_class(u"filter", u"filter_id")
-
-
-class FilterTable(table.Table):
-	tableName = "filter"
-	validcolumns = {
-		"process_id": "ilwd:char",
-		"program": "lstring",
-		"start_time": "int_4s",
-		"filter_name": "lstring",
-		"filter_id": "ilwd:char",
-		"param_set": "int_4s",
-		"comment": "lstring"
-	}
-	constraints = "PRIMARY KEY (filter_id)"
-	next_id = FilterID(0)
-
-
-class Filter(table.Table.RowType):
-	__slots__ = tuple(FilterTable.validcolumns.keys())
-
-
-FilterTable.RowType = Filter
-
-
-#
-# =============================================================================
-#
 #                                segment:table
 #
 # =============================================================================
@@ -3955,7 +3921,6 @@ TableByName = {
 	ExperimentSummaryTable.tableName: ExperimentSummaryTable,
 	ExperimentTable.tableName: ExperimentTable,
 	ExtTriggersTable.tableName: ExtTriggersTable,
-	FilterTable.tableName: FilterTable,
 	GDSTriggerTable.tableName: GDSTriggerTable,
 	LfnTable.tableName: LfnTable,
 	MultiBurstTable.tableName: MultiBurstTable,
