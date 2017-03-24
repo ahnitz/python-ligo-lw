@@ -2447,44 +2447,6 @@ SimInstParamsTable.RowType = SimInstParams
 #
 # =============================================================================
 #
-#                               stochastic:table
-#
-# =============================================================================
-#
-
-
-class StochasticTable(table.Table):
-	tableName = "stochastic"
-	validcolumns = {
-		"process_id": "ilwd:char",
-		"ifo_one": "lstring",
-		"ifo_two": "lstring",
-		"channel_one": "lstring",
-		"channel_two": "lstring",
-		"start_time": "int_4s",
-		"start_time_ns": "int_4s",
-		"duration": "int_4s",
-		"duration_ns": "int_4s",
-		"f_min": "real_8",
-		"f_max": "real_8",
-		"cc_stat": "real_8",
-		"cc_sigma": "real_8"
-	}
-
-
-class Stochastic(table.Table.RowType):
-	__slots__ = tuple(StochasticTable.validcolumns.keys())
-
-	start = gpsproperty("start_time", "start_time_ns")
-	dur = gpsproperty("duration", "duration_ns")
-
-
-StochasticTable.RowType = Stochastic
-
-
-#
-# =============================================================================
-#
 #                               stochsumm:table
 #
 # =============================================================================
@@ -3277,7 +3239,6 @@ TableByName = {
 	SnglBurstTable.tableName: SnglBurstTable,
 	SnglInspiralTable.tableName: SnglInspiralTable,
 	SnglRingdownTable.tableName: SnglRingdownTable,
-	StochasticTable.tableName: StochasticTable,
 	StochSummTable.tableName: StochSummTable,
 	SummValueTable.tableName: SummValueTable,
 	SummMimeTable.tableName: SummMimeTable,
