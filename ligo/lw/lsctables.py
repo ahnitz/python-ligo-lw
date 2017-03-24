@@ -2417,36 +2417,6 @@ SummValueTable.RowType = SummValue
 #
 # =============================================================================
 #
-#                            sim_inst_params:table
-#
-# =============================================================================
-#
-
-
-SimInstParamsID = ilwd.get_ilwdchar_class(u"sim_inst_params", u"simulation_id")
-
-
-class SimInstParamsTable(table.Table):
-	tableName = "sim_inst_params"
-	validcolumns = {
-		"simulation_id": "ilwd:char",
-		"name": "lstring",
-		"comment": "lstring",
-		"value": "real_8"
-	}
-	next_id = SimInstParamsID(0)
-
-
-class SimInstParams(table.Table.RowType):
-	__slots__ = tuple(SimInstParamsTable.validcolumns.keys())
-
-
-SimInstParamsTable.RowType = SimInstParams
-
-
-#
-# =============================================================================
-#
 #                            external_trigger:table
 #
 # =============================================================================
@@ -3195,7 +3165,6 @@ TableByName = {
 	SegmentTable.tableName: SegmentTable,
 	SimBurstTable.tableName: SimBurstTable,
 	SimInspiralTable.tableName: SimInspiralTable,
-	SimInstParamsTable.tableName: SimInstParamsTable,
 	SimRingdownTable.tableName: SimRingdownTable,
 	SnglBurstTable.tableName: SnglBurstTable,
 	SnglInspiralTable.tableName: SnglInspiralTable,
