@@ -1249,16 +1249,6 @@ class SnglBurst(table.Table.RowType):
 			self.ms_flow, self.ms_fhigh = seg
 			self.ms_bandwidth = abs(seg)
 
-	#
-	# Omega-Pipeline properties
-	#
-
-	def get_q(self):
-		return self.duration * 2 * numpy.pi**(1/2.) * self.central_freq
-
-	def get_z(self):
-		return self.snr ** 2 / 2.
-
 
 SnglBurstTable.RowType = SnglBurst
 
