@@ -299,10 +299,6 @@ class instrumentsproperty(object):
 		setattr(obj, self.name, self.set(instruments))
 
 
-instrument_set_from_ifos = instrumentsproperty.get
-ifos_from_instrument_set = instrumentsproperty.set
-
-
 class gpsproperty(object):
 	"""
 	Descriptor used internally to implement LIGOTimeGPS-valued
