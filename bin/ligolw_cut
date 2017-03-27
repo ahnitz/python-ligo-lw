@@ -187,9 +187,9 @@ def RemoveElements(doc, specs):
 options, filenames = parse_command_line()
 
 
-for n, filename in enumerate(filenames):
+for n, filename in enumerate(filenames, 1):
 	if options.verbose:
-		print("%d/%d:" % (n + 1, len(filenames)), end=' ', file=sys.stderr)
+		print("%d/%d:" % (n, len(filenames)), end=' ', file=sys.stderr)
 	doc = ligolw_utils.load_filename(filename, verbose = options.verbose, contenthandler = ContentHandler)
 	table.InterningRowBuilder.strings.clear()
 	if options.verbose:

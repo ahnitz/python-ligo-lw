@@ -143,9 +143,9 @@ if __name__ == '__main__':
 
 
 	if will_write_to_file:
-		for n, url in enumerate(urls):
+		for n, url in enumerate(urls, 1):
 			if options.verbose:
-				print("%d/%d:" % (n + 1, len(urls)), end=' ', file=sys.stderr)
+				print("%d/%d:" % (n, len(urls)), end=' ', file=sys.stderr)
 			if url.endswith(".sqlite"):
 				source_filename = dbtables.get_connection_filename(local_path_from_url(url), tmp_path = options.tmp_space, verbose = options.verbose)
 				if options.verbose:
