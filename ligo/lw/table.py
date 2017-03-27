@@ -513,6 +513,33 @@ class TableStream(ligolw.Stream):
 class Table(ligolw.Table, list):
 	"""
 	High-level Table element that knows about its columns and rows.
+
+	Special Attributes
+	------------------
+
+	These are used by table-specific subclasses to provide information
+	about the table they define.  Set to None when not used.
+
+	.validcolumns:  Dictionary of column name/type pairs defining the
+	set of columns instances of this table may have.
+
+	.loadcolumns:  Sequence of names of columns to be loaded.  If not
+	None, only names appearing in the list will be loaded, the rest
+	will be skipped.  Can be used to reduce memory use.
+
+	.interncolumns:  Sequence of names of columns to be "interned",
+	making their contents references to reused objects.  This is not
+	used by the default parsing code, but custom tokenizers can be
+	defined that make use of this information to reduce memory use.
+
+	.constraints:  Text to be included as constraints in the SQL
+	statement used to construct the table.
+
+	.how_to_index:  Dictionary mapping SQL index name to an interable
+	of column names over which to construct that index.
+
+	.next_id:  Instance of ilwd.ilwdchar giving the next ID to assign
+	to a row in this table.
 	"""
 	class TableName(ligolw.LLWNameAttr):
 		dec_pattern = re.compile(r"(?:\A[a-z0-9_]+:|\A)(?P<Name>[a-z0-9_]+):table\Z")
@@ -532,7 +559,7 @@ class Table(ligolw.Table, list):
 		Helpful parent class for row objects.  Also used as the
 		default row class by Table instances.  Provides an
 		__init__() method that accepts keyword arguments from which
-		the object's attributes are initialized.
+		the object's attributes can be initialized.
 
 		Example:
 
