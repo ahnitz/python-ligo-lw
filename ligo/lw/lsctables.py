@@ -1502,9 +1502,6 @@ class SnglRingdownTable(table.Table):
 	next_id = SnglRingdownID(0)
 	interncolumns = ("process_id", "ifo", "channel")
 
-	def get_start(self):
-		return [row.get_start() for row in self]
-
 
 class SnglRingdown(table.Table.RowType):
 	__slots__ = tuple(SnglRingdownTable.validcolumns.keys())
