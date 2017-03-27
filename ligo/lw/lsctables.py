@@ -1731,10 +1731,6 @@ class SimInspiral(table.Table.RowType):
 		ra, dec = self.ra_dec
 		return t_geocent + lal.TimeDelayFromEarthCenter(lal.cached_detector_by_prefix[instrument].location, ra, dec, t_geocent)
 
-	def get_spin_mag(self, objectnumber):
-		s = getattr(self, "spin%d" % objectnumber)
-		return math.sqrt(numpy.dot(s, s))
-
 
 SimInspiralTable.RowType = SimInspiral
 
