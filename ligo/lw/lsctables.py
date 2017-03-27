@@ -509,7 +509,7 @@ class ProcessParamsTable(table.Table):
 	def append(self, row):
 		if row.type is not None and row.type not in ligolwtypes.Types:
 			raise ligolw.ElementError("unrecognized type '%s'" % row.type)
-		table.Table.append(self, row)
+		super(ProcessParamsTable, self).append(row)
 
 
 class ProcessParams(table.Table.RowType):
