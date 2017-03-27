@@ -1381,15 +1381,6 @@ class SnglInspiral(table.Table.RowType):
 	# Methods
 	#
 
-	def get_reduced_chisq(self):
-		return float(self.chisq)/ (2*self.chisq_dof - 2)
-
-	def get_reduced_bank_chisq(self):
-		return float(self.bank_chisq)/ self.bank_chisq_dof
-
-	def get_reduced_cont_chisq(self):
-		return float(self.cont_chisq)/ self.cont_chisq_dof
-
 	# FIXME: how are two inspiral events defined to be the same?
 	def __eq__(self, other):
 		return not (
