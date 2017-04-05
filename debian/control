@@ -26,6 +26,7 @@ Depends:
  python-six
 Conflicts:
  python-glue-ligolw-tools
+ python-glue < 1.55
 Replaces:
  python-glue-ligolw-tools
 Provides:

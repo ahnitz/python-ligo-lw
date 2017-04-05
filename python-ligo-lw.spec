@@ -10,7 +10,7 @@ Source:		%{name}-%{version}.tar.gz
 Url:		https://git.ligo.org/kipp.cannon/python-ligo-lw
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
 Requires:	python-six glue glue-segments python >= 2.7
-Conflicts:	glue-ligolw-tools
+Conflicts:	glue-ligolw-tools glue < 1.55
 Provides:	glue-ligolw-tools
 BuildRequires:  python-devel
 Prefix:         %{prefix}
