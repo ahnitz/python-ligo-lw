@@ -6,14 +6,14 @@ check : \
 	ligolw_test03c \
 	ligolw_test04 \
 	ligolw_test05 \
-	test_ligolw_array \
-	test_ligolw_ilwd \
-	test_ligolw_ligolw \
-	test_ligolw_lsctables \
-	test_ligolw_table \
-	test_ligolw_tokenizer \
-	test_ligolw_utils \
-	test_ligolw_utils_segments
+	test_array \
+	test_ilwd \
+	test_ligolw \
+	test_lsctables \
+	test_table \
+	test_tokenizer \
+	test_utils \
+	test_utils_segments
 	@echo "All Tests Passed"
 
 define printpassfail
@@ -72,45 +72,45 @@ ligolw_sqlite_test :
 	sh ligolw_sqlite_test.sh && $(printpassfail)
 	@echo "<=== end ligolw_sqlite_test ==="
 
-test_ligolw_array :
-	@echo "=== start test_ligolw_array ===>"
-	./test_ligolw_array.py && $(printpassfail)
-	@echo "<=== end test_ligolw_array ==="
+test_array :
+	@echo "=== start test_array ===>"
+	./test_array.py && $(printpassfail)
+	@echo "<=== end test_array ==="
 
-test_ligolw_ilwd :
-	@echo "=== start test_ligolw_ilwd ===>"
-	python test_ligolw_ilwd.py && $(printpassfail)
-	@echo "<=== end test_ligolw_ilwd ==="
+test_ilwd :
+	@echo "=== start test_ilwd ===>"
+	python test_ilwd.py && $(printpassfail)
+	@echo "<=== end test_ilwd ==="
 
-test_ligolw_ligolw :
-	@echo "=== start test_ligolw_ligolw ===>"
-	./test_ligolw_ligolw.py && $(printpassfail)
-	@echo "<=== end test_ligolw_ligolw ==="
+test_ligolw :
+	@echo "=== start test_ligolw ===>"
+	./test_ligolw.py && $(printpassfail)
+	@echo "<=== end test_ligolw ==="
 
-test_ligolw_lsctables :
-	@echo "=== start test_ligolw_lsctables ===>"
-	./test_ligolw_lsctables.py && $(printpassfail)
-	@echo "<=== end test_ligolw_lsctables ==="
+test_lsctables :
+	@echo "=== start test_lsctables ===>"
+	./test_lsctables.py && $(printpassfail)
+	@echo "<=== end test_lsctables ==="
 
-test_ligolw_table :
-	@echo "=== start test_ligolw_table ===>"
-	./test_ligolw_table.py && $(printpassfail)
-	@echo "<=== end test_ligolw_table ==="
+test_table :
+	@echo "=== start test_table ===>"
+	./test_table.py && $(printpassfail)
+	@echo "<=== end test_table ==="
 
-test_ligolw_tokenizer :
-	@echo "=== start test_ligolw_tokenizer ===>"
-	./test_ligolw_tokenizer.py && $(printpassfail)
-	@echo "<=== end test_ligolw_tokenizer ==="
+test_tokenizer :
+	@echo "=== start test_tokenizer ===>"
+	./test_tokenizer.py && $(printpassfail)
+	@echo "<=== end test_tokenizer ==="
 
-test_ligolw_utils :
-	@echo "=== start test_ligolw_utils ===>"
-	./test_ligolw_utils.py && $(printpassfail)
-	@echo "<=== end test_ligolw_utils ==="
+test_utils :
+	@echo "=== start test_utils ===>"
+	./test_utils.py && $(printpassfail)
+	@echo "<=== end test_utils ==="
 
-test_ligolw_utils_segments :
-	@echo "=== start test_ligolw_utils_segments ===>"
-	./test_ligolw_utils_segments.py && $(printpassfail)
-	@echo "<=== end test_ligolw_utils_segments ==="
+test_utils_segments :
+	@echo "=== start test_utils_segments ===>"
+	./test_utils_segments.py && $(printpassfail)
+	@echo "<=== end test_utils_segments ==="
 
 clean :
 	rm -f ligo_lw_test_01*png
