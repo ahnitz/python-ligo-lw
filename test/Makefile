@@ -1,5 +1,4 @@
 check : \
-	glue_ligolw_ilwd_verify \
 	ligolw_sqlite_test \
 	ligolw_test01 \
 	ligolw_test03a \
@@ -8,6 +7,7 @@ check : \
 	ligolw_test04 \
 	ligolw_test05 \
 	test_ligolw_array \
+	test_ligolw_ilwd \
 	test_ligolw_ligolw \
 	test_ligolw_lsctables \
 	test_ligolw_table \
@@ -28,11 +28,6 @@ endef
 define servefilesstop
 	{ killall python ; sleep 1 ; true ; }
 endef
-
-glue_ligolw_ilwd_verify :
-	@echo "=== start glue_ligolw_ilwd_verify ===>"
-	python glue_ligolw_ilwd_verify.py && $(printpassfail)
-	@echo "<=== end glue_ligolw_ilwd_verify ==="
 
 ligolw_test01 :
 	@echo "=== start ligolw_test01 ===>"
@@ -81,6 +76,11 @@ test_ligolw_array :
 	@echo "=== start test_ligolw_array ===>"
 	./test_ligolw_array.py && $(printpassfail)
 	@echo "<=== end test_ligolw_array ==="
+
+test_ligolw_ilwd :
+	@echo "=== start test_ligolw_ilwd ===>"
+	python test_ligolw_ilwd.py && $(printpassfail)
+	@echo "<=== end test_ligolw_ilwd ==="
 
 test_ligolw_ligolw :
 	@echo "=== start test_ligolw_ligolw ===>"
