@@ -907,9 +907,9 @@ class TimeSlideTable(DBTable):
 		"""
 		# look for matching offset vectors
 		if superset_ok:
-			ids = [id for id, slide in self.as_dict().items() if offsetdict == dict((instrument, offset) for instrument, offset in slide.items() if instrument in offsetdict)]
+			ids = [time_slide_id for time_slide_id, slide in self.as_dict().items() if offsetdict == dict((instrument, offset) for instrument, offset in slide.items() if instrument in offsetdict)]
 		else:
-			ids = [id for id, slide in self.as_dict().items() if offsetdict == slide]
+			ids = [time_slide_id for time_slide_id, slide in self.as_dict().items() if offsetdict == slide]
 		if len(ids) > 1:
 			# found more than one
 			if nonunique_ok:
@@ -925,17 +925,17 @@ class TimeSlideTable(DBTable):
 			# and that's not OK
 			raise KeyError(offsetdict)
 		# that's OK, create new vector
-		id = self.get_next_id()
+		time_slide_id = self.get_next_id()
 		for instrument, offset in offsetdict.items():
 			row = self.RowType()
 			row.process_id = create_new.process_id
-			row.time_slide_id = id
+			row.time_slide_id = time_slide_id
 			row.instrument = instrument
 			row.offset = offset
 			self.append(row)
 
 		# return new ID
-		return id
+		return time_slide_id
 
 
 #
