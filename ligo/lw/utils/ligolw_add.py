@@ -34,6 +34,7 @@ import sys
 from six.moves import urllib
 
 
+from glue.text_progress_bar import ProgressBar
 from .. import __author__, __date__, __version__
 from .. import ligolw
 from .. import table
@@ -93,13 +94,13 @@ def reassign_ids(doc, verbose = False):
 	"""
 	# Can't simply run reassign_ids() on doc because we need to
 	# construct a fresh old --> new mapping within each LIGO_LW block.
-	for n, elem in enumerate(doc.childNodes, 1):
-		if verbose:
-			sys.stderr.write("reassigning row IDs: %.1f%%\r" % (100.0 * n / len(doc.childNodes)))
+	progressbar = ProgressBar("reassigning row IDs", max = len(doc.childNodes)) if verbose else None
+	for elem in doc.childNodes:
+		if progressbar is not None:
+			progressbar.increment()
 		if elem.tagName == ligolw.LIGO_LW.tagName:
 			table.reassign_ids(elem)
-	if verbose:
-		sys.stderr.write("reassigning row IDs: 100.0%\n")
+	del progressbar
 	return doc
 
 
@@ -184,9 +185,9 @@ def ligolw_add(xmldoc, urls, non_lsc_tables_ok = False, verbose = False, content
 	which they should be added.
 	"""
 	# Input
-	for n, url in enumerate(urls):
+	for n, url in enumerate(urls, 1):
 		if verbose:
-			sys.stderr.write("%d/%d:" % (n + 1, len(urls)))
+			sys.stderr.write("%d/%d:" % (n, len(urls)))
 		utils.load_url(url, verbose = verbose, xmldoc = xmldoc, contenthandler = contenthandler)
 
 	# ID reassignment
