@@ -169,13 +169,13 @@ def merge_compatible_tables(elem):
 #
 
 
+@lsctables.use_in
 class DefaultContentHandler(ligolw.LIGOLWContentHandler):
 	"""
 	Default content handler used by ligolw_add().  Not intended for use
 	outside this module.
 	"""
 	pass
-lsctables.use_in(DefaultContentHandler)
 
 
 def ligolw_add(xmldoc, urls, non_lsc_tables_ok = False, verbose = False, contenthandler = DefaultContentHandler):
