@@ -743,21 +743,24 @@ class Table(ligolw.Table, list):
 		attribute of this table does not contain an entry for a
 		column by that name.
 
-		Note that the name string is assumed to be "pre-stripped",
-		that is it is the significant portion of the elements Name
-		attribute.  The Column element's Name attribute will be
-		constructed by pre-pending the stripped Table element's
-		name and a colon.
+		The name is checked to see if a table name prefix is already
+		included.  If a prefix is included it is used as-is, if not
+		then this Table element's name is prepended to the column name.
 
 		Example:
 
 		>>> import lsctables
-		>>> process_table = lsctables.New(lsctables.ProcessTable, [])
-		>>> col = process_table.appendColumn("program")
+		>>> tbl = lsctables.New(lsctables.ProcessParamsTable, [])
+		>>> col = tbl.appendColumn("param")
 		>>> col.getAttribute("Name")
-		u'process:program'
+		u'process_params:param'
 		>>> col.Name
-		u'program'
+		u'param'
+		>>> col = tbl.appendColumn(u"process:process_id")
+		>>> col.getAttribute("Name")
+		u'process:process_id'
+		>>> col.Name
+		u'process_id'
 		"""
 		try:
 			self.getColumnByName(name)
@@ -765,7 +768,19 @@ class Table(ligolw.Table, list):
 			raise ValueError("duplicate Column '%s'" % name)
 		except KeyError:
 			pass
-		column = Column(AttributesImpl({u"Name": "%s:%s" % (self.Name, name), u"Type": self.validcolumns[name]}))
+		try:
+			Column.ColumnName.table_name(name)
+			# if we get here the new Column's name already has
+			# a table name prefix included
+		except ValueError:
+			# if we get here the name does not have a table
+			# name prefix included.  prepend our own
+			name = u"%s:%s" % (self.Name, name)
+		try:
+			coltype = self.validcolumns[Column.ColumnName(name)]
+		except KeyError:
+			raise ligolw.ElementError("invalid Column '%s' for Table '%s'" % (name, self.Name))
+		column = Column(AttributesImpl({u"Name": name, u"Type": coltype}))
 		streams = self.getElementsByTagName(ligolw.Stream.tagName)
 		if streams:
 			self.insertBefore(column, streams[0])
