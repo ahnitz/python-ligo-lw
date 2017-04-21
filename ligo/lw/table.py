@@ -782,17 +782,17 @@ class Table(ligolw.Table, list):
 			if self.validcolumns is not None:
 				try:
 					if self.validcolumns[child.Name] != child.Type:
-						raise ligolw.ElementError("invalid type '%s' for Column '%s' in Table '%s', expected type '%s'" % (child.Type, child.getAttribute("Name"), self.getAttribute("Name"), self.validcolumns[child.Name]))
+						raise ligolw.ElementError("invalid type '%s' for Column '%s' in Table '%s', expected type '%s'" % (child.Type, child.Name, self.Name, self.validcolumns[child.Name]))
 				except KeyError:
-					raise ligolw.ElementError("invalid Column '%s' for Table '%s'" % (child.getAttribute("Name"), self.getAttribute("Name")))
+					raise ligolw.ElementError("invalid Column '%s' for Table '%s'" % (child.Name, self.Name))
 			if child.Name in self.columnnames:
-				raise ligolw.ElementError("duplicate Column '%s' in Table '%s'" % (child.getAttribute("Name"), self.getAttribute("Name")))
+				raise ligolw.ElementError("duplicate Column '%s' in Table '%s'" % (child.Name, self.Name))
 			self.columnnames.append(child.Name)
 			self.columntypes.append(child.Type)
 			try:
 				self.columnpytypes.append(ligolwtypes.ToPyType[child.Type])
 			except KeyError:
-				raise ligolw.ElementError("unrecognized Type '%s' for Column '%s' in Table '%s'" % (child.Type, child.getAttribute("Name"), self.getAttribute("Name")))
+				raise ligolw.ElementError("unrecognized Type '%s' for Column '%s' in Table '%s'" % (child.Type, child.Name, self.Name))
 
 	def _verifyChildren(self, i):
 		"""
@@ -806,7 +806,7 @@ class Table(ligolw.Table, list):
 		elif child.tagName == ligolw.Stream.tagName:
 			# require agreement of non-stripped strings
 			if child.getAttribute("Name") != self.getAttribute("Name"):
-				raise ligolw.ElementError("Stream name '%s' does not match Table name '%s'" % (child.getAttribute("Name"), self.getAttribute("Name")))
+				raise ligolw.ElementError("Stream Name '%s' does not match Table Name '%s'" % (child.getAttribute("Name"), self.getAttribute("Name")))
 
 	def _end_of_columns(self):
 		"""
@@ -947,7 +947,7 @@ class Table(ligolw.Table, list):
 			return mapping
 		for i, old in enumerate(column):
 			if old is None:
-				raise ValueError("null row ID encountered in Table '%s', row %d" % (self.getAttribute("Name"), i))
+				raise ValueError("null row ID encountered in Table '%s', row %d" % (self.Name, i))
 			if old in mapping:
 				column[i] = mapping[old]
 			else:
