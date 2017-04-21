@@ -144,7 +144,7 @@ def install_signal_trap(signums = (signal.SIGTERM, signal.SIGTSTP), retval = 1):
 			temporary_files.clear()
 		if callable(origactions[signum]):
 			# original action is callable, chain to it
-			return origactions[signum](signum, frame)
+			origactions[signum](signum, frame)
 		# original action was not callable or the callable
 		# returned.  invoke sys.exit() with retval as exit code
 		sys.exit(retval)
