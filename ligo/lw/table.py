@@ -161,6 +161,8 @@ class Column(ligolw.Column):
 	u'snr'
 	>>> col.Type
 	u'real_8'
+	>>> col.table_name
+	u'test'
 	>>> # append 3 rows (with nothing in them)
 	>>> tbl.append(tbl.RowType())
 	>>> tbl.append(tbl.RowType())
@@ -200,11 +202,12 @@ class Column(ligolw.Column):
 	3
 
 	NOTE:  the .Name attribute returns the stripped "Name" attribute of
-	the element, e.g. with the table suffix removed, but when assigning
-	to the .Name attribute the value provided is stored without
-	modification, i.e. there is no attempt to reattach the table's name
-	to the string.  The calling code is responsible for doing the
-	correct manipulations.  Therefore, the assignment operation below
+	the element, e.g. with the table name prefix removed, but when
+	assigning to the .Name attribute the value provided is stored
+	without modification, i.e. there is no attempt to reattach the
+	table's name to the string.  The calling code is responsible for
+	doing the correct manipulations.  Therefore, the assignment
+	operation below
 
 	>>> col.Name, col.getAttribute("Name")
 	(u'snr', u'test:snr')
@@ -242,7 +245,28 @@ class Column(ligolw.Column):
 		dec_pattern = re.compile(r"(?:\A\w+:|\A)(?P<FullName>(?:(?P<Table>\w+):|\A)(?P<Name>\w+))\Z")
 		enc_pattern = u"%s"
 
+		@classmethod
+		def table_name(cls, name):
+			"""
+			Example:
+
+			>>> Column.ColumnName.table_name("process:process_id")
+			'process'
+			>>> Column.ColumnName.table_name("process_id")
+			Traceback (most recent call last):
+			  File "<stdin>", line 1, in <module>
+			ValueError: table name not found in 'process_id'
+			"""
+			table_name = cls.dec_pattern.match(name).group("Table")
+			if table_name is None:
+				raise ValueError("table name not found in '%s'" % name)
+			return table_name
+
 	Name = ligolw.attributeproxy(u"Name", enc = ColumnName.enc, dec = ColumnName)
+
+	@property
+	def table_name(self):
+		return self.ColumnName.table_name(self.getAttribute("Name"))
 
 	def __len__(self):
 		"""
