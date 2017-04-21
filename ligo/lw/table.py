@@ -945,13 +945,21 @@ class Table(ligolw.Table, list):
 		except KeyError:
 			# table is missing its ID column, this is a no-op
 			return mapping
+		table_name = self.Name
 		for i, old in enumerate(column):
 			if old is None:
 				raise ValueError("null row ID encountered in Table '%s', row %d" % (self.Name, i))
-			if old in mapping:
-				column[i] = mapping[old]
+			key = table_name, old
+			# FIXME:  temorary safety check to detect problems
+			# with the evolving ID reassignment algorithm.
+			# remove when no longer applicable (e.g., when IDs
+			# are turned into pure integers and don't carry a
+			# .table_name any more)
+			assert table_name == old.table_name
+			if key in mapping:
+				column[i] = mapping[key]
 			else:
-				column[i] = mapping[old] = self.get_next_id()
+				column[i] = mapping[key] = self.get_next_id()
 		return mapping
 
 	def applyKeyMapping(self, mapping):
@@ -962,10 +970,21 @@ class Table(ligolw.Table, list):
 		"""
 		for coltype, colname in zip(self.columntypes, self.columnnames):
 			if coltype in ligolwtypes.IDTypes and (self.next_id is None or colname != self.next_id.column_name):
+				# FIXME:  cannot rely on getting the ID's
+				# target table from the ID itself, must
+				# find a way to obtain this information
+				# independently.  probably need to encode
+				# it in the column name.  currently, e.g.,
+				# the search summary table has a
+				# "search_summary:process_id" column which
+				# could be renamed "process:process_id" to
+				# allow the name of the table for which
+				# these are the "process_ids" to be
+				# recovered.
 				column = self.getColumnByName(colname)
 				for i, old in enumerate(column):
 					try:
-						column[i] = mapping[old]
+						column[i] = mapping[old.table_name, old]
 					except KeyError:
 						pass
 

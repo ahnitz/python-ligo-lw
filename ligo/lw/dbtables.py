@@ -430,7 +430,7 @@ def idmap_create(connection):
 	This function is for internal use, it forms part of the code used
 	to re-map row IDs when merging multiple documents.
 	"""
-	connection.cursor().execute("CREATE TEMPORARY TABLE _idmap_ (old TEXT PRIMARY KEY NOT NULL, new TEXT NOT NULL)")
+	connection.cursor().execute("CREATE TEMPORARY TABLE _idmap_ (table_name TEXT NOT NULL, old TEXT NOT NULL, new TEXT NOT NULL, PRIMARY KEY (table_name, old))")
 
 
 def idmap_reset(connection):
@@ -469,7 +469,7 @@ def idmap_get_new(connection, old, tbl):
 	to re-map row IDs when merging multiple documents.
 	"""
 	cursor = connection.cursor()
-	cursor.execute("SELECT new FROM _idmap_ WHERE old == ?", (old,))
+	cursor.execute("SELECT new FROM _idmap_ WHERE table_name == ? AND old == ?", (tbl.Name, old))
 	new = cursor.fetchone()
 	if new is not None:
 		# a new ID has already been created for this old ID
@@ -477,7 +477,7 @@ def idmap_get_new(connection, old, tbl):
 	# this ID was not found in _idmap_ table, assign a new ID and
 	# record it
 	new = tbl.get_next_id()
-	cursor.execute("INSERT INTO _idmap_ VALUES (?, ?)", (old, new))
+	cursor.execute("INSERT INTO _idmap_ VALUES (?, ?, ?)", (tbl.Name, old, new))
 	return new
 
 
@@ -817,7 +817,11 @@ class DBTable(table.Table):
 		Loops over each row in the table, replacing references to
 		old row keys with the new values from the _idmap_ table.
 		"""
-		assignments = ", ".join("%s = (SELECT new FROM _idmap_ WHERE old == %s)" % (colname, colname) for coltype, colname in zip(self.dbcolumntypes, self.dbcolumnnames) if coltype in ligolwtypes.IDTypes and (self.next_id is None or colname != self.next_id.column_name))
+		# FIXME:  do not rely on obtaining the ID's target table
+		# from the ID itself.  encoding it in the column name would
+		# be one solution
+		self.connection.create_function("get_table_name", 1, lambda string_id: ilwd.ilwdchar(string_id).table_name)
+		assignments = ", ".join("%s = (SELECT new FROM _idmap_ WHERE _idmap_.table_name == get_table_name(%s) AND _idmap_.old == %s)" % (colname, colname, colname) for coltype, colname in zip(self.dbcolumntypes, self.dbcolumnnames) if coltype in ligolwtypes.IDTypes and (self.next_id is None or colname != self.next_id.column_name))
 		if assignments:
 			# SQLite documentation says ROWID is monotonically
 			# increasing starting at 1 for the first row unless
@@ -837,6 +841,18 @@ class DBTable(table.Table):
 #
 # =============================================================================
 #
+
+
+class CoincMapTable(DBTable):
+	tableName = lsctables.CoincMapTable.tableName
+	validcolumns = lsctables.CoincMapTable.validcolumns
+	constraints = lsctables.CoincMapTable.constraints
+	next_id = lsctables.CoincMapTable.next_id
+	RowType = lsctables.CoincMapTable.RowType
+	how_to_index = lsctables.CoincMapTable.how_to_index
+
+	def applyKeyMapping(self):
+		self.cursor.execute("UPDATE coinc_event_map SET event_id = (SELECT new FROM _idmap_ WHERE _idmap_.table_name == coinc_event_map.table_name AND old == event_id), coinc_event_id = (SELECT new FROM _idmap_ WHERE _idmap_.table_name == 'coinc_event' AND old == coinc_event_id) WHERE ROWID > ?", (self.last_maxrowid,))
 
 
 class ProcessParamsTable(DBTable):
@@ -985,6 +1001,7 @@ def build_indexes(connection, verbose = False):
 
 
 TableByName = {
+	CoincMapTable.tableName: CoincMapTable,
 	ProcessParamsTable.tableName: ProcessParamsTable,
 	TimeSlideTable.tableName: TimeSlideTable
 }

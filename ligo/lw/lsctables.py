@@ -2510,6 +2510,20 @@ class CoincMapTable(table.Table):
 		"cem_cei_index": ("coinc_event_id",)
 	}
 
+	def applyKeyMapping(self, mapping):
+		table_column = self.getColumnByName("table_name")
+		event_id_column = self.getColumnByName("event_id")
+		coinc_event_id_column = self.getColumnByName("coinc_event_id")
+		for i, (table_name, old_event_id, old_coinc_event_id) in enumerate(zip(table_column, event_id_column, coinc_event_id_column)):
+			try:
+				event_id_column[i] = mapping[table_name, old_event_id]
+			except KeyError:
+				pass
+			try:
+				coinc_event_id_column[i] = mapping["coinc_event", old_coinc_event_id]
+			except KeyError:
+				pass
+
 
 class CoincMap(table.Table.RowType):
 	__slots__ = tuple(CoincMapTable.validcolumns.keys())
