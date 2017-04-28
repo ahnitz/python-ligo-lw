@@ -432,7 +432,7 @@ class Process(table.Table.RowType):
 	>>> x.instruments
 	set([u'H1', u'L1'])
 	"""
-	__slots__ = tuple(ProcessTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, ProcessTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
 
@@ -467,7 +467,7 @@ class LfnTable(table.Table):
 
 
 class Lfn(table.Table.RowType):
-	__slots__ = tuple(LfnTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, LfnTable.validcolumns))
 
 
 LfnTable.RowType = Lfn
@@ -539,7 +539,7 @@ class ProcessParams(table.Table.RowType):
 	>>> x.pyvalue
 	1
 	"""
-	__slots__ = tuple(ProcessParamsTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, ProcessParamsTable.validcolumns))
 
 	@property
 	def pyvalue(self):
@@ -658,7 +658,7 @@ class SearchSummary(table.Table.RowType):
 	>>> print(x.out_segment)
 	None
 	"""
-	__slots__ = tuple(SearchSummaryTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SearchSummaryTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
 
@@ -700,7 +700,7 @@ class SearchSummVarsTable(table.Table):
 
 
 class SearchSummVars(table.Table.RowType):
-	__slots__ = tuple(SearchSummVarsTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SearchSummVarsTable.validcolumns))
 
 
 SearchSummVarsTable.RowType = SearchSummVars
@@ -805,7 +805,7 @@ class ExperimentTable(table.Table):
 
 
 class Experiment(table.Table.RowType):
-	__slots__ = tuple(ExperimentTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, ExperimentTable.validcolumns))
 
 	insts = instrumentsproperty("instruments")
 
@@ -971,7 +971,7 @@ class ExperimentSummaryTable(table.Table):
 
 
 class ExperimentSummary(table.Table.RowType):
-	__slots__ = tuple(ExperimentSummaryTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, ExperimentSummaryTable.validcolumns))
 
 
 ExperimentSummaryTable.RowType = ExperimentSummary
@@ -1011,7 +1011,7 @@ class ExperimentMapTable(table.Table):
 
 
 class ExperimentMap(table.Table.RowType):
-	__slots__ = tuple(ExperimentMapTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, ExperimentMapTable.validcolumns))
 
 
 ExperimentMapTable.RowType = ExperimentMap
@@ -1067,7 +1067,7 @@ class GDSTriggerTable(table.Table):
 
 
 class GDSTrigger(table.Table.RowType):
-	__slots__ = tuple(GDSTriggerTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, GDSTriggerTable.validcolumns))
 
 	start = gpsproperty("start_time", "start_time_ns")
 
@@ -1145,7 +1145,7 @@ class SnglBurstTable(table.Table):
 
 
 class SnglBurst(table.Table.RowType):
-	__slots__ = tuple(SnglBurstTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SnglBurstTable.validcolumns))
 
 	#
 	# Tile properties
@@ -1332,7 +1332,7 @@ class SnglInspiralTable(table.Table):
 
 
 class SnglInspiral(table.Table.RowType):
-	__slots__ = tuple(SnglInspiralTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SnglInspiralTable.validcolumns))
 
 	@staticmethod
 	def chirp_distance(dist, mchirp, ref_mass=1.4):
@@ -1441,7 +1441,7 @@ class CoincInspiral(table.Table.RowType):
 	>>> print(x.end)
 	None
 	"""
-	__slots__ = tuple(CoincInspiralTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, CoincInspiralTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
 
@@ -1497,7 +1497,7 @@ class SnglRingdownTable(table.Table):
 
 
 class SnglRingdown(table.Table.RowType):
-	__slots__ = tuple(SnglRingdownTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SnglRingdownTable.validcolumns))
 
 	start = gpsproperty_with_gmst("start_time", "start_time_ns", "start_time_gmst")
 
@@ -1543,7 +1543,7 @@ class CoincRingdownTable(table.Table):
 
 
 class CoincRingdown(table.Table.RowType):
-	__slots__ = tuple(CoincRingdownTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, CoincRingdownTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
 
@@ -1654,7 +1654,7 @@ class SimInspiral(table.Table.RowType):
 	>>> print(x.end_time_gmst)
 	-2238.39417156
 	"""
-	__slots__ = tuple(SimInspiralTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SimInspiralTable.validcolumns))
 
 	time_geocent = gpsproperty_with_gmst("geocent_end_time", "geocent_end_time_ns", "end_time_gmst")
 
@@ -1791,7 +1791,7 @@ class SimBurst(table.Table.RowType):
 	>>> print(x.time_geocent_gmst)
 	-2238.39417156
 	"""
-	__slots__ = tuple(SimBurstTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SimBurstTable.validcolumns))
 
 	time_geocent = gpsproperty_with_gmst("time_geocent_gps", "time_geocent_gps_ns", "time_geocent_gmst")
 
@@ -1893,7 +1893,7 @@ class SimRingdownTable(table.Table):
 
 
 class SimRingdown(table.Table.RowType):
-	__slots__ = tuple(SimRingdownTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SimRingdownTable.validcolumns))
 
 	geocent_start = gpsproperty_with_gmst("geocent_start_time", "geocent_start_time_ns", "start_time_gmst")
 
@@ -1997,7 +1997,7 @@ class SummValue(table.Table.RowType):
 	>>> print(x.segment)
 	None
 	"""
-	__slots__ = tuple(SummValueTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SummValueTable.validcolumns))
 
 	instruments = instrumentsproperty("ifo")
 
@@ -2111,7 +2111,7 @@ class Segment(table.Table.RowType):
 	>>> x.segment
 	segment(-infinity, infinity)
 	"""
-	__slots__ = tuple(SegmentTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SegmentTable.validcolumns))
 
 	start = gpsproperty("start_time", "start_time_ns")
 	end = gpsproperty("end_time", "end_time_ns")
@@ -2190,7 +2190,7 @@ class SegmentDef(table.Table.RowType):
 	>>> x.instruments
 	set([u'H1', u'L1'])
 	"""
-	__slots__ = tuple(SegmentDefTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SegmentDefTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
 
@@ -2243,7 +2243,7 @@ class SegmentSumTable(table.Table):
 
 
 class SegmentSum(Segment):
-	__slots__ = tuple(SegmentSumTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, SegmentSumTable.validcolumns))
 
 
 SegmentSumTable.RowType = SegmentSum
@@ -2368,7 +2368,7 @@ class TimeSlideTable(table.Table):
 
 
 class TimeSlide(table.Table.RowType):
-	__slots__ = tuple(TimeSlideTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, TimeSlideTable.validcolumns))
 
 
 TimeSlideTable.RowType = TimeSlide
@@ -2434,7 +2434,7 @@ class CoincDefTable(table.Table):
 
 
 class CoincDef(table.Table.RowType):
-	__slots__ = tuple(CoincDefTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, CoincDefTable.validcolumns))
 
 
 CoincDefTable.RowType = CoincDef
@@ -2473,7 +2473,7 @@ class CoincTable(table.Table):
 
 
 class Coinc(table.Table.RowType):
-	__slots__ = tuple(CoincTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, CoincTable.validcolumns))
 
 	insts = instrumentsproperty("instruments")
 
@@ -2519,7 +2519,7 @@ class CoincMapTable(table.Table):
 
 
 class CoincMap(table.Table.RowType):
-	__slots__ = tuple(CoincMapTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, CoincMapTable.validcolumns))
 
 
 CoincMapTable.RowType = CoincMap
@@ -2553,7 +2553,7 @@ class DQSpecListTable(table.Table):
 
 
 class DQSpec(table.Table.RowType):
-	__slots__ = tuple(DQSpecListTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, DQSpecListTable.validcolumns))
 
 	def apply_to_segmentlist(self, seglist):
 		"""
@@ -2594,7 +2594,7 @@ class VetoDefTable(table.Table):
 
 
 class VetoDef(table.Table.RowType):
-	__slots__ = tuple(VetoDefTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, VetoDefTable.validcolumns))
 
 
 VetoDefTable.RowType = VetoDef
@@ -2618,7 +2618,7 @@ class TimeSlideSegmentMapTable(table.Table):
 
 
 class TimeSlideSegmentMap(table.Table.RowType):
-	__slots__ = tuple(TimeSlideSegmentMapTable.validcolumns.keys())
+	__slots__ = tuple(map(table.Column.ColumnName, TimeSlideSegmentMapTable.validcolumns))
 
 
 TimeSlideSegmentMapTable.RowType = TimeSlideSegmentMap
