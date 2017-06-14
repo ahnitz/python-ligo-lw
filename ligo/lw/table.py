@@ -776,9 +776,11 @@ class Table(ligolw.Table, list):
 			# if we get here the name does not have a table
 			# name prefix included.  prepend our own
 			name = u"%s:%s" % (self.Name, name)
-		try:
+		if name in self.validcolumns:
+			coltype = self.validcolumns[name]
+		elif Column.ColumnName(name) in self.validcolumns:
 			coltype = self.validcolumns[Column.ColumnName(name)]
-		except KeyError:
+		else:
 			raise ligolw.ElementError("invalid Column '%s' for Table '%s'" % (name, self.Name))
 		column = Column(AttributesImpl({u"Name": name, u"Type": coltype}))
 		streams = self.getElementsByTagName(ligolw.Stream.tagName)
@@ -819,11 +821,14 @@ class Table(ligolw.Table, list):
 		del self.columnpytypes[:]
 		for child in self.getElementsByTagName(ligolw.Column.tagName):
 			if self.validcolumns is not None:
-				try:
-					if self.validcolumns[child.Name] != child.Type:
-						raise ligolw.ElementError("invalid type '%s' for Column '%s' in Table '%s', expected type '%s'" % (child.Type, child.Name, self.Name, self.validcolumns[child.Name]))
-				except KeyError:
+				if child.Name in self.validcolumns:
+					expected_type = self.validcolumns[child.Name]
+				elif child.getAttribute("Name") in self.validcolumns:
+					expected_type = self.validcolumns[child.getAttribute("Name")]
+				else:
 					raise ligolw.ElementError("invalid Column '%s' for Table '%s'" % (child.Name, self.Name))
+				if expected_type != child.Type:
+					raise ligolw.ElementError("invalid type '%s' for Column '%s' in Table '%s', expected type '%s'" % (child.Type, child.Name, self.Name, expected_type))
 			if child.Name in self.columnnames:
 				raise ligolw.ElementError("duplicate Column '%s' in Table '%s'" % (child.Name, self.Name))
 			self.columnnames.append(child.Name)
@@ -1009,21 +1014,17 @@ class Table(ligolw.Table, list):
 		"""
 		for coltype, colname in zip(self.columntypes, self.columnnames):
 			if coltype in ligolwtypes.IDTypes and (self.next_id is None or colname != self.next_id.column_name):
-				# FIXME:  cannot rely on getting the ID's
-				# target table from the ID itself, must
-				# find a way to obtain this information
-				# independently.  probably need to encode
-				# it in the column name.  currently, e.g.,
-				# the search summary table has a
-				# "search_summary:process_id" column which
-				# could be renamed "process:process_id" to
-				# allow the name of the table for which
-				# these are the "process_ids" to be
-				# recovered.
 				column = self.getColumnByName(colname)
+				table_name = column.table_name
 				for i, old in enumerate(column):
 					try:
-						column[i] = mapping[old.table_name, old]
+						column[i] = mapping[table_name, old]
+			# FIXME:  temorary safety check to detect problems
+			# with the evolving ID reassignment algorithm.
+			# remove when no longer applicable (e.g., when IDs
+			# are turned into pure integers and don't carry a
+			# .table_name any more)
+						assert table_name == old.table_name
 					except KeyError:
 						pass
 

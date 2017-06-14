@@ -455,7 +455,7 @@ LfnID = ilwd.get_ilwdchar_class(u"lfn", u"lfn_id")
 class LfnTable(table.Table):
 	tableName = "lfn"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"lfn_id": "ilwd:char",
 		"name": "lstring",
 		"comment": "lstring",
@@ -486,7 +486,7 @@ class ProcessParamsTable(table.Table):
 	tableName = "process_params"
 	validcolumns = {
 		"program": "lstring",
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"param": "lstring",
 		"type": "lstring",
 		"value": "lstring"
@@ -578,7 +578,7 @@ ProcessParamsTable.RowType = ProcessParams
 class SearchSummaryTable(table.Table):
 	tableName = "search_summary"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"shared_object": "lstring",
 		"lalwrapper_cvs_tag": "lstring",
 		"lal_cvs_tag": "lstring",
@@ -689,7 +689,7 @@ SearchSummVarsID = ilwd.get_ilwdchar_class(u"search_summvars", u"search_summvar_
 class SearchSummVarsTable(table.Table):
 	tableName = "search_summvars"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"search_summvar_id": "ilwd:char",
 		"name": "lstring",
 		"string": "lstring",
@@ -829,8 +829,8 @@ class ExperimentSummaryTable(table.Table):
 	tableName = "experiment_summary"
 	validcolumns = {
 		"experiment_summ_id": "ilwd:char",
-		"experiment_id": "ilwd:char",
-		"time_slide_id": "ilwd:char",
+		"experiment:experiment_id": "ilwd:char",
+		"time_slide:time_slide_id": "ilwd:char",
 		"veto_def_name": "lstring",
 		"datatype": "lstring",
 		"sim_proc_id": "ilwd:char",
@@ -989,8 +989,8 @@ ExperimentSummaryTable.RowType = ExperimentSummary
 class ExperimentMapTable(table.Table):
 	tableName = "experiment_map"
 	validcolumns = {
-		"experiment_summ_id": "ilwd:char",
-		"coinc_event_id": "ilwd:char",
+		"experiment_summary:experiment_summ_id": "ilwd:char",
+		"coinc_event:coinc_event_id": "ilwd:char",
 	}
 	how_to_index = {
 		"em_esi_index": ("experiment_summ_id",),
@@ -1033,8 +1033,8 @@ class GDSTriggerTable(table.Table):
 	tableName = "gds_trigger"
 	validcolumns = {
 		"creator_db": "int_4s",
-		"process_id": "ilwd:char_u",
-		"filter_id": "ilwd:char",
+		"process:process_id": "ilwd:char_u",
+		"filter:filter_id": "ilwd:char",
 		"name": "lstring",
 		"subtype": "lstring",
 		"ifo": "lstring",
@@ -1091,8 +1091,8 @@ class SnglBurstTable(table.Table):
 	tableName = "sngl_burst"
 	validcolumns = {
 		"creator_db": "int_4s",
-		"process_id": "ilwd:char",
-		"filter_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
+		"filter:filter_id": "ilwd:char",
 		"ifo": "lstring",
 		"search": "lstring",
 		"channel": "lstring",
@@ -1261,7 +1261,7 @@ SnglInspiralID = ilwd.get_ilwdchar_class(u"sngl_inspiral", u"event_id")
 class SnglInspiralTable(table.Table):
 	tableName = "sngl_inspiral"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"ifo": "lstring",
 		"search": "lstring",
 		"channel": "lstring",
@@ -1402,7 +1402,7 @@ SnglInspiralTable.RowType = SnglInspiral
 class CoincInspiralTable(table.Table):
 	tableName = "coinc_inspiral"
 	validcolumns = {
-		"coinc_event_id": "ilwd:char",
+		"coinc_event:coinc_event_id": "ilwd:char",
 		"ifos": "lstring",
 		"end_time": "int_4s",
 		"end_time_ns": "int_4s",
@@ -1466,7 +1466,7 @@ SnglRingdownID = ilwd.get_ilwdchar_class(u"sngl_ringdown", u"event_id")
 class SnglRingdownTable(table.Table):
 	tableName = "sngl_ringdown"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"ifo": "lstring",
 		"channel": "lstring",
 		"start_time": "int_4s",
@@ -1517,7 +1517,7 @@ SnglRingdownTable.RowType = SnglRingdown
 class CoincRingdownTable(table.Table):
 	tableName = "coinc_ringdown"
 	validcolumns = {
-		"coinc_event_id": "ilwd:char",
+		"coinc_event:coinc_event_id": "ilwd:char",
 		"ifos": "lstring",
 		"start_time": "int_4s",
 		"start_time_ns": "int_4s",
@@ -1568,7 +1568,7 @@ SimInspiralID = ilwd.get_ilwdchar_class(u"sim_inspiral", u"simulation_id")
 class SimInspiralTable(table.Table):
 	tableName = "sim_inspiral"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"waveform": "lstring",
 		"geocent_end_time": "int_4s",
 		"geocent_end_time_ns": "int_4s",
@@ -1743,7 +1743,7 @@ SimBurstID = ilwd.get_ilwdchar_class(u"sim_burst", u"simulation_id")
 class SimBurstTable(table.Table):
 	tableName = "sim_burst"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"waveform": "lstring",
 		"ra": "real_8",
 		"dec": "real_8",
@@ -1761,7 +1761,7 @@ class SimBurstTable(table.Table):
 		"hrss": "real_8",
 		"egw_over_rsquared": "real_8",
 		"waveform_number": "int_8u",
-		"time_slide_id": "ilwd:char",
+		"time_slide:time_slide_id": "ilwd:char",
 		"simulation_id": "ilwd:char"
 	}
 	constraints = "PRIMARY KEY (simulation_id)"
@@ -1854,7 +1854,7 @@ SimRingdownID = ilwd.get_ilwdchar_class(u"sim_ringdown", u"simulation_id")
 class SimRingdownTable(table.Table):
 	tableName = "sim_ringdown"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"waveform": "lstring",
 		"coordinates": "lstring",
 		"geocent_start_time": "int_4s",
@@ -1960,9 +1960,9 @@ class SummValueTable(table.Table):
 	validcolumns = {
 		"summ_value_id": "ilwd:char",
 		"program": "lstring",
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"frameset_group": "lstring",
-		"segment_def_id": "ilwd:char",
+		"segment_definer:segment_def_id": "ilwd:char",
 		"start_time": "int_4s",
 		"start_time_ns": "int_4s",
 		"end_time": "int_4s",
@@ -2025,13 +2025,13 @@ class SegmentTable(table.Table):
 	tableName = "segment"
 	validcolumns = {
 		"creator_db": "int_4s",
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"segment_id": "ilwd:char",
 		"start_time": "int_4s",
 		"start_time_ns": "int_4s",
 		"end_time": "int_4s",
 		"end_time_ns": "int_4s",
-		"segment_def_id": "ilwd:char",
+		"segment_definer:segment_def_id": "ilwd:char",
 		"segment_def_cdb": "int_4s"
 	}
 	constraints = "PRIMARY KEY (segment_id)"
@@ -2166,7 +2166,7 @@ class SegmentDefTable(table.Table):
 	tableName = "segment_definer"
 	validcolumns = {
 		"creator_db": "int_4s",
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"segment_def_id": "ilwd:char",
 		"ifos": "lstring",
 		"name": "lstring",
@@ -2214,14 +2214,14 @@ class SegmentSumTable(table.Table):
 	tableName = "segment_summary"
 	validcolumns = {
 		"creator_db": "int_4s",
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"segment_sum_id": "ilwd:char",
 		"start_time": "int_4s",
 		"start_time_ns": "int_4s",
 		"end_time": "int_4s",
 		"end_time_ns": "int_4s",
 		"comment": "lstring",
-		"segment_def_id": "ilwd:char",
+		"segment_definer:segment_def_id": "ilwd:char",
 		"segment_def_cdb": "int_4s"
 	}
 	constraints = "PRIMARY KEY (segment_sum_id)"
@@ -2265,7 +2265,7 @@ TimeSlideID = ilwd.get_ilwdchar_class(u"time_slide", u"time_slide_id")
 class TimeSlideTable(table.Table):
 	tableName = "time_slide"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"time_slide_id": "ilwd:char",
 		"instrument": "lstring",
 		"offset": "real_8"
@@ -2455,10 +2455,10 @@ CoincID = ilwd.get_ilwdchar_class(u"coinc_event", u"coinc_event_id")
 class CoincTable(table.Table):
 	tableName = "coinc_event"
 	validcolumns = {
-		"process_id": "ilwd:char",
-		"coinc_def_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
+		"coinc_definer:coinc_def_id": "ilwd:char",
 		"coinc_event_id": "ilwd:char",
-		"time_slide_id": "ilwd:char",
+		"time_slide:time_slide_id": "ilwd:char",
 		"instruments": "lstring",
 		"nevents": "int_4u",
 		"likelihood": "real_8"
@@ -2493,7 +2493,7 @@ CoincTable.RowType = Coinc
 class CoincMapTable(table.Table):
 	tableName = "coinc_event_map"
 	validcolumns = {
-		"coinc_event_id": "ilwd:char",
+		"coinc_event:coinc_event_id": "ilwd:char",
 		"table_name": "char_v",
 		"event_id": "ilwd:char"
 	}
@@ -2579,7 +2579,7 @@ DQSpecListTable.RowType = DQSpec
 class VetoDefTable(table.Table):
 	tableName = "veto_definer"
 	validcolumns = {
-		"process_id": "ilwd:char",
+		"process:process_id": "ilwd:char",
 		"ifo": "lstring",
 		"name": "lstring",
 		"version": "int_4s",
@@ -2612,8 +2612,8 @@ VetoDefTable.RowType = VetoDef
 class TimeSlideSegmentMapTable(table.Table):
 	tableName = "time_slide_segment_map"
 	validcolumns = {
-		"segment_def_id": "ilwd:char",
-		"time_slide_id": "ilwd:char",
+		"segment_definer:segment_def_id": "ilwd:char",
+		"time_slide:time_slide_id": "ilwd:char",
 	}
 
 

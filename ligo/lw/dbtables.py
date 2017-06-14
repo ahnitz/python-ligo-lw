@@ -569,14 +569,26 @@ def get_xml(connection, table_names = None):
 		except KeyError:
 			cls = DBTable
 		table_elem = cls(AttributesImpl({u"Name": u"%s:table" % table_name}), connection = connection)
+		destrip = {}
+		if table_elem.validcolumns is not None:
+			for name in table_elem.validcolumns:
+				destrip[table.Column.ColumnName(name)] = name
 		for column_name, column_type in get_column_info(connection, table_elem.Name):
 			if table_elem.validcolumns is not None:
-				# use the pre-defined column type
+				try:
+					column_name = destrip[column_name]
+				except KeyError:
+					raise ValueError("invalid column")
 				column_type = table_elem.validcolumns[column_name]
+				try:
+					table.Column.ColumnName.table_name(column_name)
+				except ValueError:
+					column_name = u"%s:%s" % (table_name, column_name)
 			else:
 				# guess the column type
 				column_type = ligolwtypes.FromSQLiteType[column_type]
-			table_elem.appendChild(table.Column(AttributesImpl({u"Name": u"%s:%s" % (table_name, column_name), u"Type": column_type})))
+				column_name = u"%s:%s" % (table_name, column_name)
+			table_elem.appendChild(table.Column(AttributesImpl({u"Name": column_name, u"Type": column_type})))
 		table_elem._end_of_columns()
 		table_elem.appendChild(table.TableStream(AttributesImpl({u"Name": u"%s:table" % table_name, u"Delimiter": table.TableStream.Delimiter.default, u"Type": table.TableStream.Type.default})))
 		ligo_lw.appendChild(table_elem)
