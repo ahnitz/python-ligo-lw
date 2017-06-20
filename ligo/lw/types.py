@@ -75,9 +75,9 @@ import six
 
 
 try:  # python < 3
-    long
+	long
 except NameError:  # python >= 3
-    long = int
+	long = int
 
 
 #
