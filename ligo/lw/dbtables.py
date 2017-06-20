@@ -53,7 +53,6 @@ from . import ligolw
 from . import table
 from . import lsctables
 from . import types as ligolwtypes
-import six
 
 
 #
@@ -370,7 +369,7 @@ def put_connection_filename(filename, working_filename, verbose = False):
 
 		# restore original handlers, and send ourselves any trapped signals
 		# in order
-		for sig, oldhandler in six.iteritems(oldhandlers):
+		for sig, oldhandler in oldhandlers.items():
 			signal.signal(sig, oldhandler)
 		while deferred_signals:
 			os.kill(os.getpid(), deferred_signals.pop(0))
@@ -993,7 +992,7 @@ def build_indexes(connection, verbose = False):
 		if how_to_index is not None:
 			if verbose:
 				sys.stderr.write("indexing %s table ...\n" % table_name)
-			for index_name, cols in six.iteritems(how_to_index):
+			for index_name, cols in how_to_index.items():
 				cursor.execute("CREATE INDEX IF NOT EXISTS %s ON %s (%s)" % (index_name, table_name, ",".join(cols)))
 	connection.commit()
 

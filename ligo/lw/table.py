@@ -297,7 +297,7 @@ class Column(ligolw.Column):
 		updated as there are items.
 		"""
 		if isinstance(i, slice):
-			for r, val in itertools.izip(self.parentNode[i], value):
+			for r, val in zip(self.parentNode[i], value):
 				setattr(r, self.Name, val)
 		else:
 			setattr(self.parentNode[i], self.Name, value)
