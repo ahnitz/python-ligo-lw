@@ -99,23 +99,6 @@ def parse_command_line():
 #
 # =============================================================================
 #
-#                                    Input
-#
-# =============================================================================
-#
-
-
-#
-# Enable column interning
-#
-
-
-table.TableStream.RowBuilder = table.InterningRowBuilder
-
-
-#
-# =============================================================================
-#
 #                         How to find things to print
 #
 # =============================================================================
@@ -206,7 +189,6 @@ if options.column is not None:
 
 for url in urls:
 	xmldoc = ligolw_utils.load_url(url, verbose = options.verbose, contenthandler = ContentHandler)
-	table.InterningRowBuilder.strings.clear()
 	for elem in ligolw.WalkChildren(xmldoc):
 		if elem.tagName == ligolw.Table.tagName:
 			print_table(elem, options.column, options.rows)

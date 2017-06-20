@@ -112,14 +112,6 @@ table.use_in(ContentHandler)
 
 
 #
-# Enable attribute interning
-#
-
-
-table.TableStream.RowBuilder = table.InterningRowBuilder
-
-
-#
 # =============================================================================
 #
 #                                     Cut
@@ -191,7 +183,6 @@ for n, filename in enumerate(filenames, 1):
 	if options.verbose:
 		print("%d/%d:" % (n, len(filenames)), end=' ', file=sys.stderr)
 	doc = ligolw_utils.load_filename(filename, verbose = options.verbose, contenthandler = ContentHandler)
-	table.InterningRowBuilder.strings.clear()
 	if options.verbose:
 		print("processing", file=sys.stderr)
 	if options.delete_column:
