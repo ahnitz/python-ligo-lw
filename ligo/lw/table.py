@@ -911,19 +911,19 @@ class Table(ligolw.Table, list):
 		associated with it.
 		"""
 		# = None if no ID generator
-		id = cls.next_id
+		next_id = cls.next_id
 		cls.next_id += 1
-		return id
+		return next_id
 
 	@classmethod
-	def set_next_id(cls, id):
+	def set_next_id(cls, next_id):
 		"""
 		Sets the value of the next_id class attribute.  This is a
 		convenience function to help prevent accidentally assigning
 		a value to an instance attribute instead of the class
 		attribute.
 		"""
-		cls.next_id = id
+		cls.next_id = next_id
 
 	@classmethod
 	def reset_next_id(cls):
