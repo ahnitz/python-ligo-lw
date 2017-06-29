@@ -221,6 +221,55 @@ class RewindableInputFile(object):
 		return False
 
 
+class NoCloseFlushWrapper(object):
+	def __init__(self, fileobj):
+		self.fileobj = fileobj
+		# avoid attribute look-ups
+		try:
+			self.next = self.fileobj.next
+		except AttributeError:
+			# replace our .next() method with something that
+			# will raise a more meaningful exception if
+			# attempted
+			self.next = lambda *args, **kwargs: fileobj.next(*args, **kwargs)
+		try:
+			self.read = self.fileobj.read
+		except AttributeError:
+			# replace our .read() method with something that
+			# will raise a more meaningful exception if
+			# attempted
+			self.read = lambda *args, **kwargs: fileobj.read(*args, **kwargs)
+		try:
+			self.write = self.fileobj.write
+		except AttributeError:
+			# replace our .write() method with something that
+			# will raise a more meaningful exception if
+			# attempted
+			self.write = lambda *args, **kwargs: fileobj.write(*args, **kwargs)
+		try:
+			self.tell = self.fileobj.tell
+		except AttributeError:
+			self.tell = lambda *args, **kwargs: fileobj.tell(*args, **kwargs)
+		try:
+			self.flush = self.fileobj.flush
+		except AttributeError:
+			self.flush = lambda *args, **kwargs: fileobj.flush(*args, **kwargs)
+
+	def __iter__(self):
+		return self
+
+	def close(self):
+		self.flush()
+
+	def __enter__(self):
+		return self
+
+	def __exit__(self, *args):
+		self.close()
+		return False
+
+
+
 class MD5File(object):
 	def __init__(self, fileobj, md5obj = None, closable = True):
 		self.fileobj = fileobj
@@ -335,19 +384,15 @@ def load_fileobj(fileobj, gz = None, xmldoc = None, contenthandler = None):
 
 	If the optional xmldoc argument is provided and not None, the
 	parsed XML tree will be appended to that document, otherwise a new
-	document will be created.  The return value is a tuple, the first
-	element of the tuple is the XML document and the second is a string
-	containing the MD5 digest in hex digits of the bytestream that was
-	parsed.
+	document will be created.  The return value is the xmldoc argument
+	or the root of the newly created XML tree.
 
 	Example:
 
 	>>> from ligo.lw import ligolw
 	>>> import StringIO
 	>>> f = StringIO.StringIO('<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE LIGO_LW SYSTEM "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt"><LIGO_LW><Table Name="demo:table"><Column Name="name" Type="lstring"/><Column Name="value" Type="real8"/><Stream Name="demo:table" Type="Local" Delimiter=",">"mass",0.5,"velocity",34</Stream></Table></LIGO_LW>')
-	>>> xmldoc, digest = load_fileobj(f, contenthandler = ligolw.LIGOLWContentHandler)
-	>>> digest
-	'6bdcc4726b892aad913531684024ed8e'
+	>>> xmldoc = load_fileobj(f, contenthandler = ligolw.LIGOLWContentHandler)
 
 	The contenthandler argument specifies the SAX content handler to
 	use when parsing the document.  The contenthandler is a required
@@ -357,8 +402,6 @@ def load_fileobj(fileobj, gz = None, xmldoc = None, contenthandler = None):
 	ligo.lw.ligolw.FilteringLIGOLWContentHandler for examples of custom
 	content handlers used to load subsets of documents into memory.
 	"""
-	fileobj = MD5File(fileobj)
-	md5obj = fileobj.md5obj
 	if gz or gz is None:
 		fileobj = RewindableInputFile(fileobj)
 		magic = fileobj.read(2)
@@ -368,7 +411,7 @@ def load_fileobj(fileobj, gz = None, xmldoc = None, contenthandler = None):
 	if xmldoc is None:
 		xmldoc = ligolw.Document()
 	ligolw.make_parser(contenthandler(xmldoc)).parse(fileobj)
-	return xmldoc, md5obj.hexdigest()
+	return xmldoc
 
 
 def load_filename(filename, verbose = False, **kwargs):
@@ -391,9 +434,7 @@ def load_filename(filename, verbose = False, **kwargs):
 		fileobj = open(filename, "rb")
 	else:
 		fileobj = sys.stdin
-	xmldoc, hexdigest = load_fileobj(fileobj, **kwargs)
-	if verbose:
-		sys.stderr.write("md5sum: %s  %s\n" % (hexdigest, (filename if filename is not None else "")))
+	xmldoc = load_fileobj(fileobj, **kwargs)
 	return xmldoc
 
 
@@ -423,9 +464,7 @@ def load_url(url, verbose = False, **kwargs):
 			fileobj = urllib.request.urlopen(url)
 	else:
 		fileobj = sys.stdin
-	xmldoc, hexdigest = load_fileobj(fileobj, **kwargs)
-	if verbose:
-		sys.stderr.write("md5sum: %s  %s\n" % (hexdigest, (url if url is not None else "")))
+	xmldoc = load_fileobj(fileobj, **kwargs)
 	return xmldoc
 
 
@@ -437,15 +476,14 @@ def write_fileobj(xmldoc, fileobj, gz = False, compresslevel = 3, **kwargs):
 	to that method.  The file object need not be seekable.  The output
 	data is gzip compressed on the fly if gz is True, and in that case
 	the compresslevel parameter sets the gzip compression level (the
-	default is 3).  The return value is a string containing the hex
-	digits of the MD5 digest of the output bytestream.
+	default is 3).
 
 	Example:
 
 	>>> import sys
 	>>> from ligo.lw import ligolw
 	>>> xmldoc = load_filename("demo.xml", contenthandler = ligolw.LIGOLWContentHandler)
-	>>> digest = write_fileobj(xmldoc, sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
+	>>> write_fileobj(xmldoc, sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
 	<?xml version='1.0' encoding='utf-8'?>
 	<!DOCTYPE LIGO_LW SYSTEM "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt">
 	<LIGO_LW>
@@ -457,15 +495,12 @@ def write_fileobj(xmldoc, fileobj, gz = False, compresslevel = 3, **kwargs):
 			</Stream>
 		</Table>
 	</LIGO_LW>
-	>>> digest
-	'37044d979a79409b3d782da126636f53'
 	"""
-	with MD5File(fileobj, closable = False) as fileobj:
-		md5obj = fileobj.md5obj
-		with fileobj if not gz else gzip.GzipFile(mode = "wb", fileobj = fileobj, compresslevel = compresslevel) as fileobj:
-			with codecs.getwriter("utf_8")(fileobj) as fileobj:
-				xmldoc.write(fileobj, **kwargs)
-		return md5obj.hexdigest()
+	with NoCloseFlushWrapper(fileobj) as fileobj:
+		if gz:
+			fileobj = gzip.GzipFile(mode = "wb", fileobj = fileobj, compresslevel = compresslevel)
+		with codecs.getwriter("utf_8")(fileobj) as fileobj:
+			xmldoc.write(fileobj, **kwargs)
 
 
 class tildefile(object):
@@ -533,15 +568,13 @@ def write_filename(xmldoc, filename, verbose = False, gz = False, with_mv = True
 		sys.stderr.write("writing %s ...\n" % (("'%s'" % filename) if filename is not None else "stdout"))
 	with SignalsTrap(trap_signals):
 		if filename is None:
-			hexdigest = write_fileobj(xmldoc, sys.stdout, gz = gz, **kwargs)
+			write_fileobj(xmldoc, sys.stdout, gz = gz, **kwargs)
 		else:
 			if not gz and filename.endswith(".gz"):
 				warnings.warn("filename '%s' ends in '.gz' but file is not being gzip-compressed" % filename, UserWarning)
 			binary_open = lambda filename: open(filename, 'wb')
 			with (binary_open if not with_mv else tildefile)(filename) as fileobj:
-				hexdigest = write_fileobj(xmldoc, fileobj, gz = gz, **kwargs)
-	if verbose:
-		sys.stderr.write("md5sum: %s  %s\n" % (hexdigest, (filename if filename is not None else "")))
+				write_fileobj(xmldoc, fileobj, gz = gz, **kwargs)
 
 
 def write_url(xmldoc, url, **kwargs):
