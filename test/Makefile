@@ -10,6 +10,7 @@ check : \
 	test_ilwd \
 	test_ligolw \
 	test_lsctables \
+	test_param \
 	test_table \
 	test_tokenizer \
 	test_utils \
@@ -91,6 +92,11 @@ test_lsctables :
 	@echo "=== start test_lsctables ===>"
 	./test_lsctables.py && $(printpassfail)
 	@echo "<=== end test_lsctables ==="
+
+test_param :
+	@echo "=== start test_param ===>"
+	./test_param.py && $(printpassfail)
+	@echo "<=== end test_param ==="
 
 test_table :
 	@echo "=== start test_table ===>"
