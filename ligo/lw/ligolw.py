@@ -449,6 +449,11 @@ class LLWNameAttr(six.text_type):
 	>>> # but attributeproxy reports original value
 	>>> x.Name
 	u'blah'
+	>>> # only lower-case Latin letters, numerals, and '_' are allowed
+	>>> x.Name = u"Hello-world"
+	Traceback (most recent call last):
+	  File "<stdin>", line 1, in <module>
+	ValueError: invalid Name 'Hello-world'
 	"""
 	def __new__(cls, name):
 		try:
@@ -459,7 +464,11 @@ class LLWNameAttr(six.text_type):
 
 	@classmethod
 	def enc(cls, name):
-		return cls.enc_pattern % name
+		s = cls.enc_pattern % name
+		# confirm invertiblity
+		if cls(s) != name:
+			raise ValueError("invalid Name '%s'" % name)
+		return s
 
 
 #
