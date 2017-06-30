@@ -210,10 +210,11 @@ def use_in(ContentHandler):
 	Example:
 
 	>>> from ligo.lw import ligolw
-	>>> def MyContentHandler(ligolw.LIGOLWContentHandler):
+	>>> class MyContentHandler(ligolw.LIGOLWContentHandler):
 	...	pass
 	...
 	>>> use_in(MyContentHandler)
+	<class 'ligo.lw.param.MyContentHandler'>
 	"""
 	def startParam(self, parent, attrs):
 		return Param(attrs)
