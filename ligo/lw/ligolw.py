@@ -460,7 +460,7 @@ class LLWNameAttr(six.text_type):
 			name = cls.dec_pattern.search(name).group(u"Name")
 		except AttributeError:
 			pass
-		return six.text_type.__new__(cls, name)
+		return name
 
 	@classmethod
 	def enc(cls, name):
