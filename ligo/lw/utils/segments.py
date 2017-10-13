@@ -29,10 +29,10 @@ Ask Kipp to document this!
 """
 
 
+import heapq
 import itertools
 
 
-from glue import iterutils
 from glue import segments
 from glue import segmentsUtils
 from .. import __author__, __date__, __version__
@@ -673,7 +673,7 @@ class LigolwSegments(set):
 		# rows from the generators in time order
 		#
 
-		for row, target_table, id_column in iterutils.inorder(*row_generators):
+		for row, target_table, id_column in heapq.merge(*row_generators):
 			setattr(row, id_column, target_table.get_next_id())
 			target_table.append(row)
 
