@@ -210,7 +210,7 @@ class LigolwSegmentList(object):
 		self.version = version
 		self.comment = comment
 
-	def sort(self, *args):
+	def sort(self, *args, **kwargs):
 		"""
 		Sort the internal segment lists.  The optional args are
 		passed to the .sort() method of the segment lists.  This
@@ -218,8 +218,8 @@ class LigolwSegmentList(object):
 		alternate comparison function.  The default is to sort by
 		start time with ties broken by end time.
 		"""
-		self.valid.sort(*args)
-		self.active.sort(*args)
+		self.valid.sort(*args, **kwargs)
+		self.active.sort(*args, **kwargs)
 
 	def coalesce(self):
 		"""
@@ -527,7 +527,7 @@ class LigolwSegments(set):
 		return self
 
 
-	def sort(self, *args):
+	def sort(self, *args, **kwargs):
 		"""
 		Sort the segment lists.  The optional args are passed to
 		the .sort() methods of the segment lists.  This can be used
@@ -536,7 +536,7 @@ class LigolwSegments(set):
 		segment start time with ties broken by end time).
 		"""
 		for ligolw_segment_list in self:
-			ligolw_segment_list.sort(*args)
+			ligolw_segment_list.sort(*args, **kwargs)
 
 
 	def optimize(self):
