@@ -636,15 +636,14 @@ class LigolwSegments(set):
 		#
 
 		def row_generator(segs, target_table, process_id, segment_def_id):
+			row = target_table.RowType
 			id_column = target_table.next_id.column_name
-			for seg in segs:
-				row = target_table.RowType()
-				row.segment = seg
-				row.process_id = process_id
-				row.segment_def_id = segment_def_id
-				if isinstance(row, lsctables.SegmentSum):
-					row.comment = None
-				yield row, target_table, id_column
+			# if it's a SegmentSum row generator, comment
+			# attribute must be initialized
+			if isinstance(target_table, lsctables.SegmentSumTable):
+				return ((row(segment = seg, process_id = process_id, segment_def_id = segment_def_id, comment = None), target_table, id_column) for seg in segs)
+			else:
+				return ((row(segment = seg, process_id = process_id, segment_def_id = segment_def_id), target_table, id_column) for seg in segs)
 
 		#
 		# populate the segment_definer table from the list of
@@ -656,13 +655,14 @@ class LigolwSegments(set):
 		row_generators = []
 		for ligolw_segment_list in sorted(self, key = lambda l: (l.name, sorted(l.instruments), l.version)):
 			self.remove(ligolw_segment_list)
-			segment_def_row = self.segment_def_table.RowType()
-			segment_def_row.process_id = process_id
-			segment_def_row.segment_def_id = self.segment_def_table.get_next_id()
-			segment_def_row.instruments = ligolw_segment_list.instruments
-			segment_def_row.name = ligolw_segment_list.name
-			segment_def_row.version = ligolw_segment_list.version
-			segment_def_row.comment = ligolw_segment_list.comment
+			segment_def_row = self.segment_def_table.RowType(
+				process_id = process_id,
+				segment_def_id = self.segment_def_table.get_next_id(),
+				instruments = ligolw_segment_list.instruments,
+				name = ligolw_segment_list.name,
+				version = ligolw_segment_list.version,
+				comment = ligolw_segment_list.comment
+			)
 			self.segment_def_table.append(segment_def_row)
 
 			row_generators.append(row_generator(ligolw_segment_list.valid, self.segment_sum_table, process_id, segment_def_row.segment_def_id))
