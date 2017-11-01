@@ -2131,7 +2131,7 @@ class Segment(table.Table.RowType):
 	def __getitem__(self, i):
 		return self.segment[i]
 
-	def __init__(self, *args):
+	def __init__(self, *args, **kwargs):
 		if args:
 			try:
 				# first try unpacking arguments
@@ -2139,6 +2139,8 @@ class Segment(table.Table.RowType):
 			except ValueError:
 				# didn't work, try unpacking 0th argument
 				self.segment, = args
+		for key, value in kwargs.items():
+			setattr(self, key, value)
 
 	def __len__(self):
 		return len(self.segment)
