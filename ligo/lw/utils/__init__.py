@@ -269,7 +269,6 @@ class NoCloseFlushWrapper(object):
 		return False
 
 
-
 class MD5File(object):
 	def __init__(self, fileobj, md5obj = None, closable = True):
 		self.fileobj = fileobj
