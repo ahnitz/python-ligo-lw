@@ -31,7 +31,6 @@ Library of utility code for LIGO Light Weight XML applications.
 
 import codecs
 import gzip
-from hashlib import md5
 import warnings
 import os
 from six.moves import urllib
@@ -102,11 +101,10 @@ class RewindableInputFile(object):
 	# using calls to .seek().  Furthermore, it uses .seek() instead of
 	# buffering data internally as required.  This makes GzipFile
 	# gratuitously unable to work with pipes, urlfile objects, and
-	# anything else that does not support seeking (including the
-	# MD5File class in this module).  To hack around this, this class
-	# provides the buffering needed by GzipFile.  It also does proper
-	# EOF checking, and uses the results to emulate the results of
-	# GzipFile's .seek() games.
+	# anything else that does not support seeking.  To hack around
+	# this, this class provides the buffering needed by GzipFile.  It
+	# also does proper EOF checking, and uses the results to emulate
+	# the results of GzipFile's .seek() games.
 	#
 	# By wrapping your file object in this class before passing it to
 	# GzipFile, you can use GzipFile to read from non-seekable files.
@@ -260,78 +258,6 @@ class NoCloseFlushWrapper(object):
 
 	def close(self):
 		self.flush()
-
-	def __enter__(self):
-		return self
-
-	def __exit__(self, *args):
-		self.close()
-		return False
-
-
-class MD5File(object):
-	def __init__(self, fileobj, md5obj = None, closable = True):
-		self.fileobj = fileobj
-		if md5obj is None:
-			self.md5obj = md5()
-		else:
-			self.md5obj = md5obj
-		self.closable = closable
-		# avoid attribute look-ups
-		self._update = self.md5obj.update
-		try:
-			self._next = self.fileobj.next
-		except AttributeError:
-			# replace our .next() method with something that
-			# will raise a more meaningful exception if
-			# attempted
-			self.next = lambda *args, **kwargs: fileobj.next(*args, **kwargs)
-		try:
-			self._read = self.fileobj.read
-		except AttributeError:
-			# replace our .read() method with something that
-			# will raise a more meaningful exception if
-			# attempted
-			self.read = lambda *args, **kwargs: fileobj.read(*args, **kwargs)
-		try:
-			self._write = self.fileobj.write
-		except AttributeError:
-			# replace our .write() method with something that
-			# will raise a more meaningful exception if
-			# attempted
-			self.write = lambda *args, **kwargs: fileobj.write(*args, **kwargs)
-		try:
-			self.tell = self.fileobj.tell
-		except AttributeError:
-			self.tell = lambda *args, **kwargs: fileobj.tell(*args, **kwargs)
-		try:
-			self.flush = self.fileobj.flush
-		except AttributeError:
-			self.flush = lambda *args, **kwargs: fileobj.flush(*args, **kwargs)
-
-	def __iter__(self):
-		return self
-
-	def next(self):
-		buf = self._next()
-		self._update(buf)
-		return buf
-
-	def read(self, *args):
-		buf = self._read(*args)
-		self._update(buf)
-		return buf
-
-	def write(self, buf):
-		self._update(buf)
-		return self._write(buf)
-
-	def close(self):
-		if self.closable:
-			return self.fileobj.close()
-		else:
-			# at least make sure we're flushed
-			self.flush()
 
 	def __enter__(self):
 		return self
