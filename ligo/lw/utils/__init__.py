@@ -43,7 +43,16 @@ from .. import __author__, __date__, __version__
 from .. import ligolw
 
 
-__all__ = ["sort_files_by_size", "local_path_from_url", "load_fileobj", "load_filename", "load_url", "write_fileobj", "write_filename", "write_url"]
+__all__ = [
+	"sort_files_by_size",
+	"local_path_from_url",
+	"load_fileobj",
+	"load_filename",
+	"load_url",
+	"write_fileobj",
+	"write_filename",
+	"write_url"
+]
 
 
 #
