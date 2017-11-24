@@ -130,16 +130,18 @@ def insert_from_url(url, preserve_ids = False, verbose = False, contenthandler =
 
 	try:
 		#
-		# load document.  this process inserts the document's contents into
-		# the database.  the XML tree constructed by this process contains
-		# a table object for each table found in the newly-inserted
-		# document and those table objects' last_max_rowid values have been
-		# initialized prior to rows being inserted.  therefore, this is the
-		# XML tree that must be passed to update_ids in order to ensure (a)
-		# that all newly-inserted tables are processed and (b) all
-		# newly-inserted rows are processed.  NOTE:  it is assumed the
-		# content handler is creating DBTable instances in the XML tree,
-		# not regular Table instances, but this is not checked.
+		# load document.  this process inserts the document's
+		# contents into the database.  the XML tree constructed by
+		# this process contains a table object for each table found
+		# in the newly-inserted document and those table objects'
+		# last_max_rowid values have been initialized prior to rows
+		# being inserted.  therefore, this is the XML tree that
+		# must be passed to update_ids in order to ensure (a) that
+		# all newly-inserted tables are processed and (b) all
+		# newly-inserted rows are processed.  NOTE:  it is assumed
+		# the content handler is creating DBTable instances in the
+		# XML tree, not regular Table instances, but this is not
+		# checked.
 		#
 
 		xmldoc = ligolw_utils.load_url(url, verbose = verbose, contenthandler = contenthandler)
