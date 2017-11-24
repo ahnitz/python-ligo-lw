@@ -1353,7 +1353,7 @@ class SnglInspiral(table.Table.RowType):
 	@spin1.setter
 	def spin1(self, spin):
 		if spin is None:
-			self.spin1x, self.spin1y, self.spin1z = None, None, None
+			self.spin1x = self.spin1y = self.spin1z = None
 		else:
 			self.spin1x, self.spin1y, self.spin1z = spin
 
@@ -1366,7 +1366,7 @@ class SnglInspiral(table.Table.RowType):
 	@spin2.setter
 	def spin2(self, spin):
 		if spin is None:
-			self.spin2x, self.spin2y, self.spin2z = None, None, None
+			self.spin2x = self.spin2y = self.spin2z = None
 		else:
 			self.spin2x, self.spin2y, self.spin2z = spin
 
