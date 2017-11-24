@@ -35,6 +35,7 @@ setup(
 	scripts = [
 		"bin/ligolw_add",
 		"bin/ligolw_cut",
+		"bin/ligolw_no_ilwdchar",
 		"bin/ligolw_print",
 		"bin/ligolw_sqlite",
 	],
