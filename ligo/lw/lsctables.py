@@ -42,14 +42,14 @@ required to incorporate them into this module's document handling
 machinery.
 
 Firstly, if a new Table class is defined, the TableByName mapping defined
-in this module should be updated.  The TableByName mapping is used to
-convert table names to corresponding Python classes.  This mapping is used
-when parsing XML documents, when extracting the contents of SQL databases
-and any other place the conversion from a name to a class definition is
-required.  Once the mapping is updated, documents containing Tables whose
-name matches the custom definition will be converted to instances of that
-class (Tables whose names are not recognized are loaded as instances of the
-generic Table class).
+in this module should be updated.  The TableByName mapping is used to map
+table names to corresponding Python classes.  This mapping is used when
+parsing XML documents, when extracting the contents of SQL databases and
+any other place the conversion from a name to a class definition is
+required.  Once the mapping is updated, XML documents containing Table
+elements whose names match the custom definition will be converted to
+instances of that class (Tables whose names are not recognized are loaded
+as instances of the generic ligo.lw.Table class).
 
 Example:
 
@@ -101,7 +101,7 @@ from . import ilwd
 def New(cls, columns = None, **kwargs):
 	"""
 	Construct a pre-defined LSC table.  The optional columns argument
-	is a sequence of the names of the columns the table should be
+	is a sequence of the names of the columns the table is to be
 	constructed with.  If columns = None, then the table is constructed
 	with all valid columns (use columns = [] to create a table with no
 	columns).
