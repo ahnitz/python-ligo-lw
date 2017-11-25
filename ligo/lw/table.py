@@ -923,7 +923,7 @@ class Table(ligolw.Table, list):
 		a value to an instance attribute instead of the class
 		attribute.
 		"""
-		cls.next_id = next_id
+		cls.next_id = type(cls.next_id)(next_id)
 
 	@classmethod
 	def reset_next_id(cls):
@@ -937,7 +937,7 @@ class Table(ligolw.Table, list):
 		>>> for cls in lsctables.TableByName.values(): cls.reset_next_id()
 		"""
 		if cls.next_id is not None:
-			cls.set_next_id(type(cls.next_id)(0))
+			cls.set_next_id(0)
 
 	def sync_next_id(self):
 		"""
@@ -968,7 +968,7 @@ class Table(ligolw.Table, list):
 			if len(self):
 				n = max(self.getColumnByName(self.next_id.column_name)) + 1
 			else:
-				n = type(self.next_id)(0)
+				n = 0
 			if n > self.next_id:
 				self.set_next_id(n)
 		return self.next_id
