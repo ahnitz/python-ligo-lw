@@ -444,39 +444,6 @@ ProcessTable.RowType = Process
 #
 # =============================================================================
 #
-#                                lfn:table
-#
-# =============================================================================
-#
-
-
-LfnID = ilwd.get_ilwdchar_class(u"lfn", u"lfn_id")
-
-
-class LfnTable(table.Table):
-	tableName = "lfn"
-	validcolumns = {
-		"process:process_id": "ilwd:char",
-		"lfn_id": "ilwd:char",
-		"name": "lstring",
-		"comment": "lstring",
-		"start_time": "int_4s",
-		"end_time": "int_4s"
-	}
-	constraints = "PRIMARY KEY (lfn_id)"
-	next_id = LfnID(0)
-
-
-class Lfn(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, LfnTable.validcolumns))
-
-
-LfnTable.RowType = Lfn
-
-
-#
-# =============================================================================
-#
 #                             process_params:table
 #
 # =============================================================================
@@ -2649,7 +2616,6 @@ TableByName = {
 	ExperimentSummaryTable.tableName: ExperimentSummaryTable,
 	ExperimentTable.tableName: ExperimentTable,
 	GDSTriggerTable.tableName: GDSTriggerTable,
-	LfnTable.tableName: LfnTable,
 	ProcessParamsTable.tableName: ProcessParamsTable,
 	ProcessTable.tableName: ProcessTable,
 	SearchSummaryTable.tableName: SearchSummaryTable,
