@@ -751,7 +751,7 @@ class DBTable(table.Table):
 		if self.next_id is not None:
 			max_id = idmap_get_max_id(self.connection, type(self.next_id))
 			if max_id is None:
-				self.set_next_id(type(self.next_id)(0))
+				self.reset_next_id()
 			else:
 				self.set_next_id(max_id + 1)
 		return self.next_id

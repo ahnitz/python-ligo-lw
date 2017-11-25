@@ -472,9 +472,9 @@ class LigolwSegments(set):
 		# reset ID generators
 		#
 
-		self.segment_def_table.set_next_id(type(self.segment_def_table.next_id)(0))
-		self.segment_table.set_next_id(type(self.segment_table.next_id)(0))
-		self.segment_sum_table.set_next_id(type(self.segment_sum_table.next_id)(0))
+		self.segment_def_table.reset_next_id()
+		self.segment_table.reset_next_id()
+		self.segment_sum_table.reset_next_id()
 
 		#
 		# Save process row for later
