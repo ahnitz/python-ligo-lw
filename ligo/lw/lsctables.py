@@ -2251,7 +2251,6 @@ class SegmentSum(Segment):
 SegmentSumTable.RowType = SegmentSum
 
 
-
 #
 # =============================================================================
 #
