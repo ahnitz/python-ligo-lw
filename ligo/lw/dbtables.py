@@ -555,6 +555,7 @@ def get_xml(connection, table_names = None):
 					column_name = destrip[column_name]
 				except KeyError:
 					raise ValueError("invalid column")
+				# use the pre-defined column type
 				column_type = table_elem.validcolumns[column_name]
 				try:
 					table.Column.ColumnName.table_name(column_name)
@@ -582,10 +583,9 @@ def get_xml(connection, table_names = None):
 
 class DBTable(table.Table):
 	"""
-	A special version of the Table class using an SQL database for
-	storage.  Many of the features of the Table class are not available
-	here, but instead the user can use SQL to query the table's
-	contents.
+	A version of the Table class using an SQL database for storage.
+	Many of the features of the Table class are not available here, but
+	instead the user can use SQL to query the table's contents.
 
 	The constraints attribute can be set to a text string that will be
 	added to the table's CREATE statement where constraints go, for
