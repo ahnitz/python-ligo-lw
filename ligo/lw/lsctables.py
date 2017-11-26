@@ -2298,12 +2298,12 @@ class TimeSlideTable(table.Table):
 		"""
 		time_slide_id = self.get_next_id()
 		for instrument, offset in offsetvect.items():
-			row = self.RowType()
-			row.process_id = process.process_id
-			row.time_slide_id = time_slide_id
-			row.instrument = instrument
-			row.offset = offset
-			self.append(row)
+			self.append(self.RowType(
+				process_id = process.process_id,
+				time_slide_id = time_slide_id,
+				instrument = instrument,
+				offset = offset
+			))
 		return time_slide_id
 
 	def get_time_slide_id(self, offsetdict, create_new = None, superset_ok = False, nonunique_ok = False):
@@ -2421,15 +2421,16 @@ class CoincDefTable(table.Table):
 		# coinc type not found in table
 		if not create_new:
 			raise KeyError((search, search_coinc_type))
-		row = self.RowType()
-		row.coinc_def_id = self.get_next_id()
-		row.search = search
-		row.search_coinc_type = search_coinc_type
-		row.description = description
-		self.append(row)
+		coinc_def_id = self.get_next_id(),
+		self.append(self.RowType(
+			coinc_def_id = coinc_def_id,
+			search = search,
+			search_coinc_type = search_coinc_type,
+			description = description
+		))
 
 		# return new ID
-		return row.coinc_def_id
+		return coinc_def_id
 
 
 class CoincDef(table.Table.RowType):
