@@ -72,6 +72,7 @@ Example:
 """
 
 
+import itertools
 import math
 import numpy
 import warnings
@@ -2279,15 +2280,12 @@ class TimeSlideTable(table.Table):
 		"""
 		Return a ditionary mapping time slide IDs to offset
 		dictionaries.
+
+		NOTE:  very little checking is done, e.g., for repeated
+		instruments for a given ID (which could suggest an ID
+		collision).
 		"""
-		d = {}
-		for row in self:
-			if row.time_slide_id not in d:
-				d[row.time_slide_id] = offsetvector.offsetvector()
-			if row.instrument in d[row.time_slide_id]:
-				raise KeyError("'%s': duplicate instrument '%s'" % (row.time_slide_id, row.instrument))
-			d[row.time_slide_id][row.instrument] = row.offset
-		return d
+		return dict((time_slide_id, offsetvector((row.instrument, row.offset) for row in rows)) for time_slide_id, rows in itertools.grouby(sorted(self, lambda row: row.time_slide_id), lambda row: row.time_slide_id))
 
 	def append_offsetvector(self, offsetvect, process):
 		"""
