@@ -708,8 +708,8 @@ class DBTable(table.Table):
 		statement += ")"
 		self.cursor.execute(statement)
 
-		# record the highest internal row ID
-		self.last_maxrowid = self.maxrowid() or 0
+		# row ID where remapping is to start
+		self.remap_first_rowid = None
 
 		# construct the SQL to be used to insert new rows
 		params = {
@@ -778,6 +778,9 @@ class DBTable(table.Table):
 			# row to avoid collisions with existing rows
 			setattr(row, self.next_id.column_name, idmap_get_new(self.connection, getattr(row, self.next_id.column_name), self))
 		self._append(row)
+		if self.remap_first_rowid is None:
+			self.remap_first_rowid = self.maxrowid()
+			assert self.remap_first_rowid is not None
 
 	append = _append
 
@@ -808,11 +811,28 @@ class DBTable(table.Table):
 		Loops over each row in the table, replacing references to
 		old row keys with the new values from the _idmap_ table.
 		"""
-		# FIXME:  do not rely on obtaining the ID's target table
-		# from the ID itself.  encoding it in the column name would
-		# be one solution
-		self.connection.create_function("get_table_name", 1, lambda string_id: ilwd.ilwdchar(string_id).table_name)
-		assignments = ", ".join("%s = (SELECT new FROM _idmap_ WHERE _idmap_.table_name == get_table_name(%s) AND _idmap_.old == %s)" % (colname, colname, colname) for coltype, colname in zip(self.dbcolumntypes, self.dbcolumnnames) if coltype in ligolwtypes.IDTypes and (self.next_id is None or colname != self.next_id.column_name))
+		if self.remap_first_rowid is None:
+			# no rows have been added since we processed this
+			# table last
+			return
+		assignments = []
+		for colname in self.dbcolumnnames:
+			column = self.getColumnByName(colname)
+			try:
+				table_name = column.table_name
+			except ValueError:
+				# if we get here the column's name does not
+				# have a table name component, so by
+				# convention it cannot contain IDs pointing
+				# to other tables
+				continue
+			# make sure it's not our own ID column (by
+			# convention this should not be possible, but it
+			# doesn't hurt to check)
+			if self.next_id is not None and colname == self.next_id.column_name:
+				continue
+			assignments.append("%s = (SELECT new FROM _idmap_ WHERE _idmap_.table_name == \"%s\" AND _idmap_.old == %s)" % (colname, table_name, colname))
+		assignments = ", ".join(assignments)
 		if assignments:
 			# SQLite documentation says ROWID is monotonically
 			# increasing starting at 1 for the first row unless
@@ -821,8 +841,8 @@ class DBTable(table.Table):
 			# way it will wrap is if somebody sets it to a very
 			# high number manually.  This library does not do
 			# that, so I don't bother checking.
-			self.cursor.execute("UPDATE %s SET %s WHERE ROWID > %d" % (self.Name, assignments, self.last_maxrowid))
-			self.last_maxrowid = self.maxrowid() or 0
+			self.cursor.execute("UPDATE %s SET %s WHERE ROWID >= %d" % (self.Name, assignments, self.remap_first_rowid))
+		self.remap_first_rowid = None
 
 
 #
@@ -843,7 +863,9 @@ class CoincMapTable(DBTable):
 	how_to_index = lsctables.CoincMapTable.how_to_index
 
 	def applyKeyMapping(self):
-		self.cursor.execute("UPDATE coinc_event_map SET event_id = (SELECT new FROM _idmap_ WHERE _idmap_.table_name == coinc_event_map.table_name AND old == event_id), coinc_event_id = (SELECT new FROM _idmap_ WHERE _idmap_.table_name == 'coinc_event' AND old == coinc_event_id) WHERE ROWID > ?", (self.last_maxrowid,))
+		if self.remap_first_rowid is not None:
+			self.cursor.execute("UPDATE coinc_event_map SET event_id = (SELECT new FROM _idmap_ WHERE _idmap_.table_name == coinc_event_map.table_name AND old == event_id), coinc_event_id = (SELECT new FROM _idmap_ WHERE _idmap_.table_name == 'coinc_event' AND old == coinc_event_id) WHERE ROWID >= ?", (self.remap_first_rowid,))
+			self.remap_first_rowid = None
 
 
 class ProcessParamsTable(DBTable):

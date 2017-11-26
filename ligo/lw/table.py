@@ -1012,21 +1012,27 @@ class Table(ligolw.Table, list):
 		Loops over each row in the table, replacing references to
 		old row keys with the new values from the mapping.
 		"""
-		for coltype, colname in zip(self.columntypes, self.columnnames):
-			if coltype in ligolwtypes.IDTypes and (self.next_id is None or colname != self.next_id.column_name):
-				column = self.getColumnByName(colname)
+		for colname in self.columnnames:
+			column = self.getColumnByName(colname)
+			try:
 				table_name = column.table_name
-				for i, old in enumerate(column):
-					try:
-						column[i] = mapping[table_name, old]
-			# FIXME:  temorary safety check to detect problems
-			# with the evolving ID reassignment algorithm.
-			# remove when no longer applicable (e.g., when IDs
-			# are turned into pure integers and don't carry a
-			# .table_name any more)
-						assert table_name == old.table_name
-					except KeyError:
-						pass
+			except ValueError:
+				# if we get here the column's name does not
+				# have a table name component, so by
+				# convention it cannot contain IDs pointing
+				# to other tables
+				continue
+			# make sure it's not our own ID column (by
+			# convention this should not be possible, but it
+			# doesn't hurt to check)
+			if self.next_id is not None and colname == self.next_id.column_name:
+				continue
+			# replace IDs with new values from mapping
+			for i, old in enumerate(column):
+				try:
+					column[i] = mapping[table_name, old]
+				except KeyError:
+					pass
 
 
 #
