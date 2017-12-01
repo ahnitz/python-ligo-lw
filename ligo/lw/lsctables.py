@@ -988,64 +988,6 @@ ExperimentMapTable.RowType = ExperimentMap
 #
 # =============================================================================
 #
-#                               gds_trigger:table
-#
-# =============================================================================
-#
-
-
-GDSTriggerID = ilwd.get_ilwdchar_class(u"gds_trigger", u"event_id")
-
-
-class GDSTriggerTable(table.Table):
-	tableName = "gds_trigger"
-	validcolumns = {
-		"creator_db": "int_4s",
-		"process:process_id": "ilwd:char_u",
-		"filter:filter_id": "ilwd:char",
-		"name": "lstring",
-		"subtype": "lstring",
-		"ifo": "lstring",
-		"start_time": "int_4s",
-		"start_time_ns": "int_4s",
-		"duration": "real_4",
-		"priority": "int_4s",
-		"disposition": "int_4s",
-		"size": "real_4",
-		"significance": "real_4",
-		"frequency": "real_4",
-		"bandwidth": "real_4",
-		"time_peak": "real_4",
-		"time_average": "real_4",
-		"time_sigma": "real_4",
-		"freq_peak": "real_4",
-		"freq_average": "real_4",
-		"freq_sigma": "real_4",
-		"noise_power": "real_4",
-		"signal_power": "real_4",
-		"pixel_count": "int_4s",
-		"confidence": "real_4",
-		"binarydata": "ilwd:char_u",
-		"binarydata_length": "int_4s",
-		"event_id": "ilwd:char"
-	}
-	constraints = "PRIMARY KEY (event_id)"
-	next_id = GDSTriggerID(0)
-	interncolumns = ("process_id", "ifo", "subtype")
-
-
-class GDSTrigger(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, GDSTriggerTable.validcolumns))
-
-	start = gpsproperty("start_time", "start_time_ns")
-
-
-GDSTriggerTable.RowType = GDSTrigger
-
-
-#
-# =============================================================================
-#
 #                               sngl_burst:table
 #
 # =============================================================================
@@ -2570,30 +2512,6 @@ VetoDefTable.RowType = VetoDef
 #
 # =============================================================================
 #
-#                            time_slide_segment_map:table
-#
-# =============================================================================
-#
-
-
-class TimeSlideSegmentMapTable(table.Table):
-	tableName = "time_slide_segment_map"
-	validcolumns = {
-		"segment_definer:segment_def_id": "ilwd:char",
-		"time_slide:time_slide_id": "ilwd:char",
-	}
-
-
-class TimeSlideSegmentMap(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, TimeSlideSegmentMapTable.validcolumns))
-
-
-TimeSlideSegmentMapTable.RowType = TimeSlideSegmentMap
-
-
-#
-# =============================================================================
-#
 #                                Table Metadata
 #
 # =============================================================================
@@ -2615,7 +2533,6 @@ TableByName = {
 	ExperimentMapTable.tableName: ExperimentMapTable,
 	ExperimentSummaryTable.tableName: ExperimentSummaryTable,
 	ExperimentTable.tableName: ExperimentTable,
-	GDSTriggerTable.tableName: GDSTriggerTable,
 	ProcessParamsTable.tableName: ProcessParamsTable,
 	ProcessTable.tableName: ProcessTable,
 	SearchSummaryTable.tableName: SearchSummaryTable,
@@ -2630,7 +2547,6 @@ TableByName = {
 	SnglInspiralTable.tableName: SnglInspiralTable,
 	SnglRingdownTable.tableName: SnglRingdownTable,
 	SummValueTable.tableName: SummValueTable,
-	TimeSlideSegmentMapTable.tableName: TimeSlideSegmentMapTable,
 	TimeSlideTable.tableName: TimeSlideTable,
 	VetoDefTable.tableName: VetoDefTable
 }
