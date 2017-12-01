@@ -100,6 +100,21 @@ def get_table(xmldoc, name):
 	return tables[0]
 
 
+class next_id(int):
+	"""
+	Type for .next_id attributes of tables with int_8s ID columns.
+	"""
+	column_name = None
+	index_offset = 0
+
+	def __add__(self, other):
+		return type(self)(super(next_id, self).__add__(other))
+
+	@classmethod
+	def type(cls, column_name):
+		return type(str("next_%s" % column_name), (cls,), {"column_name": column_name, "index_offset": 0})
+
+
 def reassign_ids(elem):
 	"""
 	Recurses over all Table elements below elem whose next_id
@@ -562,8 +577,8 @@ class Table(ligolw.Table, list):
 	.how_to_index:  Dictionary mapping SQL index name to an interable
 	of column names over which to construct that index.
 
-	.next_id:  Instance of ilwd.ilwdchar giving the next ID to assign
-	to a row in this table.
+	.next_id:  object giving the next ID to assign to a row in this
+	table, and carrying the ID column name as a .column_name attribute
 	"""
 	class TableName(ligolw.LLWNameAttr):
 		dec_pattern = re.compile(r"(?:\A[a-z0-9_]+:|\A)(?P<Name>[a-z0-9_]+):table\Z")
@@ -743,17 +758,13 @@ class Table(ligolw.Table, list):
 		attribute of this table does not contain an entry for a
 		column by that name.
 
-		The name is checked to see if a table name prefix is already
-		included.  If a prefix is included it is used as-is, if not
-		then this Table element's name is prepended to the column name.
-
 		Example:
 
 		>>> import lsctables
 		>>> tbl = lsctables.New(lsctables.ProcessParamsTable, [])
 		>>> col = tbl.appendColumn("param")
 		>>> col.getAttribute("Name")
-		u'process_params:param'
+		u'param'
 		>>> col.Name
 		u'param'
 		>>> col = tbl.appendColumn(u"process:process_id")
@@ -768,21 +779,13 @@ class Table(ligolw.Table, list):
 			raise ValueError("duplicate Column '%s'" % name)
 		except KeyError:
 			pass
-		try:
-			Column.ColumnName.table_name(name)
-			# if we get here the new Column's name already has
-			# a table name prefix included
-		except ValueError:
-			# if we get here the name does not have a table
-			# name prefix included.  prepend our own
-			name = u"%s:%s" % (self.Name, name)
 		if name in self.validcolumns:
 			coltype = self.validcolumns[name]
 		elif Column.ColumnName(name) in self.validcolumns:
 			coltype = self.validcolumns[Column.ColumnName(name)]
 		else:
 			raise ligolw.ElementError("invalid Column '%s' for Table '%s'" % (name, self.Name))
-		column = Column(AttributesImpl({u"Name": name, u"Type": coltype}))
+		column = Column(AttributesImpl({u"Name": u"%s" % name, u"Type": coltype}))
 		streams = self.getElementsByTagName(ligolw.Stream.tagName)
 		if streams:
 			self.insertBefore(column, streams[0])
@@ -962,7 +965,7 @@ class Table(ligolw.Table, list):
 		>>> import lsctables
 		>>> tbl = lsctables.New(lsctables.ProcessTable)
 		>>> print(tbl.sync_next_id())
-		process:process_id:0
+		0
 		"""
 		if self.next_id is not None:
 			if len(self):
@@ -994,12 +997,6 @@ class Table(ligolw.Table, list):
 			if old is None:
 				raise ValueError("null row ID encountered in Table '%s', row %d" % (self.Name, i))
 			key = table_name, old
-			# FIXME:  temorary safety check to detect problems
-			# with the evolving ID reassignment algorithm.
-			# remove when no longer applicable (e.g., when IDs
-			# are turned into pure integers and don't carry a
-			# .table_name any more)
-			assert table_name == old.table_name
 			if key in mapping:
 				column[i] = mapping[key]
 			else:

@@ -48,7 +48,6 @@ import warnings
 from glue import offsetvector
 from glue import segments
 from . import __author__, __date__, __version__
-from . import ilwd
 from . import ligolw
 from . import table
 from . import lsctables
@@ -472,7 +471,7 @@ def idmap_get_new(connection, old, tbl):
 	new = cursor.fetchone()
 	if new is not None:
 		# a new ID has already been created for this old ID
-		return ilwd.ilwdchar(new[0])
+		return new[0]
 	# this ID was not found in _idmap_ table, assign a new ID and
 	# record it
 	new = tbl.get_next_id()
@@ -557,14 +556,9 @@ def get_xml(connection, table_names = None):
 					raise ValueError("invalid column")
 				# use the pre-defined column type
 				column_type = table_elem.validcolumns[column_name]
-				try:
-					table.Column.ColumnName.table_name(column_name)
-				except ValueError:
-					column_name = u"%s:%s" % (table_name, column_name)
 			else:
 				# guess the column type
 				column_type = ligolwtypes.FromSQLiteType[column_type]
-				column_name = u"%s:%s" % (table_name, column_name)
 			table_elem.appendChild(table.Column(AttributesImpl({u"Name": column_name, u"Type": column_type})))
 		table_elem._end_of_columns()
 		table_elem.appendChild(table.TableStream(AttributesImpl({u"Name": u"%s:table" % table_name, u"Delimiter": table.TableStream.Delimiter.default, u"Type": table.TableStream.Type.default})))
@@ -792,9 +786,7 @@ class DBTable(table.Table):
 		queries into Python objects.
 		"""
 		row = self.RowType()
-		for c, t, v in zip(self.dbcolumnnames, self.dbcolumntypes, values):
-			if t in ligolwtypes.IDTypes:
-				v = ilwd.ilwdchar(v)
+		for c, v in zip(self.dbcolumnnames, values):
 			setattr(row, c, v)
 		return row
 	# backwards compatibility
@@ -895,7 +887,7 @@ class TimeSlideTable(DBTable):
 		Return a ditionary mapping time slide IDs to offset
 		dictionaries.
 		"""
-		return dict((ilwd.ilwdchar(time_slide_id), offsetvector.offsetvector((instrument, offset) for time_slide_id, instrument, offset in values)) for time_slide_id, values in itertools.groupby(self.cursor.execute("SELECT time_slide_id, instrument, offset FROM time_slide ORDER BY time_slide_id"), lambda time_slide_id_instrument_offset: time_slide_id_instrument_offset[0]))
+		return dict((time_slide_id, offsetvector.offsetvector((instrument, offset) for time_slide_id, instrument, offset in values)) for time_slide_id, values in itertools.groupby(self.cursor.execute("SELECT time_slide_id, instrument, offset FROM time_slide ORDER BY time_slide_id"), lambda time_slide_id_instrument_offset: time_slide_id_instrument_offset[0]))
 
 	def get_time_slide_id(self, offsetdict, create_new = None, superset_ok = False, nonunique_ok = False):
 		"""

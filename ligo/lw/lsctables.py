@@ -113,10 +113,10 @@ def New(cls, columns = None, **kwargs):
 	>>> tbl = New(ProcessTable, [u"process_id", u"start_time", u"end_time", u"comment"])
 	>>> tbl.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
 	<Table Name="process:table">
-		<Column Type="ilwd:char" Name="process:process_id"/>
-		<Column Type="int_4s" Name="process:start_time"/>
-		<Column Type="int_4s" Name="process:end_time"/>
-		<Column Type="lstring" Name="process:comment"/>
+		<Column Type="int_8s" Name="process_id"/>
+		<Column Type="int_4s" Name="start_time"/>
+		<Column Type="int_4s" Name="end_time"/>
+		<Column Type="lstring" Name="comment"/>
 		<Stream Delimiter="," Type="Local" Name="process:table">
 		</Stream>
 	</Table>
@@ -389,7 +389,7 @@ class segmentproperty(object):
 #
 
 
-ProcessID = ilwd.get_ilwdchar_class(u"process", u"process_id")
+ProcessID = table.next_id.type(u"process_id")
 
 
 class ProcessTable(table.Table):
@@ -409,7 +409,7 @@ class ProcessTable(table.Table):
 		"jobid": "int_4s",
 		"domain": "lstring",
 		"ifos": "lstring",
-		"process_id": "ilwd:char"
+		"process_id": "int_8s"
 	}
 	constraints = "PRIMARY KEY (process_id)"
 	next_id = ProcessID(0)
@@ -454,7 +454,7 @@ class ProcessParamsTable(table.Table):
 	tableName = "process_params"
 	validcolumns = {
 		"program": "lstring",
-		"process:process_id": "ilwd:char",
+		"process:process_id": "int_8s",
 		"param": "lstring",
 		"type": "lstring",
 		"value": "lstring"
@@ -546,7 +546,7 @@ ProcessParamsTable.RowType = ProcessParams
 class SearchSummaryTable(table.Table):
 	tableName = "search_summary"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
+		"process:process_id": "int_8s",
 		"shared_object": "lstring",
 		"lalwrapper_cvs_tag": "lstring",
 		"lal_cvs_tag": "lstring",
@@ -651,14 +651,14 @@ SearchSummaryTable.RowType = SearchSummary
 #
 
 
-SearchSummVarsID = ilwd.get_ilwdchar_class(u"search_summvars", u"search_summvar_id")
+SearchSummVarsID = table.next_id.type(u"search_summvar_id")
 
 
 class SearchSummVarsTable(table.Table):
 	tableName = "search_summvars"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
-		"search_summvar_id": "ilwd:char",
+		"process:process_id": "int_8s",
+		"search_summvar_id": "int_8s",
 		"name": "lstring",
 		"string": "lstring",
 		"value": "real_8"
@@ -683,13 +683,13 @@ SearchSummVarsTable.RowType = SearchSummVars
 #
 
 
-ExpDefID = ilwd.get_ilwdchar_class(u"experiment", u"experiment_id")
+ExpDefID = table.next_id.type(u"experiment_id")
 
 
 class ExperimentTable(table.Table):
 	tableName = "experiment"
 	validcolumns = {
-		"experiment_id": "ilwd:char",
+		"experiment_id": "int_8s",
 		"search_group": "lstring",
 		"search": "lstring",
 		"lars_id": "lstring",
@@ -790,15 +790,15 @@ ExperimentTable.RowType = Experiment
 #
 
 
-ExpSummID = ilwd.get_ilwdchar_class(u"experiment_summary", u"experiment_summ_id")
+ExpSummID = table.next_id.type(u"experiment_summ_id")
 
 
 class ExperimentSummaryTable(table.Table):
 	tableName = "experiment_summary"
 	validcolumns = {
-		"experiment_summ_id": "ilwd:char",
-		"experiment:experiment_id": "ilwd:char",
-		"time_slide:time_slide_id": "ilwd:char",
+		"experiment_summ_id": "int_8s",
+		"experiment:experiment_id": "int_8s",
+		"time_slide:time_slide_id": "int_8s",
 		"veto_def_name": "lstring",
 		"datatype": "lstring",
 		"sim_proc_id": "ilwd:char",
@@ -957,8 +957,8 @@ ExperimentSummaryTable.RowType = ExperimentSummary
 class ExperimentMapTable(table.Table):
 	tableName = "experiment_map"
 	validcolumns = {
-		"experiment_summary:experiment_summ_id": "ilwd:char",
-		"coinc_event:coinc_event_id": "ilwd:char",
+		"experiment_summary:experiment_summ_id": "int_8s",
+		"coinc_event:coinc_event_id": "int_8s",
 	}
 	how_to_index = {
 		"em_esi_index": ("experiment_summ_id",),
@@ -994,15 +994,15 @@ ExperimentMapTable.RowType = ExperimentMap
 #
 
 
-SnglBurstID = ilwd.get_ilwdchar_class(u"sngl_burst", u"event_id")
+SnglBurstID = table.next_id.type(u"event_id")
 
 
 class SnglBurstTable(table.Table):
 	tableName = "sngl_burst"
 	validcolumns = {
 		"creator_db": "int_4s",
-		"process:process_id": "ilwd:char",
-		"filter:filter_id": "ilwd:char",
+		"process:process_id": "int_8s",
+		"filter:filter_id": "int_8s",
 		"ifo": "lstring",
 		"search": "lstring",
 		"channel": "lstring",
@@ -1047,11 +1047,11 @@ class SnglBurstTable(table.Table):
 		"param_two_value": "real_8",
 		"param_three_name": "lstring",
 		"param_three_value": "real_8",
-		"event_id": "ilwd:char"
+		"event_id": "int_8s"
 	}
 	constraints = "PRIMARY KEY (event_id)"
 	next_id = SnglBurstID(0)
-	interncolumns = ("process_id", "ifo", "search", "channel")
+	interncolumns = ("ifo", "search", "channel")
 
 
 class SnglBurst(table.Table.RowType):
@@ -1165,13 +1165,13 @@ SnglBurstTable.RowType = SnglBurst
 #
 
 
-SnglInspiralID = ilwd.get_ilwdchar_class(u"sngl_inspiral", u"event_id")
+SnglInspiralID = table.next_id.type(u"event_id")
 
 
 class SnglInspiralTable(table.Table):
 	tableName = "sngl_inspiral"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
+		"process:process_id": "int_8s",
 		"ifo": "lstring",
 		"search": "lstring",
 		"channel": "lstring",
@@ -1234,11 +1234,11 @@ class SnglInspiralTable(table.Table):
 		"spin2x": "real_4",
 		"spin2y": "real_4",
 		"spin2z": "real_4",
-		"event_id": "ilwd:char"
+		"event_id": "int_8s"
 	}
 	constraints = "PRIMARY KEY (event_id)"
 	next_id = SnglInspiralID(0)
-	interncolumns = ("process_id", "ifo", "search", "channel")
+	interncolumns = ("ifo", "search", "channel")
 
 
 class SnglInspiral(table.Table.RowType):
@@ -1312,7 +1312,7 @@ SnglInspiralTable.RowType = SnglInspiral
 class CoincInspiralTable(table.Table):
 	tableName = "coinc_inspiral"
 	validcolumns = {
-		"coinc_event:coinc_event_id": "ilwd:char",
+		"coinc_event:coinc_event_id": "int_8s",
 		"ifos": "lstring",
 		"end_time": "int_4s",
 		"end_time_ns": "int_4s",
@@ -1331,7 +1331,7 @@ class CoincInspiralTable(table.Table):
 	how_to_index = {
 		"ci_cei_index": ("coinc_event_id",)
 	}
-	interncolumns = ("coinc_event_id", "ifos")
+	interncolumns = ("ifos",)
 
 
 class CoincInspiral(table.Table.RowType):
@@ -1370,13 +1370,13 @@ CoincInspiralTable.RowType = CoincInspiral
 #
 
 
-SnglRingdownID = ilwd.get_ilwdchar_class(u"sngl_ringdown", u"event_id")
+SnglRingdownID = table.next_id.type(u"event_id")
 
 
 class SnglRingdownTable(table.Table):
 	tableName = "sngl_ringdown"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
+		"process:process_id": "int_8s",
 		"ifo": "lstring",
 		"channel": "lstring",
 		"start_time": "int_4s",
@@ -1399,11 +1399,11 @@ class SnglRingdownTable(table.Table):
 		"snr": "real_4",
 		"eff_dist": "real_4",
 		"sigma_sq": "real_8",
-		"event_id": "ilwd:char"
+		"event_id": "int_8s"
 	}
 	constraints = "PRIMARY KEY (event_id)"
 	next_id = SnglRingdownID(0)
-	interncolumns = ("process_id", "ifo", "channel")
+	interncolumns = ("ifo", "channel")
 
 
 class SnglRingdown(table.Table.RowType):
@@ -1427,7 +1427,7 @@ SnglRingdownTable.RowType = SnglRingdown
 class CoincRingdownTable(table.Table):
 	tableName = "coinc_ringdown"
 	validcolumns = {
-		"coinc_event:coinc_event_id": "ilwd:char",
+		"coinc_event:coinc_event_id": "int_8s",
 		"ifos": "lstring",
 		"start_time": "int_4s",
 		"start_time_ns": "int_4s",
@@ -1449,7 +1449,7 @@ class CoincRingdownTable(table.Table):
 	how_to_index = {
 		"cr_cei_index": ("coinc_event_id",)
 	}
-	interncolumns = ("coinc_event_id", "ifos")
+	interncolumns = ("ifos",)
 
 
 class CoincRingdown(table.Table.RowType):
@@ -1472,13 +1472,13 @@ CoincRingdownTable.RowType = CoincRingdown
 #
 
 
-SimInspiralID = ilwd.get_ilwdchar_class(u"sim_inspiral", u"simulation_id")
+SimInspiralID = table.next_id.type(u"simulation_id")
 
 
 class SimInspiralTable(table.Table):
 	tableName = "sim_inspiral"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
+		"process:process_id": "int_8s",
 		"waveform": "lstring",
 		"geocent_end_time": "int_4s",
 		"geocent_end_time_ns": "int_4s",
@@ -1535,11 +1535,11 @@ class SimInspiralTable(table.Table):
 		"amp_order": "int_4s",
 		"taper": "lstring",
 		"bandpass": "int_4s",
-		"simulation_id": "ilwd:char"
+		"simulation_id": "int_8s"
 	}
 	constraints = "PRIMARY KEY (simulation_id)"
 	next_id = SimInspiralID(0)
-	interncolumns = ("process_id", "waveform", "source")
+	interncolumns = ("waveform", "source")
 
 
 class SimInspiral(table.Table.RowType):
@@ -1647,13 +1647,13 @@ SimInspiralTable.RowType = SimInspiral
 #
 
 
-SimBurstID = ilwd.get_ilwdchar_class(u"sim_burst", u"simulation_id")
+SimBurstID = table.next_id.type(u"simulation_id")
 
 
 class SimBurstTable(table.Table):
 	tableName = "sim_burst"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
+		"process:process_id": "int_8s",
 		"waveform": "lstring",
 		"ra": "real_8",
 		"dec": "real_8",
@@ -1671,12 +1671,12 @@ class SimBurstTable(table.Table):
 		"hrss": "real_8",
 		"egw_over_rsquared": "real_8",
 		"waveform_number": "int_8u",
-		"time_slide:time_slide_id": "ilwd:char",
-		"simulation_id": "ilwd:char"
+		"time_slide:time_slide_id": "int_8s",
+		"simulation_id": "int_8s"
 	}
 	constraints = "PRIMARY KEY (simulation_id)"
 	next_id = SimBurstID(0)
-	interncolumns = ("process_id", "waveform")
+	interncolumns = ("waveform",)
 
 
 class SimBurst(table.Table.RowType):
@@ -1758,13 +1758,13 @@ SimBurstTable.RowType = SimBurst
 #
 
 
-SimRingdownID = ilwd.get_ilwdchar_class(u"sim_ringdown", u"simulation_id")
+SimRingdownID = table.next_id.type(u"simulation_id")
 
 
 class SimRingdownTable(table.Table):
 	tableName = "sim_ringdown"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
+		"process:process_id": "int_8s",
 		"waveform": "lstring",
 		"coordinates": "lstring",
 		"geocent_start_time": "int_4s",
@@ -1795,11 +1795,11 @@ class SimRingdownTable(table.Table):
 		"hrss_h": "real_4",
 		"hrss_l": "real_4",
 		"hrss_v": "real_4",
-		"simulation_id": "ilwd:char"
+		"simulation_id": "int_8s"
 	}
 	constraints = "PRIMARY KEY (simulation_id)"
 	next_id = SimRingdownID(0)
-	interncolumns = ("process_id", "waveform", "coordinates")
+	interncolumns = ("waveform", "coordinates")
 
 
 class SimRingdown(table.Table.RowType):
@@ -1862,17 +1862,17 @@ SimRingdownTable.RowType = SimRingdown
 #
 
 
-SummValueID = ilwd.get_ilwdchar_class(u"summ_value", u"summ_value_id")
+SummValueID = table.next_id.type(u"summ_value_id")
 
 
 class SummValueTable(table.Table):
 	tableName = "summ_value"
 	validcolumns = {
-		"summ_value_id": "ilwd:char",
+		"summ_value_id": "int_8s",
 		"program": "lstring",
-		"process:process_id": "ilwd:char",
+		"process:process_id": "int_8s",
 		"frameset_group": "lstring",
-		"segment_definer:segment_def_id": "ilwd:char",
+		"segment_definer:segment_def_id": "int_8s",
 		"start_time": "int_4s",
 		"start_time_ns": "int_4s",
 		"end_time": "int_4s",
@@ -1886,7 +1886,7 @@ class SummValueTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (summ_value_id)"
 	next_id = SummValueID(0)
-	interncolumns = ("program", "process_id", "ifo", "name", "comment")
+	interncolumns = ("program", "ifo", "name", "comment")
 
 
 class SummValue(table.Table.RowType):
@@ -1928,25 +1928,24 @@ SummValueTable.RowType = SummValue
 #
 
 
-SegmentID = ilwd.get_ilwdchar_class(u"segment", u"segment_id")
+SegmentID = table.next_id.type(u"segment_id")
 
 
 class SegmentTable(table.Table):
 	tableName = "segment"
 	validcolumns = {
 		"creator_db": "int_4s",
-		"process:process_id": "ilwd:char",
-		"segment_id": "ilwd:char",
+		"process:process_id": "int_8s",
+		"segment_id": "int_8s",
 		"start_time": "int_4s",
 		"start_time_ns": "int_4s",
 		"end_time": "int_4s",
 		"end_time_ns": "int_4s",
-		"segment_definer:segment_def_id": "ilwd:char",
+		"segment_definer:segment_def_id": "int_8s",
 		"segment_def_cdb": "int_4s"
 	}
 	constraints = "PRIMARY KEY (segment_id)"
 	next_id = SegmentID(0)
-	interncolumns = ("process_id",)
 
 
 class Segment(table.Table.RowType):
@@ -2071,15 +2070,15 @@ SegmentTable.RowType = Segment
 #
 
 
-SegmentDefID = ilwd.get_ilwdchar_class(u"segment_definer", u"segment_def_id")
+SegmentDefID = table.next_id.type(u"segment_def_id")
 
 
 class SegmentDefTable(table.Table):
 	tableName = "segment_definer"
 	validcolumns = {
 		"creator_db": "int_4s",
-		"process:process_id": "ilwd:char",
-		"segment_def_id": "ilwd:char",
+		"process:process_id": "int_8s",
+		"segment_def_id": "int_8s",
 		"ifos": "lstring",
 		"name": "lstring",
 		"version": "int_4s",
@@ -2088,7 +2087,6 @@ class SegmentDefTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (segment_def_id)"
 	next_id = SegmentDefID(0)
-	interncolumns = ("process_id",)
 
 
 class SegmentDef(table.Table.RowType):
@@ -2119,26 +2117,25 @@ SegmentDefTable.RowType = SegmentDef
 #
 
 
-SegmentSumID = ilwd.get_ilwdchar_class(u"segment_summary", u"segment_sum_id")
+SegmentSumID = table.next_id.type(u"segment_sum_id")
 
 
 class SegmentSumTable(table.Table):
 	tableName = "segment_summary"
 	validcolumns = {
 		"creator_db": "int_4s",
-		"process:process_id": "ilwd:char",
-		"segment_sum_id": "ilwd:char",
+		"process:process_id": "int_8s",
+		"segment_sum_id": "int_8s",
 		"start_time": "int_4s",
 		"start_time_ns": "int_4s",
 		"end_time": "int_4s",
 		"end_time_ns": "int_4s",
 		"comment": "lstring",
-		"segment_definer:segment_def_id": "ilwd:char",
+		"segment_definer:segment_def_id": "int_8s",
 		"segment_def_cdb": "int_4s"
 	}
 	constraints = "PRIMARY KEY (segment_sum_id)"
 	next_id = SegmentSumID(0)
-	interncolumns = ("process_id","segment_def_id")
 
 	def get(self, segment_def_id = None):
 		"""
@@ -2170,20 +2167,20 @@ SegmentSumTable.RowType = SegmentSum
 #
 
 
-TimeSlideID = ilwd.get_ilwdchar_class(u"time_slide", u"time_slide_id")
+TimeSlideID = table.next_id.type(u"time_slide_id")
 
 
 class TimeSlideTable(table.Table):
 	tableName = "time_slide"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
-		"time_slide_id": "ilwd:char",
+		"process:process_id": "int_8s",
+		"time_slide_id": "int_8s",
 		"instrument": "lstring",
 		"offset": "real_8"
 	}
 	constraints = "PRIMARY KEY (time_slide_id, instrument)"
 	next_id = TimeSlideID(0)
-	interncolumns = ("process_id", "time_slide_id", "instrument")
+	interncolumns = ("instrument",)
 
 	def as_dict(self):
 		"""
@@ -2291,13 +2288,13 @@ TimeSlideTable.RowType = TimeSlide
 #
 
 
-CoincDefID = ilwd.get_ilwdchar_class(u"coinc_definer", u"coinc_def_id")
+CoincDefID = table.next_id.type(u"coinc_def_id")
 
 
 class CoincDefTable(table.Table):
 	tableName = "coinc_definer"
 	validcolumns = {
-		"coinc_def_id": "ilwd:char",
+		"coinc_def_id": "int_8s",
 		"search": "lstring",
 		"search_coinc_type": "int_4u",
 		"description": "lstring"
@@ -2358,23 +2355,23 @@ CoincDefTable.RowType = CoincDef
 #
 
 
-CoincID = ilwd.get_ilwdchar_class(u"coinc_event", u"coinc_event_id")
+CoincID = table.next_id.type(u"coinc_event_id")
 
 
 class CoincTable(table.Table):
 	tableName = "coinc_event"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
-		"coinc_definer:coinc_def_id": "ilwd:char",
-		"coinc_event_id": "ilwd:char",
-		"time_slide:time_slide_id": "ilwd:char",
+		"process:process_id": "int_8s",
+		"coinc_definer:coinc_def_id": "int_8s",
+		"coinc_event_id": "int_8s",
+		"time_slide:time_slide_id": "int_8s",
 		"instruments": "lstring",
 		"nevents": "int_4u",
 		"likelihood": "real_8"
 	}
 	constraints = "PRIMARY KEY (coinc_event_id)"
 	next_id = CoincID(0)
-	interncolumns = ("process_id", "coinc_def_id", "time_slide_id", "instruments")
+	interncolumns = ("instruments",)
 	how_to_index = {
 		"ce_cdi_index": ("coinc_def_id",),
 		"ce_tsi_index": ("time_slide_id",)
@@ -2402,9 +2399,9 @@ CoincTable.RowType = Coinc
 class CoincMapTable(table.Table):
 	tableName = "coinc_event_map"
 	validcolumns = {
-		"coinc_event:coinc_event_id": "ilwd:char",
+		"coinc_event:coinc_event_id": "int_8s",
 		"table_name": "char_v",
-		"event_id": "ilwd:char"
+		"event_id": "int_8s"
 	}
 	interncolumns = ("table_name",)
 	how_to_index = {
@@ -2443,15 +2440,15 @@ CoincMapTable.RowType = CoincMap
 #
 
 
-DQSpecListID = ilwd.get_ilwdchar_class(u"dq_list", u"dq_list_id")
-DQSpecListRowID = ilwd.get_ilwdchar_class(u"dq_list", u"dq_list_row_id")
+DQSpecListID = table.next_id.type(u"dq_list_id")
+DQSpecListRowID = table.next_id.type(u"dq_list_row_id")
 
 
 class DQSpecListTable(table.Table):
 	tableName = "dq_list"
 	validcolumns = {
-		"dq_list_id": "ilwd:char",
-		"dq_list_row_id": "ilwd:char",
+		"dq_list:dq_list_id": "int_8s",
+		"dq_list_row_id": "int_8s",
 		"instrument": "lstring",
 		"flag": "lstring",
 		"low_window": "real_8",
@@ -2488,7 +2485,7 @@ DQSpecListTable.RowType = DQSpec
 class VetoDefTable(table.Table):
 	tableName = "veto_definer"
 	validcolumns = {
-		"process:process_id": "ilwd:char",
+		"process:process_id": "int_8s",
 		"ifo": "lstring",
 		"name": "lstring",
 		"version": "int_4s",
@@ -2499,7 +2496,7 @@ class VetoDefTable(table.Table):
 		"end_pad": "int_4s",
 		"comment": "lstring"
 	}
-	interncolumns = ("process_id","ifo")
+	interncolumns = ("ifo",)
 
 
 class VetoDef(table.Table.RowType):

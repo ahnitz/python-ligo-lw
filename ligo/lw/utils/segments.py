@@ -360,41 +360,41 @@ class LigolwSegments(set):
 	<!DOCTYPE LIGO_LW SYSTEM "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt">
 	<LIGO_LW>
 		<Table Name="segment_definer:table">
-			<Column Type="ilwd:char" Name="process:process_id"/>
-			<Column Type="ilwd:char" Name="segment_definer:segment_def_id"/>
-			<Column Type="lstring" Name="segment_definer:ifos"/>
-			<Column Type="lstring" Name="segment_definer:name"/>
-			<Column Type="int_4s" Name="segment_definer:version"/>
-			<Column Type="lstring" Name="segment_definer:comment"/>
+			<Column Type="int_8s" Name="process:process_id"/>
+			<Column Type="int_8s" Name="segment_def_id"/>
+			<Column Type="lstring" Name="ifos"/>
+			<Column Type="lstring" Name="name"/>
+			<Column Type="int_4s" Name="version"/>
+			<Column Type="lstring" Name="comment"/>
 			<Stream Delimiter="," Type="Local" Name="segment_definer:table">
-				"process:process_id:0","segment_definer:segment_def_id:0","H1","test",,,
-				"process:process_id:0","segment_definer:segment_def_id:1","L1","test",,,
+				0,0,"H1","test",,,
+				0,1,"L1","test",,,
 			</Stream>
 		</Table>
 		<Table Name="segment_summary:table">
-			<Column Type="ilwd:char" Name="process:process_id"/>
-			<Column Type="ilwd:char" Name="segment_summary:segment_sum_id"/>
-			<Column Type="int_4s" Name="segment_summary:start_time"/>
-			<Column Type="int_4s" Name="segment_summary:start_time_ns"/>
-			<Column Type="int_4s" Name="segment_summary:end_time"/>
-			<Column Type="int_4s" Name="segment_summary:end_time_ns"/>
-			<Column Type="ilwd:char" Name="segment_definer:segment_def_id"/>
-			<Column Type="lstring" Name="segment_summary:comment"/>
+			<Column Type="int_8s" Name="process:process_id"/>
+			<Column Type="int_8s" Name="segment_sum_id"/>
+			<Column Type="int_4s" Name="start_time"/>
+			<Column Type="int_4s" Name="start_time_ns"/>
+			<Column Type="int_4s" Name="end_time"/>
+			<Column Type="int_4s" Name="end_time_ns"/>
+			<Column Type="int_8s" Name="segment_definer:segment_def_id"/>
+			<Column Type="lstring" Name="comment"/>
 			<Stream Delimiter="," Type="Local" Name="segment_summary:table">
-				"process:process_id:0","segment_summary:segment_sum_id:0",4294967295,4294967295,2147483647,4294967295,"segment_definer:segment_def_id:1",,
+				0,0,4294967295,4294967295,2147483647,4294967295,1,,
 			</Stream>
 		</Table>
 		<Table Name="segment:table">
-			<Column Type="ilwd:char" Name="process:process_id"/>
-			<Column Type="ilwd:char" Name="segment:segment_id"/>
-			<Column Type="int_4s" Name="segment:start_time"/>
-			<Column Type="int_4s" Name="segment:start_time_ns"/>
-			<Column Type="int_4s" Name="segment:end_time"/>
-			<Column Type="int_4s" Name="segment:end_time_ns"/>
-			<Column Type="ilwd:char" Name="segment_definer:segment_def_id"/>
+			<Column Type="int_8s" Name="process:process_id"/>
+			<Column Type="int_8s" Name="segment_id"/>
+			<Column Type="int_4s" Name="start_time"/>
+			<Column Type="int_4s" Name="start_time_ns"/>
+			<Column Type="int_4s" Name="end_time"/>
+			<Column Type="int_4s" Name="end_time_ns"/>
+			<Column Type="int_8s" Name="segment_definer:segment_def_id"/>
 			<Stream Delimiter="," Type="Local" Name="segment:table">
-				"process:process_id:0","segment:segment_id:0",0,0,10,0,"segment_definer:segment_def_id:0",
-				"process:process_id:0","segment:segment_id:1",5,0,15,0,"segment_definer:segment_def_id:1"
+				0,0,0,0,10,0,0,
+				0,1,5,0,15,0,1
 			</Stream>
 		</Table>
 	</LIGO_LW>
