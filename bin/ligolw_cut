@@ -60,10 +60,11 @@ def parse_command_line():
 		usage = "%prog [options] [file ...]",
 		description = "%prog removes XML elements from a LIGO Light Weight XML file.  If file names are given on the command line, those files are read, processed, and rewritten one at a time, otherwise input is read from stdin and output written to stdout.  Gzipped files are automatically detected on input, if the file's name ends in \".gz\" it will be gzip-compressed when written."
 	)
-	parser.add_option("-v", "--verbose", action = "store_true", help = "Be verbose.")
 	parser.add_option("--delete-column", metavar = "name", action = "append", default = [], help = "Delete matching columns.  Example \"--delete-column sim_burst:dtminus\".")
 	parser.add_option("--delete-element", metavar = "tag[,attr=value[,...]]", action = "append", default = [], help = "Delete matching elements.  Example \"--delete-element Table,Name=search_summary\".")
 	parser.add_option("--delete-table", metavar = "name", action = "append", default = [], help = "Delete matching tables.  Example \"--delete-table search_summary\".")
+	parser.add_option("--ilwdchar-compat", action = "store_true", help = "Use obsolete ilwd:char based table definitions and ID reassignment algorithm (default = use new int_8s based table definitions and ID reassignment algorithm).")
+	parser.add_option("-v", "--verbose", action = "store_true", help = "Be verbose.")
 	options, filenames = parser.parse_args()
 
 	# strip column names
@@ -101,14 +102,6 @@ class ElementFilter(object):
 	def element_filter(self, name, attrs):
 		# check for unwanted tables
 		return name != ligolw.Table.tagName or table.Table.TableName(attrs["Name"]) not in self.delete_tables
-
-
-class ContentHandler(ligolw.FilteringLIGOLWContentHandler):
-	def __init__(self, xmldoc):
-		super(ContentHandler, self).__init__(xmldoc, ElementFilter(options.delete_table).element_filter)
-
-
-table.use_in(ContentHandler)
 
 
 #
@@ -156,10 +149,7 @@ def IsDeleteElement(elem, specs):
 	"""
 	Return True if elem matches an elem spec for deleting.
 	"""
-	for name, attrvalues in specs:
-		if CompareDeleteElement(elem, name, attrvalues) == 0:
-			return True
-	return False
+	return not all(CompareDeleteElement(elem, name, attrvalues) for name, attrvalues in specs)
 
 
 def RemoveElements(doc, specs):
@@ -177,6 +167,20 @@ def RemoveElements(doc, specs):
 
 
 options, filenames = parse_command_line()
+
+
+if options.ilwdchar_compat:
+	from glue.ligolw import ligolw
+	from glue.ligolw import table
+	from glue.ligolw import utils as ligolw_utils
+
+
+# FIXME:  return this to the Input section above when we no longer need to
+# support ilwdchar compat mode
+@table.use_in
+class ContentHandler(ligolw.FilteringLIGOLWContentHandler):
+	def __init__(self, xmldoc):
+		super(ContentHandler, self).__init__(xmldoc, ElementFilter(options.delete_table).element_filter)
 
 
 for n, filename in enumerate(filenames, 1):
