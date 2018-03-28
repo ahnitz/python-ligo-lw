@@ -297,7 +297,7 @@ class Element(object):
 		# not something equivalent to it.
 		for i, childNode in enumerate(self.childNodes):
 			if childNode is oldchild:
-				self.childNodes[i].parentNode = None
+				childNode.parentNode = None
 				self.childNodes[i] = newchild
 				newchild.parentNode = self
 				self._verifyChildren(i)
