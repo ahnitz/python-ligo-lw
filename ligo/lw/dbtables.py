@@ -740,7 +740,13 @@ class DBTable(table.Table):
 
 	def __iter__(self):
 		cursor = self.connection.cursor()
-		cursor.execute("SELECT * FROM %s" % self.Name)
+		cursor.execute("SELECT * FROM %s ORDER BY rowid ASC" % self.Name)
+		for values in cursor:
+			yield self.row_from_cols(values)
+
+	def __reversed__(self):
+		cursor = self.connection.cursor()
+		cursor.execute("SELECT * FROM %s ORDER BY rowid DESC" % self.Name)
 		for values in cursor:
 			yield self.row_from_cols(values)
 
