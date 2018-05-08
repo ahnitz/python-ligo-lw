@@ -42,5 +42,5 @@ rm -rf $RPM_BUILD_ROOT
 %{prefix}/lib*/python*/site-packages/ligo/lw
 
 %changelog
-*  Thu Mar 23 2017 Kipp Cannon <kipp.cannon@ligo.org>
+*  Tue May 8 2018 Kipp Cannon <kipp.cannon@ligo.org>
 - Initial release.
