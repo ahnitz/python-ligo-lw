@@ -9,6 +9,9 @@ setup(
 	description = "Python LIGO Light-Weight XML I/O Library",
 	url = "https://git.ligo.org/kipp.cannon/python-ligo-lw",
 	license = "GPL",
+	namespace_packages = [
+		"ligo",
+	],
 	packages = [
 		"ligo.lw",
 		"ligo.lw.utils"
