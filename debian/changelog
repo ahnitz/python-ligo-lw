@@ -1,5 +1,11 @@
+python-ligo-lw (1.0.1-1) unstable; urgency=low
+
+  * Various packaging adjustments.
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Thu, 10 May 2018 13:55:00 +0900
+
 python-ligo-lw (1.0.0-1) unstable; urgency=low
 
   * First release of stand-alone ligo.lw library from glue.ligolw
 
- -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 8 May 2018 15:58:00 +0(00
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 8 May 2018 15:58:00 +0900

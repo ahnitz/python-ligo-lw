@@ -2,7 +2,7 @@
 
 Name: 		python-ligo-lw
 Summary:	LIGO Light-Weight XML I/O Library
-Version:	1.0.0
+Version:	1.0.1
 Release:	1
 License:	GPL
 Group:		Development/Libraries
