@@ -18,16 +18,16 @@ check : \
 	@echo "All Tests Passed"
 
 define printpassfail
-	{ echo "Pass" ; true ; } || { echo "Fail" ; false ; }
+{ echo "Pass" ; true ; } || { echo "Fail" ; false ; }
 endef
 
 SERVEFILESPORT := 16543
 
 define servefilesstart
-	{ python -c "import SocketServer, SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).serve_forever()" & sleep 1 ; }
+{ python -c "import SocketServer, SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & sleep 1 ; }
 endef
 define servefilesstop
-	{ killall python ; sleep 1 ; true ; }
+wait
 endef
 
 ligolw_test01 :
