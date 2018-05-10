@@ -33,11 +33,7 @@ import re
 import sys
 from xml.sax.saxutils import escape as xmlescape
 from xml.sax.xmlreader import AttributesImpl as Attributes
-try:
-	import yaml
-except ImportError:
-	# yaml serialization is optional
-	pass
+import yaml
 
 
 from . import __author__, __date__, __version__
@@ -118,10 +114,6 @@ class Param(ligolw.Param):
 		if self.pcdata is not None:
 			# convert pcdata from string to native Python type
 			if self.Type == u"yaml":
-				try:
-					yaml
-				except NameError:
-					raise NotImplementedError("yaml support not installed")
 				self.pcdata = yaml.load(self.pcdata)
 			else:
 				self.pcdata = ligolwtypes.ToPyType[self.Type](self.pcdata.strip())
@@ -134,10 +126,6 @@ class Param(ligolw.Param):
 			c.write(fileobj, indent + ligolw.Indent)
 		if self.pcdata is not None:
 			if self.Type == u"yaml":
-				try:
-					yaml
-				except NameError:
-					raise NotImplementedError("yaml support not installed")
 				fileobj.write(xmlescape(yaml.dump(self.pcdata).strip()))
 			else:
 				# we have to strip quote characters from

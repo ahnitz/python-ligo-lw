@@ -23,7 +23,8 @@ Depends:
  python-glue,
  python-glue-segments,
  python-numpy,
- python-six
+ python-six,
+ python-yaml
 Conflicts:
  python-glue-ligolw-tools,
  python-glue (<< 1.55)
@@ -47,7 +48,8 @@ Depends:
  python3-glue,
  python3-glue-segments,
  python3-numpy,
- python3-six
+ python3-six,
+ python3-yaml
 Description: LIGO Light-Weight XML I/O library
  The LIGO Light-Weight XML format is used extensively by compact object
  detection pipelines and associate tool sets.  This package provides a
