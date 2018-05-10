@@ -35,8 +35,8 @@ Usage:
 
 $ ligolw_no_ilwdchar [filename ...]
 
-Files are convert *in place*.  Make a copy before conversion if you wish to
-preserve the original.  If no filenames are given, stdin is convert to
+Files are converted *in place*.  Make a copy before conversion if you wish
+to preserve the original.  If no filenames are given, stdin is converted to
 stdout.  Files are overwritten even if no changes are made.  Verbosity is
 written to stderr unconditionally.
 """
