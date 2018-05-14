@@ -43,15 +43,15 @@ written to stderr unconditionally.
 
 
 import sys
-from ligo.lw import array
+from ligo.lw import array as ligolw_array
 from ligo.lw import ligolw
 from ligo.lw import lsctables
-from ligo.lw import table
+from ligo.lw import table as ligolw_table
 from ligo.lw import utils as ligolw_utils
 
 
-@table.use_in
-@array.use_in
+@ligolw_table.use_in
+@ligolw_array.use_in
 class LIGOLWContentHandler(ligolw.LIGOLWContentHandler):
 	pass
 
@@ -73,10 +73,12 @@ for filename in sys.argv[1:] or [None]:
 		# have them
 		if table.Name in lsctables.TableByName:
 			validcolumns = lsctables.TableByName[table.Name].validcolumns
+			stripped_column_to_valid_column = dict((ligolw_table.Column.ColumnName(name), name) for name in validcolumns)
 			for column in table.getElementsByTagName(ligolw.Column.tagName):
 				if column.getAttribute("Name") not in validcolumns:
-					print >>sys.stderr, "\trenaming column %s to %s" % (column.getAttribute("Name"), column.Name)
-					column.setAttribute("Name", column.Name)
+					print >>sys.stderr, "\trenaming %s column %s" % (table.Name, column.getAttribute("Name")),
+					column.setAttribute("Name", stripped_column_to_valid_column[column.Name])
+					print >>sys.stderr, "to %s" % column.getAttribute("Name")
 
 		print >>sys.stderr, "\t%s: " % table.Name,
 		idattrs = tuple(table.columnnames[i] for i, coltype in enumerate(table.columntypes) if coltype == u"ilwd:char")
