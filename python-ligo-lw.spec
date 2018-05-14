@@ -1,5 +1,3 @@
-%define prefix /usr
-
 Name: 		python-ligo-lw
 Summary:	LIGO Light-Weight XML I/O Library
 Version:	1.0.1
@@ -14,7 +12,7 @@ Conflicts:	glue-ligolw-tools glue < 1.55
 Obsoletes:	glue-ligolw-tools
 Provides:	glue-ligolw-tools
 BuildRequires:  python-devel
-Prefix:         %{prefix}
+Prefix:         %{_prefix}
 %description
 The LIGO Light-Weight XML format is widely used within gravitational-wave
 data analysis pipelines.  This package provides a Python library to read,
@@ -31,16 +29,16 @@ rm -rf %{buildroot}
 %{__python} setup.py install -O1 \
         --skip-build \
         --root=%{buildroot} \
-        --prefix=%{prefix}
-rm -rf $RPM_BUILD_ROOT/%{prefix}/lib*/python*/site-packages/*.egg-info
+        --prefix=%{_prefix}
+rm -rf $RPM_BUILD_ROOT/%{_prefix}/lib*/python*/site-packages/*.egg-info
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-%{prefix}/bin/*
-%{prefix}/lib*/python*/site-packages/ligo/lw
+%{_prefix}/bin/*
+%{_prefix}/lib*/python*/site-packages/ligo/lw
 
 %changelog
 *  Tue May 8 2018 Kipp Cannon <kipp.cannon@ligo.org>
