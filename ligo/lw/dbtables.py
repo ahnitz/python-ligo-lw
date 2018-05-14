@@ -419,16 +419,17 @@ def discard_connection_filename(filename, working_filename, verbose = False):
 
 def idmap_create(connection):
 	"""
-	Create the _idmap_ table.  This table has columns "old" and "new"
-	containing text strings mapping old IDs to new IDs.  The old column
-	is a primary key (is indexed and must contain unique entries).  The
-	table is created as a temporary table, so it will be automatically
-	dropped when the database connection is closed.
+	Create the _idmap_ table.  This table has columns "table_name",
+	"old", and "new" mapping old IDs to new IDs for each table.  The
+	(table_name, old) column pair is a primary key (is indexed and must
+	contain unique entries).  The table is created as a temporary
+	table, so it will be automatically dropped when the database
+	connection is closed.
 
 	This function is for internal use, it forms part of the code used
 	to re-map row IDs when merging multiple documents.
 	"""
-	connection.cursor().execute("CREATE TEMPORARY TABLE _idmap_ (table_name TEXT NOT NULL, old TEXT NOT NULL, new TEXT NOT NULL, PRIMARY KEY (table_name, old))")
+	connection.cursor().execute("CREATE TEMPORARY TABLE _idmap_ (table_name TEXT NOT NULL, old INTEGER NOT NULL, new INTEGER NOT NULL, PRIMARY KEY (table_name, old))")
 
 
 def idmap_reset(connection):
@@ -454,7 +455,7 @@ def idmap_sync(connection):
 	xmldoc.unlink()
 
 
-def idmap_get_new(connection, old, tbl):
+def idmap_get_new(cursor, table_name, old, tbl):
 	"""
 	From the old ID string, obtain a replacement ID string by either
 	grabbing it from the _idmap_ table if one has already been assigned
@@ -466,8 +467,7 @@ def idmap_get_new(connection, old, tbl):
 	This function is for internal use, it forms part of the code used
 	to re-map row IDs when merging multiple documents.
 	"""
-	cursor = connection.cursor()
-	cursor.execute("SELECT new FROM _idmap_ WHERE table_name == ? AND old == ?", (tbl.Name, old))
+	cursor.execute("SELECT new FROM _idmap_ WHERE table_name == ? AND old == ?", (table_name, old))
 	new = cursor.fetchone()
 	if new is not None:
 		# a new ID has already been created for this old ID
@@ -475,7 +475,7 @@ def idmap_get_new(connection, old, tbl):
 	# this ID was not found in _idmap_ table, assign a new ID and
 	# record it
 	new = tbl.get_next_id()
-	cursor.execute("INSERT INTO _idmap_ VALUES (?, ?, ?)", (tbl.Name, old, new))
+	cursor.execute("INSERT INTO _idmap_ VALUES (?, ?, ?)", (table_name, old, new))
 	return new
 
 
@@ -776,7 +776,7 @@ class DBTable(table.Table):
 		if self.next_id is not None:
 			# assign (and record) a new ID before inserting the
 			# row to avoid collisions with existing rows
-			setattr(row, self.next_id.column_name, idmap_get_new(self.connection, getattr(row, self.next_id.column_name), self))
+			setattr(row, self.next_id.column_name, idmap_get_new(self.cursor, self.Name, getattr(row, self.next_id.column_name), self))
 		self._append(row)
 		if self.remap_first_rowid is None:
 			self.remap_first_rowid = self.maxrowid()
