@@ -7,11 +7,11 @@ Group:		Development/Libraries
 Source:		%{name}-%{version}.tar.gz
 Url:		https://git.ligo.org/kipp.cannon/python-ligo-lw
 BuildRoot:	%{_tmppath}/%{name}-%{version}-root
-Requires:	python-six glue glue-segments lal-python python >= 2.7 PyYAML
+Requires:	python-six glue glue-segments lal-python ligo-common python >= 2.7 PyYAML
 Conflicts:	glue-ligolw-tools glue < 1.55
 Obsoletes:	glue-ligolw-tools
 Provides:	glue-ligolw-tools
-BuildRequires:  python-devel
+BuildRequires:  ligo-common python-devel
 Prefix:         %{_prefix}
 %description
 The LIGO Light-Weight XML format is widely used within gravitational-wave
