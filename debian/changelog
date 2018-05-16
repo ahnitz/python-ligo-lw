@@ -1,3 +1,10 @@
+python-ligo-lw (1.1.0-1) unstable; urgency=low
+
+  * Fix bugs in ligolw_no_ilwdchar
+  * Adjust package metadata
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Wed, 16 May 2018 12:55:00 +0900
+
 python-ligo-lw (1.0.1-1) unstable; urgency=low
 
   * Various packaging adjustments.
