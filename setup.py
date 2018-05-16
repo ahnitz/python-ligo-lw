@@ -7,6 +7,7 @@ setup(
 	author = "Kipp Cannon",
 	author_email = "kipp.cannon@ligo.org",
 	description = "Python LIGO Light-Weight XML I/O Library",
+	long_description = "The LIGO Light-Weight XML format is used extensively by compact object detection pipeline and associated tool sets.  This package provides a Python I/O library for reading, writing, and interacting with documents in this format.",
 	url = "https://git.ligo.org/kipp.cannon/python-ligo-lw",
 	license = "GPL",
 	namespace_packages = [
