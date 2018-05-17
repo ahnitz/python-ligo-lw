@@ -1,3 +1,9 @@
+python-ligo-lw (1.1.1-1) unstable; urgency=low
+
+  * pypi dependencies from Leo
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Thu, 17 May 2018 12:47:00 +0900
+
 python-ligo-lw (1.1.0-1) unstable; urgency=low
 
   * Fix bugs in ligolw_no_ilwdchar
