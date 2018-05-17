@@ -55,5 +55,10 @@ setup(
 		"Topic :: Scientific/Engineering :: Physics",
 		"Topic :: Software Development :: Libraries",
 		"Topic :: Text Processing :: Markup :: XML",
+	],
+	install_requires = [
+		"numpy",
+		"six",
+		"pyyaml"
 	]
 )
