@@ -46,7 +46,6 @@ import warnings
 
 
 from glue import offsetvector
-from glue import segments
 from . import __author__, __date__, __version__
 from . import ligolw
 from . import table
