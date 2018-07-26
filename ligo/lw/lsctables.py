@@ -80,7 +80,7 @@ from xml import sax
 
 
 from glue import offsetvector
-from glue import segments
+from ligo import segments
 import lal
 from lal import LIGOTimeGPS
 from . import __author__, __date__, __version__
