@@ -87,7 +87,6 @@ from . import __author__, __date__, __version__
 from . import ligolw
 from . import table
 from . import types as ligolwtypes
-from . import ilwd
 
 
 #
