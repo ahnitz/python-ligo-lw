@@ -53,7 +53,7 @@ from . import __author__, __date__, __version__
 from . import ligolw
 from . import tokenizer
 from . import types as ligolwtypes
-from six.moves import map, range
+from six.moves import map
 
 
 #
