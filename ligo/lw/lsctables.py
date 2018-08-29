@@ -1280,6 +1280,19 @@ class SnglInspiral(table.Table.RowType):
 			self.spin2x, self.spin2y, self.spin2z = spin
 
 	#
+	# simulate tempate_id column
+	# FIXME:  add a proper column for this
+	#
+
+	@property
+	def template_id(self):
+		return int(self.Gamma0)
+
+	@template_id.setter
+	def template_id(self, template_id):
+		self.Gamma0 = float(template_id)
+
+	#
 	# Methods
 	#
 
