@@ -3,7 +3,7 @@ from distutils.core import setup, Extension
 
 setup(
 	name = "python-ligo-lw",
-	version = "1.1.1",
+	version = "1.2.0",
 	author = "Kipp Cannon",
 	author_email = "kipp.cannon@ligo.org",
 	description = "Python LIGO Light-Weight XML I/O Library",
