@@ -11,7 +11,7 @@ Requires:	python-six glue python2-ligo-segments lal-python python2-ligo-common p
 Conflicts:	glue-ligolw-tools glue < 1.55
 Obsoletes:	glue-ligolw-tools
 Provides:	glue-ligolw-tools
-BuildRequires:  ligo-common python-devel
+BuildRequires:  python2-ligo-common python-devel
 Prefix:         %{_prefix}
 %description
 The LIGO Light-Weight XML format is widely used within gravitational-wave
