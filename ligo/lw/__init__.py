@@ -78,8 +78,8 @@ Example:
 
 
 __author__ = "Kipp Cannon <kipp.cannon@ligo.org>"
-__version__ = "1.0.0"
-__date__ = "2017-03-22"
+__version__ = "1.3.0"
+__date__ = "2018-09-28"
 
 
 __all__ = [
