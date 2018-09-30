@@ -33,7 +33,7 @@ import heapq
 import itertools
 
 
-from glue import segments
+from ligo import segments
 from glue import segmentsUtils
 from .. import __author__, __date__, __version__
 from .. import ligolw
