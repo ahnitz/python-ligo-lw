@@ -41,7 +41,7 @@ setup(
 		"bin/ligolw_cut",
 		"bin/ligolw_no_ilwdchar",
 		"bin/ligolw_print",
-		"bin/ligolw_segments",
+		#"bin/ligolw_segments",
 		"bin/ligolw_sqlite",
 	],
 	classifiers = [
