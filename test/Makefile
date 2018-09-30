@@ -1,4 +1,5 @@
 check : \
+	ligolw_print_test \
 	ligolw_sqlite_test \
 	ligolw_test01 \
 	ligolw_test03a \
@@ -29,6 +30,12 @@ endef
 define servefilesstop
 wait
 endef
+
+ligolw_print_test :
+	@echo "=== start $@ ===>"
+	# test reading array data from a file
+	./ligolw_print_test.sh && $(printpassfail)
+	@echo "<=== end $@ ==="
 
 ligolw_test01 :
 	@echo "=== start $@ ===>"
