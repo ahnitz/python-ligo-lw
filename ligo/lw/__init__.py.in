@@ -78,7 +78,7 @@ Example:
 
 
 __author__ = "Kipp Cannon <kipp.cannon@ligo.org>"
-__version__ = "1.4.0"
+__version__ = @VERSION@
 __date__ = "2018-09-30"
 
 

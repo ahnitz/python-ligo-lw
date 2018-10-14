@@ -1,9 +1,33 @@
 from distutils.core import setup, Extension
 
 
+version = "1.4.0"
+
+
+def macroreplace(filename, substs):
+	"""
+	Autoconf-style macro replacement
+	"""
+	if not filename.endswith(".in"):
+		raise ValueError("\"%s\" must end in \".in\"" % filename)
+	for pattern in substs:
+		if not pattern.startswith("@") or not pattern.endswith("@"):
+			raise ValueError("bad pattern \"%s\"" % pattern)
+	with open(filename[:-3], "w") as outfile:
+		for line in open(filename, "r"):
+			for pattern, value in substs.items():
+				line = line.replace(pattern, value)
+			outfile.write(line)
+
+
+macroreplace("ligo/lw/__init__.py.in", {
+	"@VERSION@": "\"%s\"" % version,
+})
+
+
 setup(
 	name = "python-ligo-lw",
-	version = "1.4.0",
+	version = version,
 	author = "Kipp Cannon",
 	author_email = "kipp.cannon@ligo.org",
 	description = "Python LIGO Light-Weight XML I/O Library",
