@@ -30,6 +30,7 @@ rm -rf %{buildroot}
         --skip-build \
         --root=%{buildroot} \
         --prefix=%{_prefix}
+rm -rf $RPM_BUILD_ROOT/%{_prefix}/lib*/python*/site-packages/ligo/*.*
 rm -rf $RPM_BUILD_ROOT/%{_prefix}/lib*/python*/site-packages/*.egg-info
 
 %clean
