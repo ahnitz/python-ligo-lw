@@ -33,13 +33,11 @@ endef
 
 ligolw_print_test :
 	@echo "=== start $@ ===>"
-	# test reading array data from a file
 	./ligolw_print_test.sh && $(printpassfail)
 	@echo "<=== end $@ ==="
 
 ligolw_test01 :
 	@echo "=== start $@ ===>"
-	# test reading array data from a file
 	python ligo_lw_test_01.py && $(printpassfail)
 	@echo "<=== end $@ ==="
 
@@ -80,49 +78,9 @@ ligolw_sqlite_test :
 	sh ligolw_sqlite_test.sh && $(printpassfail)
 	@echo "<=== end $@ ==="
 
-test_array :
+test_array test_ilwd test_ligolw test_lsctables test_param test_table test_tokenizer test_utils test_utils_segments :
 	@echo "=== start $@ ===>"
-	./test_array.py && $(printpassfail)
-	@echo "<=== end $@ ==="
-
-test_ilwd :
-	@echo "=== start $@ ===>"
-	python test_ilwd.py && $(printpassfail)
-	@echo "<=== end $@ ==="
-
-test_ligolw :
-	@echo "=== start $@ ===>"
-	./test_ligolw.py && $(printpassfail)
-	@echo "<=== end $@ ==="
-
-test_lsctables :
-	@echo "=== start $@ ===>"
-	./test_lsctables.py && $(printpassfail)
-	@echo "<=== end $@ ==="
-
-test_param :
-	@echo "=== start $@ ===>"
-	./test_param.py && $(printpassfail)
-	@echo "<=== end $@ ==="
-
-test_table :
-	@echo "=== start $@ ===>"
-	./test_table.py && $(printpassfail)
-	@echo "<=== end $@ ==="
-
-test_tokenizer :
-	@echo "=== start $@ ===>"
-	./test_tokenizer.py && $(printpassfail)
-	@echo "<=== end $@ ==="
-
-test_utils :
-	@echo "=== start $@ ===>"
-	./test_utils.py && $(printpassfail)
-	@echo "<=== end $@ ==="
-
-test_utils_segments :
-	@echo "=== start $@ ===>"
-	./test_utils_segments.py && $(printpassfail)
+	./$@.py && $(printpassfail)
 	@echo "<=== end $@ ==="
 
 clean :
