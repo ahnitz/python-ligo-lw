@@ -4,23 +4,28 @@ from distutils.core import setup, Extension
 version = "1.4.0"
 
 
-def macroreplace(filename, substs):
+def macroreplace(filenames, substs):
 	"""
 	Autoconf-style macro replacement
 	"""
-	if not filename.endswith(".in"):
-		raise ValueError("\"%s\" must end in \".in\"" % filename)
+	for filename in filenames:
+		if not filename.endswith(".in"):
+			raise ValueError("\"%s\" must end in \".in\"" % filename)
 	for pattern in substs:
 		if not pattern.startswith("@") or not pattern.endswith("@"):
 			raise ValueError("bad pattern \"%s\"" % pattern)
-	with open(filename[:-3], "w") as outfile:
-		for line in open(filename, "r"):
-			for pattern, value in substs.items():
-				line = line.replace(pattern, value)
-			outfile.write(line)
+	for filename in filenames:
+		with open(filename[:-3], "w") as outfile:
+			for line in open(filename, "r"):
+				for pattern, value in substs.items():
+					line = line.replace(pattern, value)
+				outfile.write(line)
 
 
-macroreplace("ligo/lw/__init__.py.in", {
+macroreplace([
+	"ligo/lw/__init__.py.in",
+	"python-ligo-lw.spec.in",
+], {
 	"@VERSION@": "\"%s\"" % version,
 })
 
