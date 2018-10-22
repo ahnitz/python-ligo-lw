@@ -178,8 +178,21 @@ class Param(ligolw.Param):
 		Convenience wrapper for .build() that constructs a Param
 		element from an instance of a Python builtin type.  See
 		.build() for a description of the valid keyword arguments.
+
+		Examples:
+
+		>>> Param.from_pyvalue(u"float", 3.0).write()
+		<Param Type="real_8" Name="float:param">3</Param>
+		>>> Param.from_pyvalue(u"string", u"test").write()
+		<Param Type="lstring" Name="string:param">test</Param>
+		>>> Param.from_pyvalue(u"shortstring", u"").write()
+		<Param Type="lstring" Name="shortstring:param"> </Param>
+		>>> Param.from_pyvalue(u"none", None).write()
+		<Param Type="None", Name="none:param"></Param>
 		"""
-		return cls.build(name, ligolwtypes.FromPyType[type(value)], value, **kwargs)
+		if value is not None:
+			return cls.build(name, ligolwtypes.FromPyType[type(value)], value, **kwargs)
+		return cls.build(name, None, None, **kwargs)
 
 	@classmethod
 	def getParamsByName(cls, elem, name):
