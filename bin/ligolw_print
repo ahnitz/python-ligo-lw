@@ -34,7 +34,6 @@ Print things from LIGO LW XML files.  Inspired by lwtprint from LIGOTools.
 from optparse import OptionParser
 
 
-from glue import segmentsUtils
 from lal.utils.cache import CacheEntry
 from ligo.lw import __date__, __version__
 from ligo.lw import ligolw
@@ -42,6 +41,7 @@ from ligo.lw import table
 from ligo.lw import lsctables
 from ligo.lw import array as ligolw_array
 from ligo.lw import utils as ligolw_utils
+from ligo.segments import utils as segmentsUtils
 import six
 
 

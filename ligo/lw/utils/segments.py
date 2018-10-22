@@ -34,7 +34,7 @@ import itertools
 
 
 from ligo import segments
-from glue import segmentsUtils
+from ligo.segments import utils as segmentsUtils
 from .. import __author__, __date__, __version__
 from .. import ligolw
 from .. import lsctables
