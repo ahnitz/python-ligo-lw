@@ -1,3 +1,5 @@
+PYTHON ?= python
+
 check : \
 	ligolw_print_test \
 	ligolw_sqlite_test \
@@ -25,7 +27,7 @@ endef
 SERVEFILESPORT := 16543
 
 define servefilesstart
-{ python -c "import SocketServer, SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & SERVERPID=$${!} ; sleep 1 ; }
+{ $(PYTHON) -c "import SocketServer, SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & SERVERPID=$${!} ; sleep 1 ; }
 endef
 define servefilesstop
 kill $${SERVERPID}
@@ -38,7 +40,7 @@ ligolw_print_test :
 
 ligolw_test01 :
 	@echo "=== start $@ ===>"
-	python ligo_lw_test_01.py && $(printpassfail)
+	$(PYTHON) ligo_lw_test_01.py && $(printpassfail)
 	@echo "<=== end $@ ==="
 
 ligolw_test03a :
@@ -80,7 +82,7 @@ ligolw_sqlite_test :
 
 test_array test_ilwd test_ligolw test_lsctables test_param test_table test_tokenizer test_utils test_utils_segments :
 	@echo "=== start $@ ===>"
-	./$@.py && $(printpassfail)
+	$(PYTHON) $@.py && $(printpassfail)
 	@echo "<=== end $@ ==="
 
 clean :
