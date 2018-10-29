@@ -25,10 +25,10 @@ endef
 SERVEFILESPORT := 16543
 
 define servefilesstart
-{ python -c "import SocketServer, SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & sleep 1 ; }
+{ python -c "import SocketServer, SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & SERVERPID=$${!} ; sleep 1 ; }
 endef
 define servefilesstop
-wait
+kill $${SERVERPID}
 endef
 
 ligolw_print_test :
