@@ -3,7 +3,7 @@ PYTHON ?= python
 check : \
 	ligolw_print_test \
 	ligolw_sqlite_test \
-	ligolw_test01 \
+	ligo_lw_test_01 \
 	ligolw_test03a \
 	ligolw_test03b \
 	ligolw_test03c \
@@ -32,16 +32,6 @@ endef
 define servefilesstop
 kill $${SERVERPID}
 endef
-
-ligolw_print_test :
-	@echo "=== start $@ ===>"
-	./ligolw_print_test.sh && $(printpassfail)
-	@echo "<=== end $@ ==="
-
-ligolw_test01 :
-	@echo "=== start $@ ===>"
-	$(PYTHON) ligo_lw_test_01.py && $(printpassfail)
-	@echo "<=== end $@ ==="
 
 ligolw_test03a :
 	@echo "=== start $@ ===>"
@@ -75,12 +65,12 @@ ligolw_test05 :
 	FILENAME=$(shell mktemp --suffix .xml.gz) && { ligolw_add --output $${FILENAME} ligolw_sqlite_test_input.xml.gz && gunzip --test $${FILENAME} && $(printpassfail) ; } ; rm -f $${FILENAME}
 	@echo "<=== end $@ ==="
 
-ligolw_sqlite_test :
+ligolw_print_test ligolw_sqlite_test :
 	@echo "=== start $@ ===>"
-	sh ligolw_sqlite_test.sh && $(printpassfail)
+	sh $@.sh && $(printpassfail)
 	@echo "<=== end $@ ==="
 
-test_array test_ilwd test_ligolw test_lsctables test_param test_table test_tokenizer test_utils test_utils_segments :
+ligo_lw_test_01 test_array test_ilwd test_ligolw test_lsctables test_param test_table test_tokenizer test_utils test_utils_segments :
 	@echo "=== start $@ ===>"
 	$(PYTHON) $@.py && $(printpassfail)
 	@echo "<=== end $@ ==="
