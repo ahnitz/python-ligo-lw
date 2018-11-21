@@ -27,7 +27,9 @@ endef
 SERVEFILESPORT := 16543
 
 define servefilesstart
-{ $(PYTHON) -c "import SocketServer, SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & SERVERPID=$${!} ; sleep 1 ; }
+{ $(PYTHON) -c "from six.moves import socketserver as SocketServer ; from six.moves import SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & SERVERPID=$${!} ; sleep 1 ; }
+# Python 2 version
+# { $(PYTHON) -c "import SocketServer, SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & SERVERPID=$${!} ; sleep 1 ; }
 endef
 define servefilesstop
 kill $${SERVERPID}
