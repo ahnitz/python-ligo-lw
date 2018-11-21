@@ -75,6 +75,7 @@ Example:
 import itertools
 import math
 import numpy
+import operator
 import warnings
 from xml import sax
 
@@ -299,20 +300,21 @@ class gpsproperty(object):
 	"""
 	def __init__(self, s_name, ns_name):
 		self.s_name = s_name
+		self.get_s = operator.attrgetter(s_name)
 		self.ns_name = ns_name
+		self.get_ns = operator.attrgetter(ns_name)
 
 	posinf = 0x7FFFFFFF, 0xFFFFFFFF
 	neginf = 0xFFFFFFFF, 0xFFFFFFFF
+	infs = posinf, neginf
 
 	def __get__(self, obj, cls = None):
-		s = getattr(obj, self.s_name)
-		ns = getattr(obj, self.ns_name)
+		s = self.get_s(obj)
+		ns = self.get_ns(obj)
 		if s is None and ns is None:
 			return None
-		if (s, ns) == self.posinf:
-			return segments.PosInfinity
-		if (s, ns) == self.neginf:
-			return segments.NegInfinity
+		if (s, ns) in self.infs:
+			return segments.PosInfinity if (s, ns) == self.posinf else segments.NegInfinity
 		return LIGOTimeGPS(s, ns)
 
 	def __set__(self, obj, gps):
