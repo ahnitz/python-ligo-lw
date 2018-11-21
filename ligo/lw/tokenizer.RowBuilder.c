@@ -221,6 +221,11 @@ static struct PyMethodDef methods[] = {
 "\n"\
 "Example:\n"\
 "\n"\
+">>> from . import tokenizer\n"\
+">>> class Row(object):\n"\
+"...	pass\n"\
+"...\n"\
+">>> rows = tokenizer.RowBuilder(Row, [\"time\", \"snr\"])\n"\
 ">>> for row in rows.append([10, 6.8, 15, 29.1]):\n"\
 "...     print row.snr\n"\
 "..."
