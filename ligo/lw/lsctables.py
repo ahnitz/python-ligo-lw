@@ -285,7 +285,7 @@ class instrumentsproperty(object):
 			return u"%s," % _instruments[0]
 		return u",".join(_instruments)
 
-	def __get__(self, obj, type = None):
+	def __get__(self, obj, cls = None):
 		return self.get(getattr(obj, self.name))
 
 	def __set__(self, obj, instruments):
@@ -304,7 +304,7 @@ class gpsproperty(object):
 	posinf = 0x7FFFFFFF, 0xFFFFFFFF
 	neginf = 0xFFFFFFFF, 0xFFFFFFFF
 
-	def __get__(self, obj, type = None):
+	def __get__(self, obj, cls = None):
 		s = getattr(obj, self.s_name)
 		ns = getattr(obj, self.ns_name)
 		if s is None and ns is None:
@@ -363,7 +363,7 @@ class segmentproperty(object):
 		self.start = start_name
 		self.stop = stop_name
 
-	def __get__(self, obj, type = None):
+	def __get__(self, obj, cls = None):
 		start = getattr(obj, self.start)
 		stop = getattr(obj, self.stop)
 		if start is None and stop is None:
