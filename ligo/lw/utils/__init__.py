@@ -324,8 +324,8 @@ def load_fileobj(fileobj, gz = None, xmldoc = None, contenthandler = None):
 	Example:
 
 	>>> from ligo.lw import ligolw
-	>>> import StringIO
-	>>> f = StringIO.StringIO('<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE LIGO_LW SYSTEM "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt"><LIGO_LW><Table Name="demo:table"><Column Name="name" Type="lstring"/><Column Name="value" Type="real8"/><Stream Name="demo:table" Type="Local" Delimiter=",">"mass",0.5,"velocity",34</Stream></Table></LIGO_LW>')
+	>>> from io import BytesIO
+	>>> f = BytesIO(b'<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE LIGO_LW SYSTEM "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt"><LIGO_LW><Table Name="demo:table"><Column Name="name" Type="lstring"/><Column Name="value" Type="real8"/><Stream Name="demo:table" Type="Local" Delimiter=",">"mass",0.5,"velocity",34</Stream></Table></LIGO_LW>')
 	>>> xmldoc = load_fileobj(f, contenthandler = ligolw.LIGOLWContentHandler)
 
 	The contenthandler argument specifies the SAX content handler to
