@@ -128,7 +128,7 @@ def compare_table_cols(a, b):
 	(ignoring order) according to LIGO LW name conventions, return True
 	otherwise.
 	"""
-	return cmp(sorted((col.Name, col.Type) for col in a.getElementsByTagName(ligolw.Column.tagName)), sorted((col.Name, col.Type) for col in b.getElementsByTagName(ligolw.Column.tagName)))
+	return {(col.Name, col.Type) for col in a.getElementsByTagName(ligolw.Column.tagName)} != {(col.Name, col.Type) for col in b.getElementsByTagName(ligolw.Column.tagName)}
 
 
 def merge_compatible_tables(elem):
