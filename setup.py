@@ -44,6 +44,8 @@ setup(
 	],
 	packages = [
 		"ligo",
+		"ligo.lw",
+		"ligo.lw.utils",
 	],
 	ext_modules = [
 		Extension(
