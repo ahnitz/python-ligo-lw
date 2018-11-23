@@ -181,14 +181,15 @@ class Param(ligolw.Param):
 
 		Examples:
 
-		>>> Param.from_pyvalue(u"float", 3.0).write()
+		>>> import sys
+		>>> Param.from_pyvalue(u"float", 3.0).write(sys.stdout)
 		<Param Type="real_8" Name="float:param">3</Param>
-		>>> Param.from_pyvalue(u"string", u"test").write()
+		>>> Param.from_pyvalue(u"string", u"test").write(sys.stdout)
 		<Param Type="lstring" Name="string:param">test</Param>
-		>>> Param.from_pyvalue(u"shortstring", u"").write()
+		>>> Param.from_pyvalue(u"shortstring", u"").write(sys.stdout)
 		<Param Type="lstring" Name="shortstring:param"> </Param>
-		>>> Param.from_pyvalue(u"none", None).write()
-		<Param Type="None", Name="none:param"></Param>
+		>>> Param.from_pyvalue(u"none", None).write(sys.stdout)
+		<Param Type="None" Name="none:param"></Param>
 		"""
 		if value is not None:
 			return cls.build(name, ligolwtypes.FromPyType[type(value)], value, **kwargs)
