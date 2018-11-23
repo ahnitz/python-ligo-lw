@@ -45,7 +45,7 @@ from xml.sax.xmlreader import AttributesImpl
 import warnings
 
 
-from glue import offsetvector
+from lalburst import offsetvector
 from . import __author__, __date__, __version__
 from . import ligolw
 from . import table

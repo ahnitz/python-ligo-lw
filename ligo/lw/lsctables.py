@@ -80,10 +80,10 @@ import warnings
 from xml import sax
 
 
-from glue import offsetvector
 from ligo import segments
 import lal
 from lal import LIGOTimeGPS
+from lalburst import offsetvector
 from . import __author__, __date__, __version__
 from . import ligolw
 from . import table
