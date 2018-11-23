@@ -368,6 +368,12 @@ def load_filename(filename, verbose = False, **kwargs):
 		fileobj = open(filename, "rb")
 	else:
 		fileobj = sys.stdin
+		# In Python 3, sys.stdin has a .buffer attribute that is
+		# the underyling byte-oriented stream.
+		try:
+			fileobj = fileobj.buffer
+		except AttributeError:
+			pass
 	xmldoc = load_fileobj(fileobj, **kwargs)
 	return xmldoc
 
@@ -398,6 +404,12 @@ def load_url(url, verbose = False, **kwargs):
 			fileobj = urllib.request.urlopen(url)
 	else:
 		fileobj = sys.stdin
+		# In Python 3, sys.stdin has a .buffer attribute that is
+		# the underyling byte-oriented stream.
+		try:
+			fileobj = fileobj.buffer
+		except AttributeError:
+			pass
 	xmldoc = load_fileobj(fileobj, **kwargs)
 	return xmldoc
 
@@ -502,7 +514,14 @@ def write_filename(xmldoc, filename, verbose = False, gz = False, with_mv = True
 		sys.stderr.write("writing %s ...\n" % (("'%s'" % filename) if filename is not None else "stdout"))
 	with SignalsTrap(trap_signals):
 		if filename is None:
-			write_fileobj(xmldoc, sys.stdout, gz = gz, **kwargs)
+			# In Python 3, sys.stdout has a .buffer attribute
+			# that is the underyling byte-oriented stream.
+			fileobj = sys.stdout
+			try:
+				fileobj = fileobj.buffer
+			except AttributeError:
+				pass
+			write_fileobj(xmldoc, fileobj, gz = gz, **kwargs)
 		else:
 			if not gz and filename.endswith(".gz"):
 				warnings.warn("filename '%s' ends in '.gz' but file is not being gzip-compressed" % filename, UserWarning)
