@@ -227,7 +227,7 @@ static struct PyMethodDef methods[] = {
 "...\n"\
 ">>> rows = tokenizer.RowBuilder(Row, [\"time\", \"snr\"])\n"\
 ">>> for row in rows.append([10, 6.8, 15, 29.1]):\n"\
-"...     print row.snr\n"\
+"...     print(row.snr)\n"\
 "..."
 	},
 	{NULL,}

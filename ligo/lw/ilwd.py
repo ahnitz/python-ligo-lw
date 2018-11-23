@@ -55,8 +55,8 @@ suffix can be retrieved by converting the object to an integer.
 
 Example:
 
->>> x.table_name
-u'process'
+>>> print(x.table_name)
+process
 >>> int(x)
 10
 
@@ -172,7 +172,7 @@ def get_ilwdchar_class(tbl_name, col_name, namespace = globals()):
 	Example:
 
 	>>> for i in range(10):
-	...	print str(process_id(i))
+	...	print(str(process_id(i)))
 	...
 	process:process_id:0
 	process:process_id:1
@@ -246,10 +246,10 @@ class ilwdchar(object):
 		>>> x = ilwdchar(u"process:process_id:10")
 		>>> str(x)
 		'process:process_id:10'
-		>>> x.table_name
-		u'process'
-		>>> x.column_name
-		u'process_id'
+		>>> print(x.table_name)
+		process
+		>>> print(x.column_name)
+		process_id
 		>>> int(x)
 		10
 		>>> x.index_offset

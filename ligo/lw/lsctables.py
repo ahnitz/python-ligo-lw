@@ -189,22 +189,14 @@ class instrumentsproperty(object):
 
 		>>> print(instrumentsproperty.get(None))
 		None
-		>>> instrumentsproperty.get(u"")
-		set([])
-		>>> instrumentsproperty.get(u"  ,  ,,")
-		set([])
-		>>> instrumentsproperty.get(u"H1")
-		set([u'H1'])
-		>>> instrumentsproperty.get(u"SWIFT")
-		set([u'SWIFT'])
-		>>> instrumentsproperty.get(u"H1L1")
-		set([u'H1', u'L1'])
-		>>> instrumentsproperty.get(u"H1L1,")
-		set([u'H1L1'])
-		>>> instrumentsproperty.get(u"H1,L1")
-		set([u'H1', u'L1'])
-		>>> instrumentsproperty.get(u"H1+L1")
-		set([u'H1', u'L1'])
+		>>> assert instrumentsproperty.get(u"") == set([])
+		>>> assert instrumentsproperty.get(u"  ,  ,,") == set([])
+		>>> assert instrumentsproperty.get(u"H1") == set([u'H1'])
+		>>> assert instrumentsproperty.get(u"SWIFT") == set([u'SWIFT'])
+		>>> assert instrumentsproperty.get(u"H1L1") == set([u'H1', u'L1'])
+		>>> assert instrumentsproperty.get(u"H1L1,") == set([u'H1L1'])
+		>>> assert instrumentsproperty.get(u"H1,L1") == set([u'H1', u'L1'])
+		>>> assert instrumentsproperty.get(u"H1+L1") == set([u'H1', u'L1'])
 		"""
 		if ifos is None:
 			return None
@@ -259,18 +251,12 @@ class instrumentsproperty(object):
 
 		>>> print(instrumentsproperty.set(None))
 		None
-		>>> instrumentsproperty.set(())
-		u''
-		>>> instrumentsproperty.set((u"H1",))
-		u'H1'
-		>>> instrumentsproperty.set((u"H1",u"H1",u"H1"))
-		u'H1'
-		>>> instrumentsproperty.set((u"H1",u"L1"))
-		u'H1,L1'
-		>>> instrumentsproperty.set((u"SWIFT",))
-		u'SWIFT'
-		>>> instrumentsproperty.set((u"H1L1",))
-		u'H1L1,'
+		>>> assert instrumentsproperty.set(()) == u''
+		>>> assert instrumentsproperty.set((u"H1",)) == u'H1'
+		>>> assert instrumentsproperty.set((u"H1",u"H1",u"H1")) == u'H1'
+		>>> assert instrumentsproperty.set((u"H1",u"L1")) == u'H1,L1'
+		>>> assert instrumentsproperty.set((u"SWIFT",)) == u'SWIFT'
+		>>> assert instrumentsproperty.set((u"H1L1",)) == u'H1L1,'
 		"""
 		if instruments is None:
 			return None
@@ -429,10 +415,8 @@ class Process(table.Table.RowType):
 
 	>>> x = Process()
 	>>> x.instruments = (u"H1", u"L1")
-	>>> x.ifos
-	u'H1,L1'
-	>>> x.instruments
-	set([u'H1', u'L1'])
+	>>> assert x.ifos == u'H1,L1'
+	>>> assert x.instruments == set([u'H1', u'L1'])
 	"""
 	__slots__ = tuple(map(table.Column.ColumnName, ProcessTable.validcolumns))
 
@@ -480,18 +464,17 @@ class ProcessParams(table.Table.RowType):
 
 	>>> x = ProcessParams()
 	>>> x.pyvalue = u"test"
-	>>> x.type
-	u'lstring'
-	>>> x.value
-	u'test'
-	>>> x.pyvalue
-	u'test'
+	>>> print(x.type)
+	lstring
+	>>> print(x.value)
+	test
+	>>> print(x.pyvalue)
+	test
 	>>> x.pyvalue = 6.
-	>>> x.type
-	u'real_8'
-	>>> x.value
-	u'6'
-	>>> x.pyvalue
+	>>> print(x.type)
+	real_8
+	>>> assert x.value == u'6'
+	>>> print(x.pyvalue)
 	6.0
 	>>> x.pyvalue = None
 	>>> print(x.type)
@@ -501,10 +484,9 @@ class ProcessParams(table.Table.RowType):
 	>>> print(x.pyvalue)
 	None
 	>>> x.pyvalue = True
-	>>> x.type
-	u'int_4s'
-	>>> x.value
-	u'1'
+	>>> print(x.type)
+	int_4s
+	>>> assert x.value == u'1'
 	>>> x.pyvalue
 	1
 	"""
@@ -611,10 +593,9 @@ class SearchSummary(table.Table.RowType):
 
 	>>> x = SearchSummary()
 	>>> x.instruments = (u"H1", u"L1")
-	>>> x.ifos
-	u'H1,L1'
-	>>> x.instruments
-	set([u'H1', u'L1'])
+	>>> print(x.ifos)
+	H1,L1
+	>>> assert x.instruments == set([u'H1', u'L1'])
 	>>> x.in_start = x.out_start = LIGOTimeGPS(0)
 	>>> x.in_end = x.out_end = LIGOTimeGPS(10)
 	>>> x.in_segment
@@ -1354,10 +1335,9 @@ class CoincInspiral(table.Table.RowType):
 
 	>>> x = CoincInspiral()
 	>>> x.instruments = (u"H1", u"L1")
-	>>> x.ifos
-	u'H1,L1'
-	>>> x.instruments
-	set([u'H1', u'L1'])
+	>>> print(x.ifos)
+	H1,L1
+	>>> assert x.instruments == set([u'H1', u'L1'])
 	>>> x.end = LIGOTimeGPS(10)
 	>>> x.end
 	LIGOTimeGPS(10, 0)
@@ -1575,7 +1555,7 @@ class SimInspiral(table.Table.RowType):
 	>>> x.time_geocent = LIGOTimeGPS(6e8)
 	>>> print(x.time_geocent)
 	600000000
-	>>> print(x.end_time_gmst)
+	>>> print(round(x.end_time_gmst, 8))
 	-2238.39417156
 	"""
 	__slots__ = tuple(map(table.Column.ColumnName, SimInspiralTable.validcolumns))
@@ -1712,7 +1692,7 @@ class SimBurst(table.Table.RowType):
 	>>> x.time_geocent = LIGOTimeGPS(6e8)
 	>>> print(x.time_geocent)
 	600000000
-	>>> print(x.time_geocent_gmst)
+	>>> print(round(x.time_geocent_gmst, 8))
 	-2238.39417156
 	"""
 	__slots__ = tuple(map(table.Column.ColumnName, SimBurstTable.validcolumns))
@@ -1909,10 +1889,9 @@ class SummValue(table.Table.RowType):
 
 	>>> x = SummValue()
 	>>> x.instruments = (u"H1", u"L1")
-	>>> x.ifo
-	u'H1,L1'
-	>>> x.instruments
-	set([u'H1', u'L1'])
+	>>> print(x.ifo)
+	H1,L1
+	>>> assert x.instruments == set([u'H1', u'L1'])
 	>>> x.start = LIGOTimeGPS(0)
 	>>> x.end = LIGOTimeGPS(10)
 	>>> x.segment
@@ -2109,10 +2088,9 @@ class SegmentDef(table.Table.RowType):
 
 	>>> x = SegmentDef()
 	>>> x.instruments = (u"H1", u"L1")
-	>>> x.ifos
-	u'H1,L1'
-	>>> x.instruments
-	set([u'H1', u'L1'])
+	>>> print(x.ifos)
+	H1,L1
+	>>> assert x.instruments == set([u'H1', u'L1'])
 	"""
 	__slots__ = tuple(map(table.Column.ColumnName, SegmentDefTable.validcolumns))
 

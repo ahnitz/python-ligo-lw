@@ -172,12 +172,12 @@ class Column(ligolw.Column):
 	>>> tbl.appendChild(TableStream(AttributesImpl({u"Name": u"test"})))	# doctest: +ELLIPSIS
 	<ligo.lw.table.TableStream object at ...>
 	>>> tbl._update_column_info()
-	>>> col.Name
-	u'snr'
-	>>> col.Type
-	u'real_8'
-	>>> col.table_name
-	u'test'
+	>>> print(col.Name)
+	snr
+	>>> print(col.Type)
+	real_8
+	>>> print(col.table_name)
+	test
 	>>> # append 3 rows (with nothing in them)
 	>>> tbl.append(tbl.RowType())
 	>>> tbl.append(tbl.RowType())
@@ -224,11 +224,15 @@ class Column(ligolw.Column):
 	doing the correct manipulations.  Therefore, the assignment
 	operation below
 
-	>>> col.Name, col.getAttribute("Name")
-	(u'snr', u'test:snr')
+	>>> print(col.Name)
+	snr
+	>>> print(col.getAttribute("Name"))
+	test:snr
 	>>> col.Name = col.Name
-	>>> col.Name, col.getAttribute("Name")
-	(u'snr', u'snr')
+	>>> print(col.Name)
+	snr
+	>>> print(col.getAttribute("Name"))
+	snr
 
 	does not preserve the value of the "Name" attribute (though it does
 	preserve the stripped form reported by the .Name property).  This
@@ -763,15 +767,15 @@ class Table(ligolw.Table, list):
 		>>> from ligo.lw import lsctables
 		>>> tbl = lsctables.New(lsctables.ProcessParamsTable, [])
 		>>> col = tbl.appendColumn("param")
-		>>> col.getAttribute("Name")
-		u'param'
-		>>> col.Name
-		u'param'
+		>>> print(col.getAttribute("Name"))
+		param
+		>>> print(col.Name)
+		param
 		>>> col = tbl.appendColumn(u"process:process_id")
-		>>> col.getAttribute("Name")
-		u'process:process_id'
-		>>> col.Name
-		u'process_id'
+		>>> print(col.getAttribute("Name"))
+		process:process_id
+		>>> print(col.Name)
+		process_id
 		"""
 		try:
 			self.getColumnByName(name)

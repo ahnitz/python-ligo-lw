@@ -139,8 +139,7 @@ class attributeproxy(property):
 	  File "<stdin>", line 1, in <module>
 	AttributeError: can't set attribute
 	>>> # internally, value is stored as unicode (for XML)
-	>>> x.getAttribute("Scale")
-	u'16'
+	>>> assert x.getAttribute("Scale") == "16"
 	>>> # deleting an attribute restores the default value if defined
 	>>> del x.Scale
 	>>> x.Scale
@@ -444,11 +443,11 @@ class LLWNameAttr(six.text_type):
 	>>> x = Test()
 	>>> x.Name = u"blah"
 	>>> # internally, suffix has been appended
-	>>> x.getAttribute("Name")
-	u'blah:test'
+	>>> print(x.getAttribute("Name"))
+	blah:test
 	>>> # but attributeproxy reports original value
-	>>> x.Name
-	u'blah'
+	>>> print(x.Name)
+	blah
 	>>> # only lower-case Latin letters, numerals, and '_' are allowed
 	>>> x.Name = u"Hello-world"
 	Traceback (most recent call last):

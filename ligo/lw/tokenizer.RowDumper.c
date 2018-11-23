@@ -298,7 +298,7 @@ PyTypeObject ligolw_RowDumper_Type = {
 ">>> rows[2].status = \"good\"\n" \
 ">>> rowdumper = RowDumper((\"snr\", \"status\"), (\"%.16g\".__mod__, \"\\\"%s\\\"\".__mod__))\n" \
 ">>> for line in rowdumper.dump(rows):\n" \
-"...     print line\n" \
+"...     print(line)\n" \
 "... \n" \
 "10.1,\"bad\"\n" \
 "15.2,\"bad\"\n" \
