@@ -221,7 +221,7 @@ static struct PyMethodDef methods[] = {
 "\n"\
 "Example:\n"\
 "\n"\
-">>> from . import tokenizer\n"\
+">>> from ligo.lw import tokenizer\n"\
 ">>> class Row(object):\n"\
 "...	pass\n"\
 "...\n"\
@@ -248,7 +248,7 @@ PyTypeObject ligolw_RowBuilder_Type = {
 "\n"\
 "Example:\n"\
 "\n"\
-">>> import tokenizer\n"\
+">>> from ligo.lw import tokenizer\n"\
 ">>> class Row(object):\n"\
 "...     pass\n"\
 "...\n"\

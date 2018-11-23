@@ -110,7 +110,7 @@ at least one corresponding ID string has been processed.
 
 Example:
 
->>> import ilwd
+>>> from ligo.lw import ilwd
 >>> "foo_bar_class" in ilwd.__dict__
 False
 >>> x = ilwd.ilwdchar("foo:bar:0")

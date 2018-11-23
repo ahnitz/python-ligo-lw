@@ -82,8 +82,8 @@ def get_table(xmldoc, name):
 
 	Example:
 
-	>>> import ligolw
-	>>> import lsctables
+	>>> from ligo.lw import ligolw
+	>>> from ligo.lw import lsctables
 	>>> xmldoc = ligolw.Document()
 	>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
 	[]
@@ -134,8 +134,8 @@ def reassign_ids(elem):
 
 	Example:
 
-	>>> import ligolw
-	>>> import lsctables
+	>>> from ligo.lw import ligolw
+	>>> from ligo.lw import lsctables
 	>>> xmldoc = ligolw.Document()
 	>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
 	[]
@@ -664,8 +664,8 @@ class Table(ligolw.Table, list):
 
 		Example:
 
-		>>> import ligolw
-		>>> import lsctables
+		>>> from ligo.lw import ligolw
+		>>> from ligo.lw import lsctables
 		>>> xmldoc = ligolw.Document()
 		>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
 		[]
@@ -718,7 +718,7 @@ class Table(ligolw.Table, list):
 
 		Example:
 
-		>>> import lsctables
+		>>> from ligo.lw import lsctables
 		>>> lsctables.ProcessTable.CheckProperties(u"Table", {u"Name": u"process:table"})
 		True
 		"""
@@ -738,7 +738,7 @@ class Table(ligolw.Table, list):
 
 		Example:
 
-		>>> import lsctables
+		>>> from ligo.lw import lsctables
 		>>> tbl = lsctables.New(lsctables.SnglInspiralTable)
 		>>> col = tbl.getColumnByName("mass1")
 		"""
@@ -760,7 +760,7 @@ class Table(ligolw.Table, list):
 
 		Example:
 
-		>>> import lsctables
+		>>> from ligo.lw import lsctables
 		>>> tbl = lsctables.New(lsctables.ProcessParamsTable, [])
 		>>> col = tbl.appendColumn("param")
 		>>> col.getAttribute("Name")
@@ -936,7 +936,7 @@ class Table(ligolw.Table, list):
 
 		Example:
 
-		>>> import lsctables
+		>>> from ligo.lw import lsctables
 		>>> for cls in lsctables.TableByName.values(): cls.reset_next_id()
 		"""
 		if cls.next_id is not None:
@@ -962,7 +962,7 @@ class Table(ligolw.Table, list):
 
 		Example:
 
-		>>> import lsctables
+		>>> from ligo.lw import lsctables
 		>>> tbl = lsctables.New(lsctables.ProcessTable)
 		>>> print(tbl.sync_next_id())
 		0
