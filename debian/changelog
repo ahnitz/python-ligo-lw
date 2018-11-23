@@ -1,3 +1,12 @@
+python-ligo-lw (1.5.0-1) unstable; urgency=low
+
+  * port Leo's Python 3 doctest fixes from glue that had been left behind
+  * build script fixes
+  * restore ligolw_segments to this package
+  * update for offsetvector's move to lalburst (adds lalburst dependency)
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Mon, 26 Nov 2018 13:00:00 +0900
+
 python-ligo-lw (1.4.0-1) unstable; urgency=low
 
   * fix ligolw_print
