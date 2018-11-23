@@ -201,13 +201,9 @@ def get_ilwdchar_class(tbl_name, col_name, namespace = globals()):
 	# otherwise define a new class, and add it to the cache
 	#
 
-	class new_class(_ilwd.ilwdchar):
-		__slots__ = ()
-		table_name, column_name = key
-		index_offset = len(u"%s:%s:" % key)
-
-	new_class.__name__ = cls_name
-
+	cls_dict = {"__slots__": (), "index_offset": len(u"%s:%s:" % key)}
+	cls_dict["table_name"], cls_dict["column_name"] = key
+	new_class = type(cls_name, (_ilwd.ilwdchar,), cls_dict)
 	namespace[cls_name] = new_class
 
 	#
