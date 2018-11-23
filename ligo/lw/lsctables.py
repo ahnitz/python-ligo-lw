@@ -72,6 +72,7 @@ Example:
 """
 
 
+import functools
 import itertools
 import math
 import numpy
@@ -1941,6 +1942,7 @@ class SegmentTable(table.Table):
 	next_id = SegmentID(0)
 
 
+@functools.total_ordering
 class Segment(table.Table.RowType):
 	"""
 	Example:
@@ -2024,8 +2026,11 @@ class Segment(table.Table.RowType):
 	def __abs__(self):
 		return abs(self.segment)
 
-	def __cmp__(self, other):
-		return cmp(self.segment, other)
+	def __lt__(self, other):
+		return self.segment < other
+
+	def __eq__(self, other):
+		return self.segment == other
 
 	def __contains__(self, other):
 		return other in self.segment
