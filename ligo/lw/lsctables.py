@@ -300,7 +300,7 @@ class gpsproperty(object):
 		ns = self.get_ns(obj)
 		if s is None and ns is None:
 			return None
-		if (s, ns) in self.infs:
+		if ns == 0xFFFFFFFF:
 			return segments.PosInfinity if (s, ns) == self.posinf else segments.NegInfinity
 		return LIGOTimeGPS(s, ns)
 
