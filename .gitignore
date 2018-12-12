@@ -3,3 +3,4 @@ dist
 MANIFEST
 python-ligo-lw.spec
 ligo/lw/__init__.py
+__pycache__
