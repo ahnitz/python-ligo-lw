@@ -141,7 +141,10 @@ class RewindableInputFile(object):
 		# flag indicating a .seek()-based EOF test is in progress
 		self.gzip_hack_pretend_to_be_at_eof = False
 		# avoid attribute look-ups
-		self._next = self.fileobj.next
+		try:
+			self._next = self.fileobj.next
+		except AttributeError:
+			self.next = lambda *args, **kwargs: fileobj.next(*args, **kwargs)
 		self._read = self.fileobj.read
 		self.close = self.fileobj.close
 
