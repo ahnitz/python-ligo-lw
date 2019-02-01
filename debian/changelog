@@ -1,3 +1,9 @@
+python-ligo-lw (1.6.0-1) unstable; urgency=low
+
+  * load_filename() load_url():  close files
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  ???, ?? ??? ???? ??:??:?? +0900
+
 python-ligo-lw (1.5.0-1) unstable; urgency=low
 
   * port Leo's Python 3 doctest fixes from glue that had been left behind
