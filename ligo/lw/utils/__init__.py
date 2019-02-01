@@ -367,17 +367,10 @@ def load_filename(filename, verbose = False, **kwargs):
 	"""
 	if verbose:
 		sys.stderr.write("reading %s ...\n" % (("'%s'" % filename) if filename is not None else "stdin"))
-	if filename is not None:
-		fileobj = open(filename, "rb")
-	else:
-		fileobj = sys.stdin
-		# In Python 3, sys.stdin has a .buffer attribute that is
-		# the underyling byte-oriented stream.
-		try:
-			fileobj = fileobj.buffer
-		except AttributeError:
-			pass
-	xmldoc = load_fileobj(fileobj, **kwargs)
+	# In Python 3, ``sys.stdin`` has an attribute called ``buffer``
+	# that is the underyling byte-oriented stream.
+	with open(filename, "rb") if filename is not None else sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin as fileobj:
+		xmldoc = load_fileobj(fileobj, **kwargs)
 	return xmldoc
 
 
@@ -402,18 +395,15 @@ def load_url(url, verbose = False, **kwargs):
 	if url is not None:
 		scheme, host, path = urllib.parse.urlparse(url)[:3]
 		if scheme.lower() in ("", "file") and host.lower() in ("", "localhost"):
-			fileobj = open(path, "rb")
+			fileobj = lambda: open(path, "rb")
 		else:
-			fileobj = urllib.request.urlopen(url)
+			fileobj = lambda: urllib.request.urlopen(url)
 	else:
-		fileobj = sys.stdin
-		# In Python 3, sys.stdin has a .buffer attribute that is
-		# the underyling byte-oriented stream.
-		try:
-			fileobj = fileobj.buffer
-		except AttributeError:
-			pass
-	xmldoc = load_fileobj(fileobj, **kwargs)
+		# In Python 3, ``sys.stdin`` has an attribute called
+		# ``buffer`` that is the underyling byte-oriented stream.
+		fileobj = lambda: sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin
+	with fileobj() as fileobj:
+		xmldoc = load_fileobj(fileobj, **kwargs)
 	return xmldoc
 
 
