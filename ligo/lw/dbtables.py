@@ -45,7 +45,6 @@ from xml.sax.xmlreader import AttributesImpl
 import warnings
 
 
-from lalburst import offsetvector
 from . import __author__, __date__, __version__
 from . import ligolw
 from . import table
@@ -892,6 +891,11 @@ class TimeSlideTable(DBTable):
 		Return a ditionary mapping time slide IDs to offset
 		dictionaries.
 		"""
+		# import is done here to reduce risk of a cyclic
+		# dependency.  at the time of writing there is not one, but
+		# we can help prevent it in the future by putting this
+		# here.
+		from lalburst import offsetvector
 		return dict((time_slide_id, offsetvector.offsetvector((instrument, offset) for time_slide_id, instrument, offset in values)) for time_slide_id, values in itertools.groupby(self.cursor.execute("SELECT time_slide_id, instrument, offset FROM time_slide ORDER BY time_slide_id"), lambda time_slide_id_instrument_offset: time_slide_id_instrument_offset[0]))
 
 	def get_time_slide_id(self, offsetdict, create_new = None, superset_ok = False, nonunique_ok = False):

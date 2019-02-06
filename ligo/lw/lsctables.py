@@ -84,7 +84,6 @@ from xml import sax
 from ligo import segments
 import lal
 from lal import LIGOTimeGPS
-from lalburst import offsetvector
 from . import __author__, __date__, __version__
 from . import ligolw
 from . import table
@@ -2188,6 +2187,11 @@ class TimeSlideTable(table.Table):
 		instruments for a given ID (which could suggest an ID
 		collision).
 		"""
+		# import is done here to reduce risk of a cyclic
+		# dependency.  at the time of writing there is not one, but
+		# we can help prevent it in the future by putting this
+		# here.
+		from lalburst import offsetvector
 		return dict((time_slide_id, offsetvector((row.instrument, row.offset) for row in rows)) for time_slide_id, rows in itertools.grouby(sorted(self, lambda row: row.time_slide_id), lambda row: row.time_slide_id))
 
 	def append_offsetvector(self, offsetvect, process):
