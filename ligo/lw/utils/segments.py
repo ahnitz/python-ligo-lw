@@ -69,7 +69,7 @@ class LigolwSegmentList(object):
 
 	Example:
 
-	>>> from glue.segments import *
+	>>> from ligo.segments import *
 	>>> segs = segmentlist([segment(0, 10), segment(20, 30)])
 	>>> validity = segmentlist([segment(0, 10), segment(25, 100)])
 	>>> x = LigolwSegmentList(active = segs, valid = validity, instruments = set(("H1",)), name = "test")
@@ -100,7 +100,7 @@ class LigolwSegmentList(object):
 
 	Example:
 
-	>>> from glue.segments import *
+	>>> from ligo.segments import *
 	>>> segs = segmentlist([segment(0, 10), segment(20, 30)])
 	>>> validity = segmentlist([segment(0, 35)])
 	>>> x = LigolwSegmentList(active = segs, valid = validity, instruments = set(("H1",)), name = "test")
@@ -319,7 +319,7 @@ class LigolwSegmentList(object):
 class LigolwSegments(set):
 	"""
 	An interface shim between code that makes use of segments in
-	glue.segments form, and LIGO Light-Weight XML I/O code.
+	ligo.segments form, and LIGO Light-Weight XML I/O code.
 
 	This class is "attached" to an XML document object, at which time
 	it parses and extracts the segment lists from the document, and
@@ -343,7 +343,7 @@ class LigolwSegments(set):
 	Example:
 
 	>>> import sys
-	>>> from glue.segments import *
+	>>> from ligo.segments import *
 	>>> from lal import LIGOTimeGPS
 	>>> from ligo.lw import ligolw, lsctables
 	>>> xmldoc = ligolw.Document()

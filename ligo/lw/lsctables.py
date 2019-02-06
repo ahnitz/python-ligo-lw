@@ -1967,7 +1967,7 @@ class Segment(table.Table.RowType):
 	>>> Segment(20, 30).segment
 	segment(LIGOTimeGPS(20, 0), LIGOTimeGPS(30, 0))
 	>>> # use as a segment object in segmentlist operations
-	>>> from glue import segments
+	>>> from ligo import segments
 	>>> x = segments.segmentlist([Segment(0, 10), Segment(20, 30)])
 	>>> abs(x)
 	LIGOTimeGPS(20, 0)
@@ -2021,7 +2021,7 @@ class Segment(table.Table.RowType):
 	end = gpsproperty("end_time", "end_time_ns")
 	segment = segmentproperty("start", "end")
 
-	# emulate a glue.segments.segment object
+	# emulate a ligo.segments.segment object
 
 	def __abs__(self):
 		return abs(self.segment)
