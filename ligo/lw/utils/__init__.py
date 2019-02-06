@@ -367,10 +367,13 @@ def load_filename(filename, verbose = False, **kwargs):
 	"""
 	if verbose:
 		sys.stderr.write("reading %s ...\n" % (("'%s'" % filename) if filename is not None else "stdin"))
-	# In Python 3, ``sys.stdin`` has an attribute called ``buffer``
-	# that is the underyling byte-oriented stream.
-	with open(filename, "rb") if filename is not None else sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin as fileobj:
-		xmldoc = load_fileobj(fileobj, **kwargs)
+	if filename is None:
+		# In Python 3, ``sys.stdin`` has an attribute called
+		# ``buffer`` that is the underyling byte-oriented stream.
+		xmldoc = load_fileobj(sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin, **kwargs)
+	else:
+		with open(filename, "rb") as fileobj:
+			xmldoc = load_fileobj(fileobj, **kwargs)
 	return xmldoc
 
 
@@ -392,18 +395,18 @@ def load_url(url, verbose = False, **kwargs):
 	"""
 	if verbose:
 		sys.stderr.write("reading %s ...\n" % (("'%s'" % url) if url is not None else "stdin"))
-	if url is not None:
+	if url is None:
+		# In Python 3, ``sys.stdin`` has an attribute called
+		# ``buffer`` that is the underyling byte-oriented stream.
+		xmldoc = load_fileobj(sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin, **kwargs)
+	else:
 		scheme, host, path = urllib.parse.urlparse(url)[:3]
 		if scheme.lower() in ("", "file") and host.lower() in ("", "localhost"):
 			fileobj = lambda: open(path, "rb")
 		else:
 			fileobj = lambda: urllib.request.urlopen(url)
-	else:
-		# In Python 3, ``sys.stdin`` has an attribute called
-		# ``buffer`` that is the underyling byte-oriented stream.
-		fileobj = lambda: sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin
-	with fileobj() as fileobj:
-		xmldoc = load_fileobj(fileobj, **kwargs)
+		with fileobj() as fileobj:
+			xmldoc = load_fileobj(fileobj, **kwargs)
 	return xmldoc
 
 
