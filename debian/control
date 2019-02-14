@@ -60,6 +60,12 @@ Depends:
  python3-yaml
 Recommends:
  lalburst-python3
+Conflicts:
+ python3-glue-ligolw-tools
+Replaces:
+ python3-glue-ligolw-tools
+Provides:
+ python3-glue-ligolw-tools
 Description: LIGO Light-Weight XML I/O library
  The LIGO Light-Weight XML format is used extensively by compact object
  detection pipelines and associate tool sets.  This package provides a
