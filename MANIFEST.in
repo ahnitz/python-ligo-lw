@@ -1,5 +1,6 @@
 include LICENSE
 include python-ligo-lw.spec
+include python-ligo-lw.spec.in
 include setup.py
 recursive-include bin *
 recursive-include db2 *
