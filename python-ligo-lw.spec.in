@@ -14,7 +14,10 @@ Requires:	python >= 2.7
 Requires:	python-dateutil
 Requires:	python-six
 Requires:	python2-lal
-Requires:	python2-lalburst
+# temporarily commented out to break cyclic dependency.  lalburst is an
+# optional dependency, but the rpm version at CIT is too old for that
+# feature
+#Requires:	python2-lalburst
 Requires:	python2-ligo-common
 Requires:	python2-ligo-segments
 Requires:	PyYAML

@@ -2,6 +2,7 @@ python-ligo-lw (1.6.0-1) unstable; urgency=low
 
   * load_filename() load_url():  close files
   * add missing python-dateutil dependency
+  * don't require lalburst, just recommend it
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  ???, ?? ??? ???? ??:??:?? +0900
 

@@ -22,7 +22,6 @@ Depends:
  ${misc:Depends},
  ${python:Depends},
  lal-python,
- lalburst-python,
  python-dateutil,
  python-glue,
  python-ligo-common,
@@ -30,6 +29,8 @@ Depends:
  python-numpy,
  python-six,
  python-yaml
+Recommends:
+ lalburst-python
 Conflicts:
  python-glue-ligolw-tools,
  python-glue (<< 1.55)
@@ -50,7 +51,6 @@ Depends:
  ${misc:Depends},
  ${python3:Depends},
  lal-python3,
- lalburst-python3,
  python3-dateutil,
  python3-glue,
  python3-ligo-common,
@@ -58,6 +58,8 @@ Depends:
  python3-numpy,
  python3-six,
  python3-yaml
+Recommends:
+ lalburst-python3
 Description: LIGO Light-Weight XML I/O library
  The LIGO Light-Weight XML format is used extensively by compact object
  detection pipelines and associate tool sets.  This package provides a
