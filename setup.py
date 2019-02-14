@@ -26,7 +26,7 @@ macroreplace([
 	"ligo/lw/__init__.py.in",
 	"python-ligo-lw.spec.in",
 ], {
-	"@VERSION@": "\"%s\"" % version,
+	"@VERSION@": version,
 })
 
 
