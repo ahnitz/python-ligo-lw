@@ -7,3 +7,7 @@ export PYBUILD_INSTALL_ARGS_python3 := --install-scripts=/dont-install
 
 %:
 	dh $@ --with=python2,python3 --buildsystem=pybuild
+
+# do not run tests at all.
+override_dh_auto_test:
+	true
