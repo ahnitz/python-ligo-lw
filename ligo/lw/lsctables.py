@@ -2180,7 +2180,7 @@ class TimeSlideTable(table.Table):
 
 	def as_dict(self):
 		"""
-		Return a ditionary mapping time slide IDs to offset
+		Return a dictionary mapping time slide IDs to offset
 		dictionaries.
 
 		NOTE:  very little checking is done, e.g., for repeated

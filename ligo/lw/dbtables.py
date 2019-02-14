@@ -888,7 +888,7 @@ class TimeSlideTable(DBTable):
 
 	def as_dict(self):
 		"""
-		Return a ditionary mapping time slide IDs to offset
+		Return a dictionary mapping time slide IDs to offset
 		dictionaries.
 		"""
 		# import is done here to reduce risk of a cyclic
