@@ -11,6 +11,7 @@ BuildRequires:  python-devel
 BuildRequires:  python2-ligo-common
 Requires:	glue
 Requires:	python >= 2.7
+Requires:	python-dateutil
 Requires:	python-six
 Requires:	python2-lal
 Requires:	python2-lalburst

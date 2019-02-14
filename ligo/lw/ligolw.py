@@ -33,6 +33,7 @@ constructing a parser.
 """
 
 
+import dateutil.parser
 import sys
 from xml import sax
 from xml.sax.xmlreader import AttributesImpl
@@ -710,7 +711,6 @@ class Time(Element):
 
 	def endElement(self):
 		if self.Type == u"ISO-8601":
-			import dateutil.parser
 			self.pcdata = dateutil.parser.parse(self.pcdata)
 		elif self.Type == u"GPS":
 			from lal import LIGOTimeGPS
