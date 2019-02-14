@@ -2192,7 +2192,7 @@ class TimeSlideTable(table.Table):
 		# we can help prevent it in the future by putting this
 		# here.
 		from lalburst import offsetvector
-		return dict((time_slide_id, offsetvector((row.instrument, row.offset) for row in rows)) for time_slide_id, rows in itertools.grouby(sorted(self, lambda row: row.time_slide_id), lambda row: row.time_slide_id))
+		return dict((time_slide_id, offsetvector((row.instrument, row.offset) for row in rows)) for time_slide_id, rows in itertools.groupby(sorted(self, lambda row: row.time_slide_id), lambda row: row.time_slide_id))
 
 	def append_offsetvector(self, offsetvect, process):
 		"""
