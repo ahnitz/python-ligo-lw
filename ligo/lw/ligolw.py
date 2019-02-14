@@ -33,6 +33,7 @@ constructing a parser.
 """
 
 
+import datetime
 import dateutil.parser
 import sys
 from xml import sax
@@ -751,7 +752,6 @@ class Time(Element):
 		time in the default format (ISO-8601).  The Name attribute
 		will be set to the value of the Name parameter if given.
 		"""
-		import datetime
 		self = cls()
 		if Name is not None:
 			self.Name = Name
