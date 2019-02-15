@@ -217,10 +217,9 @@ for url in urls:
 	#
 
 
-	if options.output:
-		if options.output == "-":
-			ligolw_utils.write_filename(xmldoc, None, verbose = options.verbose)
-		else:
-			ligolw_utils.write_filename(xmldoc, options.output, verbose = options.verbose, gz = options.output.endswith(".gz"))
-	else:
+	if not options.output:
 		ligolw_utils.write_url(xmldoc, url, verbose = options.verbose, gz = (url or "stdout").endswith(".gz"))
+	elif options.output == "-":
+		ligolw_utils.write_filename(xmldoc, None, verbose = options.verbose)
+	else:
+		ligolw_utils.write_filename(xmldoc, options.output, verbose = options.verbose, gz = options.output.endswith(".gz"))
