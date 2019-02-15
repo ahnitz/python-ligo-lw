@@ -21,7 +21,7 @@ Requires:	python2-lal
 Requires:	python2-ligo-common
 Requires:	python2-ligo-segments
 Requires:	PyYAML
-Conflicts:	glue-ligolw-tools glue < 1.55
+Conflicts:	glue-ligolw-tools glue <= 1.60
 Obsoletes:	glue-ligolw-tools
 Provides:	glue-ligolw-tools
 Prefix:         %{_prefix}
