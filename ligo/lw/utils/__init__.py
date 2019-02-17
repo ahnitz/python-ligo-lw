@@ -30,6 +30,7 @@ Library of utility code for LIGO Light Weight XML applications.
 
 
 import codecs
+import contextlib
 import gzip
 import warnings
 import os
@@ -398,16 +399,13 @@ def load_url(url, verbose = False, **kwargs):
 	if url is None:
 		# In Python 3, ``sys.stdin`` has an attribute called
 		# ``buffer`` that is the underyling byte-oriented stream.
-		xmldoc = load_fileobj(sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin, **kwargs)
-	else:
-		scheme, host, path = urllib.parse.urlparse(url)[:3]
-		if scheme.lower() in ("", "file") and host.lower() in ("", "localhost"):
-			fileobj = lambda: open(path, "rb")
-		else:
-			fileobj = lambda: urllib.request.urlopen(url)
-		with fileobj() as fileobj:
-			xmldoc = load_fileobj(fileobj, **kwargs)
-	return xmldoc
+		return load_fileobj(sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin, **kwargs)
+	scheme, host, path = urllib.parse.urlparse(url)[:3]
+	if scheme.lower() in ("", "file") and host.lower() in ("", "localhost"):
+		with open(path, "rb") as fileobj:
+			return load_fileobj(fileobj, **kwargs)
+	with contextlib.closing(urllib.request.urlopen(url)) as fileobj:
+		return load_fileobj(fileobj, **kwargs)
 
 
 def write_fileobj(xmldoc, fileobj, gz = False, compresslevel = 3, **kwargs):
