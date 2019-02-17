@@ -1,3 +1,10 @@
+python-ligo-lw (1.5.3-1) unstable; urgency=low
+
+  * fix another offsetvector thinko lsctables.py
+  * add table.columnnamesreal
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  
+
 python-ligo-lw (1.5.2-1) unstable; urgency=low
 
   * fix typo in lsctables.py

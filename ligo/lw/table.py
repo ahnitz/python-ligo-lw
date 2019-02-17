@@ -642,6 +642,15 @@ class Table(ligolw.Table, list):
 		self.columnpytypes = []
 
 
+	@property
+	def columnnamesreal(self):
+		"""
+		The non-stripped (with table prefixes attached) Name
+		attributes of the Column elements in this table.
+		"""
+		return [child.getAttribute(u"Name") for child in self.getElementsByTagName(ligolw.Column.tagName)]
+
+
 	#
 	# Table retrieval
 	#
