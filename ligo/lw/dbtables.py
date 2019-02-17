@@ -673,7 +673,7 @@ class DBTable(table.Table):
 		This method is not implemented.  See ligo.lw.table.Table
 		for more information.
 		"""
-		raise NotImplemented
+		raise NotImplementedError
 
 	def _end_of_columns(self):
 		table.Table._end_of_columns(self)
