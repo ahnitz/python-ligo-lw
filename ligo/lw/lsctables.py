@@ -2328,7 +2328,7 @@ class CoincDefTable(table.Table):
 		# coinc type not found in table
 		if not create_new:
 			raise KeyError((search, search_coinc_type))
-		coinc_def_id = self.get_next_id(),
+		coinc_def_id = self.get_next_id()
 		self.append(self.RowType(
 			coinc_def_id = coinc_def_id,
 			search = search,
