@@ -105,14 +105,13 @@ class next_id(int):
 	Type for .next_id attributes of tables with int_8s ID columns.
 	"""
 	column_name = None
-	index_offset = 0
 
 	def __add__(self, other):
 		return type(self)(super(next_id, self).__add__(other))
 
 	@classmethod
 	def type(cls, column_name):
-		return type(str("next_%s" % column_name), (cls,), {"column_name": column_name, "index_offset": 0})
+		return type(str("next_%s" % column_name), (cls,), {"column_name": column_name})
 
 
 def reassign_ids(elem):
