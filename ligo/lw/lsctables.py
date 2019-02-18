@@ -2252,7 +2252,7 @@ class TimeSlideTable(table.Table):
 		"""
 		# look for matching offset vectors
 		if superset_ok:
-			ids = [time_slide_id for time_slide_idid, slide in self.as_dict().items() if offsetdict == dict((instrument, offset) for instrument, offset in slide.items() if instrument in offsetdict)]
+			ids = [time_slide_id for time_slide_id, slide in self.as_dict().items() if offsetdict == dict((instrument, offset) for instrument, offset in slide.items() if instrument in offsetdict)]
 		else:
 			ids = [time_slide_id for time_slide_id, slide in self.as_dict().items() if offsetdict == slide]
 		if len(ids) > 1:

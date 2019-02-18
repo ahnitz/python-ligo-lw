@@ -1,6 +1,7 @@
 python-ligo-lw (1.5.3-1) unstable; urgency=low
 
   * fix another offsetvector thinko lsctables.py
+  * fix typo in TimeSlideTable.get_time_slide_id()
   * add table.columnnamesreal
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  
