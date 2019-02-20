@@ -161,7 +161,7 @@ class Column(ligolw.Column):
 	>>> col[:] = [8.0, 10.0, 12.0]
 	>>> col[:]
 	[8.0, 10.0, 12.0]
-	>>> col.asarray()
+	>>> col.asarray()	# doctest: +NORMALIZE_WHITESPACE
 	array([ 8., 10., 12.])
 	>>> tbl.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
 	<Table Name="test">
