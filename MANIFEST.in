@@ -8,4 +8,4 @@ recursive-include debian *
 recursive-include etc *
 recursive-include ligo *
 include test/Makefile
-include test/*.py test/*.sh test/*.xml*
+include test/*.py test/*.sh test/*.xml* test/*.txt
