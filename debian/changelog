@@ -1,10 +1,14 @@
-python-ligo-lw (1.5.3-1) unstable; urgency=low
+python-ligo-lw (1.5.3-1) unstable; urgency=medium
 
-  * fix another offsetvector thinko lsctables.py
+  * fix another offsetvector thinko in lsctables.py
   * fix typo in TimeSlideTable.get_time_slide_id()
   * add table.columnnamesreal
+  * bump glue conflict to "< 2.0"
+  * more reduction of reliance on "six" module
+  * ligolw_print:  use proper format functions to prevent loss of precision
+    in floating-point values
 
- -- Kipp Cannon <kipp.cannon@ligo.org>  
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Thu, 21 Feb 2019 13:53:33 +0900
 
 python-ligo-lw (1.5.2-1) unstable; urgency=low
 
