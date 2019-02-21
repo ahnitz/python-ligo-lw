@@ -33,7 +33,7 @@ Recommends:
  lalburst-python
 Conflicts:
  python-glue-ligolw-tools,
- python-glue (<= 1.60)
+ python-glue (<< 2.0)
 Replaces:
  python-glue-ligolw-tools
 Provides:
@@ -62,7 +62,7 @@ Recommends:
  lalburst-python3
 Conflicts:
  python3-glue-ligolw-tools
- python3-glue (<= 1.60)
+ python3-glue (<< 2.0)
 Replaces:
  python3-glue-ligolw-tools
 Provides:
