@@ -53,7 +53,6 @@ from . import __author__, __date__, __version__
 from . import ligolw
 from . import tokenizer
 from . import types as ligolwtypes
-from six.moves import map
 
 
 #
@@ -135,7 +134,7 @@ class ArrayStream(ligolw.Stream):
 		# avoid symbol and attribute look-ups in inner loop
 		linelen = self.parentNode.array.shape[0]
 		lines = self.parentNode.array.size // linelen if self.parentNode.array.size else 0
-		tokens = map(ligolwtypes.FormatFunc[self.parentNode.Type], self.parentNode.array.T.flat)
+		tokens = iter(map(ligolwtypes.FormatFunc[self.parentNode.Type], self.parentNode.array.T.flat))
 		islice = itertools.islice
 		join = self.Delimiter.join
 		w = fileobj.write

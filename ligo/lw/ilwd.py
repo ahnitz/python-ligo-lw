@@ -189,7 +189,7 @@ def get_ilwdchar_class(tbl_name, col_name, namespace = globals()):
 	# if the class already exists, retrieve and return it
 	#
 
-	key = six.text_type(tbl_name), six.text_type(col_name)
+	key = tbl_name, col_name
 	cls_name = str("%s_%s_class" % key)
 	assert cls_name != "get_ilwdchar_class"
 	try:
@@ -201,7 +201,7 @@ def get_ilwdchar_class(tbl_name, col_name, namespace = globals()):
 	# otherwise define a new class, and add it to the cache
 	#
 
-	cls_dict = {"__slots__": (), "index_offset": len(u"%s:%s:" % key)}
+	cls_dict = {"__slots__": (), "index_offset": len("%s:%s:" % key)}
 	cls_dict["table_name"], cls_dict["column_name"] = key
 	new_class = type(cls_name, (_ilwd.ilwdchar,), cls_dict)
 	namespace[cls_name] = new_class

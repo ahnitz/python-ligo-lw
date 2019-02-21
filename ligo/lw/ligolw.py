@@ -320,9 +320,10 @@ class Element(object):
 
 	def getChildrenByAttributes(self, attrs):
 		l = []
+		attrs = tuple(attrs.items())
 		for c in self.childNodes:
 			try:
-				if reduce(lambda t, kv: t and (c.getAttribute(kv[0]) == kv[1]), six.iteritems(attrs), True):
+				if all(c.getAttribute(name) == value for name, value in attrs):
 					l.append(c)
 			except KeyError:
 				pass

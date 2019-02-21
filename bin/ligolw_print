@@ -36,13 +36,13 @@ from optparse import OptionParser
 
 from lal.utils.cache import CacheEntry
 from ligo.lw import __date__, __version__
-from ligo.lw import ligolw
-from ligo.lw import table
-from ligo.lw import lsctables
 from ligo.lw import array as ligolw_array
+from ligo.lw import ligolw
+from ligo.lw import lsctables
+from ligo.lw import table as ligolw_table
+from ligo.lw import types as ligolw_types
 from ligo.lw import utils as ligolw_utils
 from ligo.segments import utils as segmentsUtils
-import six
 
 
 __author__ = "Kipp Cannon <kipp.cannon@ligo.org>"
@@ -74,15 +74,12 @@ def parse_command_line():
 	parser.add_option("--constrain-lsc-tables", action = "store_true", help = "Impose additional constraints on official LSC tables.  Provides format validation and allows RAM requirements to be reduced.")
 	options, urls = parser.parse_args()
 
-	# Ensure the delimiter is unicode compliant as well
-	options.delimiter = six.text_type(options.delimiter)
-
 	# add urls from cache files
 	urls += [CacheEntry(line).url for cache in options.input_cache for line in open(cache)]
 
 	# strip table names
 	if options.table:
-		options.table = list(map(table.Table.TableName, options.table))
+		options.table = list(map(ligolw_table.Table.TableName, options.table))
 
 	if options.array:
 		options.array = list(map(ligolw_array.Array.ArrayName, options.array))
@@ -116,7 +113,7 @@ def print_table(table_elem, columns, rows):
 		columns = table_elem.columnnames
 	for n, row in enumerate(table_elem):
 		if n in rows:
-			print(options.delimiter.join([six.text_type(getattr(row, key)) for key in columns]))
+			print(options.delimiter.join(str(getattr(row, key)) for key in columns))
 
 
 #
@@ -151,10 +148,11 @@ options, urls = parse_command_line()
 
 
 if options.ilwdchar_compat:
-	from glue.ligolw import ligolw
-	from glue.ligolw import table
-	from glue.ligolw import lsctables
 	from glue.ligolw import array as ligolw_array
+	from glue.ligolw import ligolw
+	from glue.ligolw import lsctables
+	from glue.ligolw import table as ligolw_table
+	from glue.ligolw import types as ligolw_types
 	from glue.ligolw import utils as ligolw_utils
 
 
@@ -172,14 +170,14 @@ if not (options.table or options.array):
 else:
 	class ContentHandler(ligolw.PartialLIGOLWContentHandler):
 		def __init__(self, xmldoc):
-			super(ContentHandler, self).__init__(xmldoc, lambda name, attrs: (name in (ligolw.Table.tagName, ligolw.Array.tagName)) and (table.Table.TableName(attrs["Name"]) in options.table or ligolw_array.Array.ArrayName(attrs["Name"]) in options.array))
+			super(ContentHandler, self).__init__(xmldoc, lambda name, attrs: (name in (ligolw.Table.tagName, ligolw.Array.tagName)) and (ligolw_table.Table.TableName(attrs["Name"]) in options.table or ligolw_array.Array.ArrayName(attrs["Name"]) in options.array))
 
 ligolw_array.use_in(ContentHandler)
 
 if options.constrain_lsc_tables:
 	lsctables.use_in(ContentHandler)
 else:
-	table.use_in(ContentHandler)
+	ligolw_table.use_in(ContentHandler)
 
 
 #
@@ -188,7 +186,7 @@ else:
 
 
 if options.column is not None:
-	table.Table.loadcolumns = set(options.column)
+	ligolw_table.Table.loadcolumns = set(options.column)
 
 
 #

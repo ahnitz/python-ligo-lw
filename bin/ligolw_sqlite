@@ -45,11 +45,10 @@ from ligo.lw import ligolw
 from ligo.lw import dbtables
 from ligo.lw.utils import local_path_from_url
 from ligo.lw.utils import ligolw_sqlite
-import six
 
 
 # so they can be inserted into a database
-dbtables.ligolwtypes.ToPyType["ilwd:char"] = six.text_type
+dbtables.ligolwtypes.ToPyType["ilwd:char"] = str
 
 
 __author__ = "Kipp Cannon <kipp.cannon@ligo.org>"
