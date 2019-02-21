@@ -18,7 +18,7 @@ thinca,0,--h1-triggers,string,None
 thinca,0,--h2-triggers,string,None
 thinca,0,--multi-ifo-coinc,string,None
 0,standalone, ,s5-iulgroup-20060221 , ,H1H2,822727765,0,822730393,0,822727765,0,822730393,0,2,1
-0,input_file,H1-INSPIRAL_H1H2-822727516-2048.xml,0.0
-0,input_file,H1-INSPIRAL_H1H2-822729178-2048.xml,0.0
-0,input_file,H2-INSPIRAL_H1H2-822726767-2048.xml,0.0
-0,input_file,H2-INSPIRAL_H1H2-822728687-2048.xml,0.0
+0,input_file,H1-INSPIRAL_H1H2-822727516-2048.xml,0
+0,input_file,H1-INSPIRAL_H1H2-822729178-2048.xml,0
+0,input_file,H2-INSPIRAL_H1H2-822726767-2048.xml,0
+0,input_file,H2-INSPIRAL_H1H2-822728687-2048.xml,0

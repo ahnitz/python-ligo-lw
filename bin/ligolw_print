@@ -111,9 +111,11 @@ def parse_command_line():
 def print_table(table_elem, columns, rows):
 	if not columns:
 		columns = table_elem.columnnames
+	fmts = tuple(ligolw_types.FormatFunc[table_elem.getColumnByName(col).Type] for col in columns)
+	columns = zip(fmts, columns)
 	for n, row in enumerate(table_elem):
 		if n in rows:
-			print(options.delimiter.join(str(getattr(row, key)) for key in columns))
+			print(options.delimiter.join(fmt(getattr(row, col)) for fmt, col in columns))
 
 
 #
@@ -154,6 +156,15 @@ if options.ilwdchar_compat:
 	from glue.ligolw import table as ligolw_table
 	from glue.ligolw import types as ligolw_types
 	from glue.ligolw import utils as ligolw_utils
+
+
+#
+# don't quote strings when printing them
+#
+
+
+for typ in ligolw_types.StringTypes:
+	ligolw_types.FormatFunc[typ] = str
 
 
 #
