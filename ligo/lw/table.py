@@ -147,7 +147,6 @@ class Column(ligolw.Column):
 	>>> col = tbl.appendChild(Column(AttributesImpl({u"Name": u"test:snr", u"Type": u"real_8"})))
 	>>> tbl.appendChild(TableStream(AttributesImpl({u"Name": u"test"})))	# doctest: +ELLIPSIS
 	<ligo.lw.table.TableStream object at ...>
-	>>> tbl._update_column_info()
 	>>> print(col.Name)
 	snr
 	>>> print(col.Type)
@@ -607,24 +606,40 @@ class Table(ligolw.Table, list):
 		def __setstate__(self, state):
 			self.__init__(**state)
 
-
-	def __init__(self, *args):
+	@property
+	def columnnames(self):
 		"""
-		Initialize
+		The stripped (without table prefixes attached) Name
+		attributes of the Column elements in this table, in order.
+		These are the names of the attributes that row objects in
+		this taable possess.
 		"""
-		super(Table, self).__init__(*args)
-		self.columnnames = []
-		self.columntypes = []
-		self.columnpytypes = []
-
+		return [child.Name for child in self.getElementsByTagName(ligolw.Column.tagName)]
 
 	@property
 	def columnnamesreal(self):
 		"""
 		The non-stripped (with table prefixes attached) Name
-		attributes of the Column elements in this table.
+		attributes of the Column elements in this table, in order.
+		These are the Name attributes as they appear in the XML.
 		"""
 		return [child.getAttribute(u"Name") for child in self.getElementsByTagName(ligolw.Column.tagName)]
+
+	@property
+	def columntypes(self):
+		"""
+		The Type attributes of the Column elements in this table,
+		in order.
+		"""
+		return [child.Type for child in self.getElementsByTagName(ligolw.Column.tagName)]
+
+	@property
+	def columnpytypes(self):
+		"""
+		The Python types corresponding to the Type attributes of
+		the Column elements in this table, in order.
+		"""
+		return [ligolwtypes.ToPyType[child.Type] for child in self.getElementsByTagName(ligolw.Column.tagName)]
 
 
 	#
@@ -818,13 +833,17 @@ class Table(ligolw.Table, list):
 
 	def _update_column_info(self):
 		"""
-		Used for validation during parsing, and additional
-		book-keeping.  For internal use only.
+		Deprecated stub.  Do not use.
 		"""
-		del self.columnnames[:]
-		del self.columntypes[:]
-		del self.columnpytypes[:]
-		for child in self.getElementsByTagName(ligolw.Column.tagName):
+		pass
+
+	def _verifyChildren(self, i):
+		"""
+		Used for validation during parsing.  For internal use only.
+		"""
+		super(Table, self)._verifyChildren(i)
+		child = self.childNodes[i]
+		if child.tagName == ligolw.Column.tagName:
 			if self.validcolumns is not None:
 				if child.Name in self.validcolumns:
 					expected_type = self.validcolumns[child.Name]
@@ -834,24 +853,18 @@ class Table(ligolw.Table, list):
 					raise ligolw.ElementError("invalid Column '%s' for Table '%s'" % (child.Name, self.Name))
 				if expected_type != child.Type:
 					raise ligolw.ElementError("invalid type '%s' for Column '%s' in Table '%s', expected type '%s'" % (child.Type, child.Name, self.Name, expected_type))
-			if child.Name in self.columnnames:
-				raise ligolw.ElementError("duplicate Column '%s' in Table '%s'" % (child.Name, self.Name))
-			self.columnnames.append(child.Name)
-			self.columntypes.append(child.Type)
 			try:
-				self.columnpytypes.append(ligolwtypes.ToPyType[child.Type])
+				ligolwtypes.ToPyType[child.Type]
 			except KeyError:
 				raise ligolw.ElementError("unrecognized Type '%s' for Column '%s' in Table '%s'" % (child.Type, child.Name, self.Name))
-
-	def _verifyChildren(self, i):
-		"""
-		Used for validation during parsing, and additional
-		book-keeping.  For internal use only.
-		"""
-		super(Table, self)._verifyChildren(i)
-		child = self.childNodes[i]
-		if child.tagName == ligolw.Column.tagName:
-			self._update_column_info()
+			# since this is called after each child is
+			# appeneded, the first failure occurs on the
+			# offending child, so the error message reports the
+			# current child as the offender
+			# FIXME:  this is O(n^2 log n) in the number of
+			# columns.  think about a better way
+			if len(set(self.columnnames)) != len(self.columnnames):
+				raise ligolw.ElementError("duplicate Column '%s' in Table '%s'" % (child.Name, self.Name))
 		elif child.tagName == ligolw.Stream.tagName:
 			# require agreement of non-stripped strings
 			if child.getAttribute("Name") != self.getAttribute("Name"):
@@ -874,16 +887,6 @@ class Table(ligolw.Table, list):
 		the last row.
 		"""
 		pass
-
-	def removeChild(self, child):
-		"""
-		Remove a child from this element.  The child element is
-		returned, and it's parentNode element is reset.
-		"""
-		super(Table, self).removeChild(child)
-		if child.tagName == ligolw.Column.tagName:
-			self._update_column_info()
-		return child
 
 	def unlink(self):
 		"""

@@ -108,7 +108,6 @@ for filename in filenames or [None]:
 				setattr(row, attr, int(getattr(row, attr)))
 		for attr in idattrs:
 			table.getColumnByName(attr).Type = u"int_8s"
-		table._update_column_info()
 
 	ligolw_utils.write_filename(xmldoc, filename, gz = (filename or "stdout").endswith(".gz"), verbose = options.verbose)
 	xmldoc.unlink()
