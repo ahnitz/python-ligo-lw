@@ -52,8 +52,6 @@ typedef struct {
 	PyTypeObject *rowtype;
 	/* tuple of attribute names */
 	PyObject *attributes;
-	/* tuple of internable attributes */
-	PyObject *interns;
 	/* current row */
 	PyObject *row;
 	/* current attribute index */
@@ -93,7 +91,6 @@ static void __del__(PyObject *self)
 
 	Py_XDECREF(rowbuilder->rowtype);
 	Py_XDECREF(rowbuilder->attributes);
-	Py_XDECREF(rowbuilder->interns);
 	Py_XDECREF(rowbuilder->row);
 	Py_XDECREF(rowbuilder->iter);
 
@@ -110,19 +107,14 @@ static int __init__(PyObject *self, PyObject *args, PyObject *kwds)
 {
 	ligolw_RowBuilder *rowbuilder = (ligolw_RowBuilder *) self;
 
-	rowbuilder->interns = NULL;
-	if(!PyArg_ParseTuple(args, "OO|O", &rowbuilder->rowtype, &rowbuilder->attributes, &rowbuilder->interns))
+	if(!PyArg_ParseTuple(args, "OO", &rowbuilder->rowtype, &rowbuilder->attributes))
 		return -1;
 
 	Py_INCREF(rowbuilder->rowtype);
 
 	rowbuilder->attributes = llwtokenizer_build_attributes(rowbuilder->attributes);
-	if(rowbuilder->interns)
-		rowbuilder->interns = PySequence_Tuple(rowbuilder->interns);
-	else
-		rowbuilder->interns = PyTuple_New(0);
 
-	if(!rowbuilder->attributes || !rowbuilder->interns)
+	if(!rowbuilder->attributes)
 		return -1;
 
 	rowbuilder->row = Py_None;
@@ -202,7 +194,6 @@ static PyObject *next(PyObject *self)
 static struct PyMemberDef members[] = {
 	{"rowtype", T_OBJECT, offsetof(ligolw_RowBuilder, rowtype), 0, "row class"},
 	{"attributes", T_OBJECT, offsetof(ligolw_RowBuilder, attributes), READONLY, "in-order tuple of attribute names"},
-	{"interns", T_OBJECT, offsetof(ligolw_RowBuilder, interns), 0, "names of attributes suitable for interning"},
 	{"row", T_OBJECT, offsetof(ligolw_RowBuilder, row), 0, "current row object"},
 	{"i", T_INT, offsetof(ligolw_RowBuilder, i), 0, "current attribute index"},
 	{NULL,}
@@ -259,34 +250,7 @@ PyTypeObject ligolw_RowBuilder_Type = {
 ">>> l[0].snr\n"\
 "6.8\n"\
 ">>> l[1].time\n"\
-"15\n"\
-"\n"\
-"Hint:  If you wish to try to save memory by \"interning\" the values in\n"\
-"certain columns of a table, try sub-classing this and replacing the append\n"\
-"method with your own.\n"\
-"\n"\
-"Example:\n"\
-"\n"\
-">>> strings = {}\n"\
-">>> OldRowBuilder = RowBuilder\n"\
-">>> class MyRowBuilder(RowBuilder):\n"\
-"...     def append(self, tokens):\n"\
-"...             for row in OldRowBuilder.append(self, tokens):\n"\
-"...                     if hasattr(row, \"channel\"):\n"\
-"...                             row.channel = strings.setdefault(row.channel, row.channel)\n"\
-"...                     yield row\n"\
-"...\n"\
-">>> RowBuilder = MyRowBuilder\n"\
-"\n"\
-"This will significantly slow down table parsing, but for now this approach\n"\
-"of allowing individual applications to override row construction on an\n"\
-"as-desired basis seems to be the best way to implement the feature without\n"\
-"adding a great deal of complexity.  Note that when initialized the\n"\
-"RowBuilder class is passed the interns argument which is an iterable of\n"\
-"attribute names that should be considered for interning.  These names come\n"\
-"from hints stored in the Table class definitions, and will have been\n"\
-"filtered so that only names corresponding to columns actually in the table\n"\
-"will be listed.",
+"15",
 	.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,
 	.tp_init = __init__,
 	.tp_iter = __iter__,

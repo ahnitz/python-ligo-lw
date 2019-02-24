@@ -722,7 +722,6 @@ class SnglBurstTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (event_id)"
 	next_id = SnglBurstID(0)
-	interncolumns = ("ifo", "search", "channel")
 
 
 class SnglBurst(table.Table.RowType):
@@ -909,7 +908,6 @@ class SnglInspiralTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (event_id)"
 	next_id = SnglInspiralID(0)
-	interncolumns = ("ifo", "search", "channel")
 
 
 class SnglInspiral(table.Table.RowType):
@@ -1015,7 +1013,6 @@ class CoincInspiralTable(table.Table):
 	how_to_index = {
 		"ci_cei_index": ("coinc_event_id",)
 	}
-	interncolumns = ("ifos",)
 
 
 class CoincInspiral(table.Table.RowType):
@@ -1086,7 +1083,6 @@ class SnglRingdownTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (event_id)"
 	next_id = SnglRingdownID(0)
-	interncolumns = ("ifo", "channel")
 
 
 class SnglRingdown(table.Table.RowType):
@@ -1132,7 +1128,6 @@ class CoincRingdownTable(table.Table):
 	how_to_index = {
 		"cr_cei_index": ("coinc_event_id",)
 	}
-	interncolumns = ("ifos",)
 
 
 class CoincRingdown(table.Table.RowType):
@@ -1222,7 +1217,6 @@ class SimInspiralTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (simulation_id)"
 	next_id = SimInspiralID(0)
-	interncolumns = ("waveform", "source")
 
 
 class SimInspiral(table.Table.RowType):
@@ -1359,7 +1353,6 @@ class SimBurstTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (simulation_id)"
 	next_id = SimBurstID(0)
-	interncolumns = ("waveform",)
 
 
 class SimBurst(table.Table.RowType):
@@ -1482,7 +1475,6 @@ class SimRingdownTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (simulation_id)"
 	next_id = SimRingdownID(0)
-	interncolumns = ("waveform", "coordinates")
 
 
 class SimRingdown(table.Table.RowType):
@@ -1569,7 +1561,6 @@ class SummValueTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (summ_value_id)"
 	next_id = SummValueID(0)
-	interncolumns = ("program", "ifo", "name", "comment")
 
 
 class SummValue(table.Table.RowType):
@@ -1865,7 +1856,6 @@ class TimeSlideTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (time_slide_id, instrument)"
 	next_id = TimeSlideID(0)
-	interncolumns = ("instrument",)
 
 	def as_dict(self):
 		"""
@@ -2061,7 +2051,6 @@ class CoincTable(table.Table):
 	}
 	constraints = "PRIMARY KEY (coinc_event_id)"
 	next_id = CoincID(0)
-	interncolumns = ("instruments",)
 	how_to_index = {
 		"ce_cdi_index": ("coinc_def_id",),
 		"ce_tsi_index": ("time_slide_id",)
@@ -2093,7 +2082,6 @@ class CoincMapTable(table.Table):
 		"table_name": "char_v",
 		"event_id": "int_8s"
 	}
-	interncolumns = ("table_name",)
 	how_to_index = {
 		"cem_tn_ei_index": ("table_name", "event_id"),
 		"cem_cei_index": ("coinc_event_id",)
@@ -2186,7 +2174,6 @@ class VetoDefTable(table.Table):
 		"end_pad": "int_4s",
 		"comment": "lstring"
 	}
-	interncolumns = ("ifo",)
 
 
 class VetoDef(table.Table.RowType):

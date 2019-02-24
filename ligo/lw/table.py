@@ -365,63 +365,6 @@ class Column(ligolw.Column):
 
 
 #
-# A subclass of tokenizer.RowBuilder that interns strings.
-#
-
-
-class InterningRowBuilder(tokenizer.RowBuilder):
-	"""
-	This subclass of the tokenizer.RowBuilder class respects the
-	"interning" hints provided by table definitions, and attempts to
-	replace the values of row attributes associated with interned
-	columns with references to shared instances of those values.  This
-	results in a reduction in memory use which is small for most
-	documents, but can be subtantial when dealing with tables
-	containing large volumes of repeated information.
-
-	Example:
-
-	>>> class Row(object):
-	...	pass
-	...
-	>>> # 3rd arg is optional list of attributes to intern
-	>>> rows = InterningRowBuilder(Row, ["name", "age"], ("name",))
-	>>> l = list(rows.append(["Dick", 20., "Jane", 75., "Dick", 22.]))
-	>>> l[0].name
-	'Dick'
-	>>> l[2].name
-	'Dick'
-	>>> l[2].name is l[0].name
-	True
-
-	Note that Python naturally interns short strings, so this example
-	would return True regardless;  it is intended only to demonstrate
-	the use of the class.
-
-	The values are stored in a dictionary that is shared between all
-	instances of this class, and which survives forever.  Nothing is
-	ever naturally "uninterned", so the string dictionary grows without
-	bound as more documents are processed.  This can be a problem in
-	some use cases, and the work-around is to run
-
-	>>> InterningRowBuilder.strings.clear()
-
-	to reset the dictionary at appropriate points in the application.
-	Typically this would be done immediately after each document is
-	loaded.
-	"""
-	strings = {}
-	def append(self, tokens):
-		interns = self.interns
-		setdefault = self.strings.setdefault
-		for row in super(InterningRowBuilder, self).append(tokens):
-			for col in interns:
-				val = getattr(row, col)
-				setattr(row, col, setdefault(val, val))
-			yield row
-
-
-#
 # Stream class
 #
 
@@ -450,11 +393,7 @@ class TableStream(ligolw.Stream):
 			loadcolumns &= set(parentNode.loadcolumns)
 		self._tokenizer = tokenizer.Tokenizer(self.Delimiter)
 		self._tokenizer.set_types([(pytype if colname in loadcolumns else None) for pytype, colname in zip(parentNode.columnpytypes, parentNode.columnnames)])
-		columnnames = [name for name in parentNode.columnnames if name in loadcolumns]
-		# FIXME:  convert interncolumns attributes to sets to
-		# simplify computing the intersection
-		interncolumns = [name for name in (parentNode.interncolumns or set()) if name in columnnames]
-		self._rowbuilder = self.RowBuilder(parentNode.RowType, columnnames, interncolumns)
+		self._rowbuilder = self.RowBuilder(parentNode.RowType, [name for name in parentNode.columnnames if name in loadcolumns])
 		return self
 
 	def appendData(self, content):
@@ -545,11 +484,6 @@ class Table(ligolw.Table, list):
 	None, only names appearing in the list will be loaded, the rest
 	will be skipped.  Can be used to reduce memory use.
 
-	.interncolumns:  Sequence of names of columns to be "interned",
-	making their contents references to reused objects.  This is not
-	used by the default parsing code, but custom tokenizers can be
-	defined that make use of this information to reduce memory use.
-
 	.constraints:  Text to be included as constraints in the SQL
 	statement used to construct the table.
 
@@ -567,7 +501,6 @@ class Table(ligolw.Table, list):
 
 	validcolumns = None
 	loadcolumns = None
-	interncolumns = None
 	constraints = None
 	how_to_index = None
 	next_id = None
