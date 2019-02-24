@@ -864,20 +864,6 @@ class CoincMapTable(DBTable):
 			self.remap_first_rowid = None
 
 
-class ProcessParamsTable(DBTable):
-	tableName = lsctables.ProcessParamsTable.tableName
-	validcolumns = lsctables.ProcessParamsTable.validcolumns
-	constraints = lsctables.ProcessParamsTable.constraints
-	next_id = lsctables.ProcessParamsTable.next_id
-	RowType = lsctables.ProcessParamsTable.RowType
-	how_to_index = lsctables.ProcessParamsTable.how_to_index
-
-	def append(self, row):
-		if row.type is not None and row.type not in ligolwtypes.Types:
-			raise ligolw.ElementError("unrecognized type '%s'" % row.type)
-		DBTable.append(self, row)
-
-
 class TimeSlideTable(DBTable):
 	tableName = lsctables.TimeSlideTable.tableName
 	validcolumns = lsctables.TimeSlideTable.validcolumns
@@ -1016,7 +1002,6 @@ def build_indexes(connection, verbose = False):
 
 TableByName = {
 	CoincMapTable.tableName: CoincMapTable,
-	ProcessParamsTable.tableName: ProcessParamsTable,
 	TimeSlideTable.tableName: TimeSlideTable
 }
 
