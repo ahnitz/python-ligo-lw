@@ -72,32 +72,9 @@ def get_table(xmldoc, name):
 	Scan xmldoc for a Table element named name.  Raises ValueError if
 	not exactly 1 such table is found.
 
-	NOTE:  if a Table sub-class has its .tableName attribute set, then
-	its .get_table() class method can be used instead.  This is true
-	for all Table classes in the ligo.lw.lsctables module, and it is
-	recommended to always use the .get_table() class method of those
-	classes to retrieve those standard tables instead of calling this
-	function and passing the .tableName attribute.  The example below
-	shows both techniques.
-
-	Example:
-
-	>>> from ligo.lw import ligolw
-	>>> from ligo.lw import lsctables
-	>>> xmldoc = ligolw.Document()
-	>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
-	[]
-	>>> # find table with this function
-	>>> sngl_inspiral_table = get_table(xmldoc, lsctables.SnglInspiralTable.tableName)
-	>>> # find table with .get_table() class method (preferred)
-	>>> sngl_inspiral_table = lsctables.SnglInspiralTable.get_table(xmldoc)
-
 	See also the .get_table() class method of the Table class.
 	"""
-	tables = Table.getTablesByName(xmldoc, name)
-	if len(tables) != 1:
-		raise ValueError("document must contain exactly one %s table" % Table.TableName(name))
-	return tables[0]
+	return Table.get_table(xmldoc, name)
 
 
 class next_id(int):
@@ -658,21 +635,24 @@ class Table(ligolw.Table, list):
 	@classmethod
 	def getTablesByName(cls, elem, name):
 		"""
-		Return a list of Table elements named name under elem.
+		Return a list of Table elements named name under elem.  See
+		also .get_table().
 		"""
 		name = cls.TableName(name)
 		return elem.getElements(lambda e: (e.tagName == cls.tagName) and (e.Name == name))
 
 	@classmethod
-	def get_table(cls, xmldoc):
+	def get_table(cls, xmldoc, name = None):
 		"""
-		Equivalent to the module-level function get_table(), but
-		uses the .tableName attribute of this class to provide the
-		name of the table to search for.  The Table parent class
-		does not provide a .tableName attribute, but sub-classes,
-		especially those in lsctables.py, do provide a value for
-		that attribute, and in those cases this class method
-		provides a cleaner way to retrieve them.
+		Scan xmldoc for a Table element named name.  Raises
+		ValueError if not exactly 1 such table is found.  If name
+		is None (default), then the .tableName attribute of this
+		class is used.  The Table class does not provide a
+		.tableName attribute, but sub-classes, for example those in
+		lsctables.py, do provide a value for that attribute.
+
+		The module-level get_table() function is a wrapper of this
+		class method.
 
 		Example:
 
@@ -681,9 +661,19 @@ class Table(ligolw.Table, list):
 		>>> xmldoc = ligolw.Document()
 		>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
 		[]
+		>>> # find table with module function
+		>>> sngl_inspiral_table = get_table(xmldoc, lsctables.SnglInspiralTable.tableName)
+		>>> # find table with .get_table() class method (preferred)
 		>>> sngl_inspiral_table = lsctables.SnglInspiralTable.get_table(xmldoc)
+
+		See also .getTablesByName().
 		"""
-		return get_table(xmldoc, cls.tableName)
+		if name is None:
+			name = cls.tableName
+		tables = cls.getTablesByName(xmldoc, name)
+		if len(tables) != 1:
+			raise ValueError("document must contain exactly one %s table" % Table.TableName(name))
+		return tables[0]
 
 	def copy(self):
 		"""
