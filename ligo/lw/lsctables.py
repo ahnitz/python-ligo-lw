@@ -921,7 +921,7 @@ class SnglInspiral(table.Table.RowType):
 	# Properties
 	#
 
-	end = gpsproperty("end_time", "end_time_ns")
+	end = gpsproperty_with_gmst("end_time", "end_time_ns", "end_time_gmst")
 
 	@property
 	def spin1(self):
