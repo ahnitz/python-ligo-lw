@@ -1822,6 +1822,10 @@ class SegmentSumTable(table.Table):
 class SegmentSum(Segment):
 	__slots__ = tuple(map(table.Column.ColumnName, SegmentSumTable.validcolumns))
 
+	start = gpsproperty("start_time", "start_time_ns")
+	end = gpsproperty("end_time", "end_time_ns")
+	segment = segmentproperty("start", "end")
+
 
 SegmentSumTable.RowType = SegmentSum
 
