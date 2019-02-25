@@ -417,10 +417,36 @@ class Process(table.Table.RowType):
 	>>> x.instruments = (u"H1", u"L1")
 	>>> assert x.ifos == u'H1,L1'
 	>>> assert x.instruments == set([u'H1', u'L1'])
+	>>> # truncates to integers
+	>>> x.start = 10.5
+	>>> x.start
+	LIGOTimeGPS(10, 0)
+	>>> x.end = 20.5
+	>>> x.end
+	LIGOTimeGPS(20, 0)
+	>>> x.segment
+	semgent(LIGOTimeGPS(10, 0), LIGOTimeGPS(20, 0))
 	"""
 	__slots__ = tuple(map(table.Column.ColumnName, ProcessTable.validcolumns))
 
+	@property
+	def start_time_ns(eslf):
+		return 0
+	@start_time_ns.setter
+	def start_time_ns(self, val):
+		pass
+
+	@property
+	def end_time_ns(eslf):
+		return 0
+	@end_time_ns.setter
+	def end_time_ns(self, val):
+		pass
+
 	instruments = instrumentsproperty("ifos")
+	start = gpsproperty("start_time", "start_time_ns")
+	end = gpsproperty("end_time", "end_time_ns")
+	segment = gpsproperty("start", "end")
 
 
 ProcessTable.RowType = Process
