@@ -340,6 +340,8 @@ def load_fileobj(fileobj, gz = None, xmldoc = None, contenthandler = None):
 	ligo.lw.ligolw.FilteringLIGOLWContentHandler for examples of custom
 	content handlers used to load subsets of documents into memory.
 	"""
+	if contenthandler is None:
+		raise ValueError("missing required keyword argument \"contenthandler\"")
 	if gz or gz is None:
 		fileobj = RewindableInputFile(fileobj)
 		magic = fileobj.read(2)
