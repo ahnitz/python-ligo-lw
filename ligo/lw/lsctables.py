@@ -2197,9 +2197,75 @@ class VetoDefTable(table.Table):
 		"comment": "lstring"
 	}
 
+	def versions(self, name, category):
+		"""
+		Report the versions available for the (name, category)
+		pair.
+		"""
+		return set(row.version for row in self if row.name == name and row.category == category)
+
+	def segmentlistdict(self, name, category, version = None, padded = False):
+		"""
+		Return a segments.segmentlistdict mapping instrument to the
+		segments for the (name, category) pair.  If version is None
+		(the default) then the newest version of the segments are
+		reported, otherwise the segments for the requested version
+		are reported.  If padded is False (the default) the
+		non-padded segments are reported, otherwise if padded is
+		True the padded segments are reported.
+		"""
+		seglists = segments.segmentlistdict()
+		if version is None:
+			version = max(self.versions(name, category))
+		for row in self:
+			if row.name != name or row.category != category or row.version != version:
+				continue
+			try:
+				seglist = seglists[row.ifo]
+			except KeyError:
+				seglist = seglists[row.ifo] = segments.segmentlist()
+			seglist.append(row.segment_padded if padded else row.segment)
+		return seglists
+
 
 class VetoDef(table.Table.RowType):
 	__slots__ = tuple(map(table.Column.ColumnName, VetoDefTable.validcolumns))
+
+	# because detchar refuses to allow vetoes to have non-integer
+	# boundaries, even in principle (i.e., by designing out the choice
+	# altogether, regardless current use), we have a problem
+	# interfacing to this table using standard tools.  to work-around
+	# the problem virtual nanoseconds columns are emulated, which
+	# always truncate towards 0.
+
+	@property
+	def start_time_ns(eslf):
+		return 0
+	@start_time_ns.setter
+	def start_time_ns(self, val):
+		pass
+
+	@property
+	def end_time_ns(eslf):
+		return 0
+	@end_time_ns.setter
+	def end_time_ns(self, val):
+		pass
+
+	# now we can provide easier interfaces to the start and stop pair
+
+	start = gpsproperty("start_time", "start_time_ns")
+	end = gpsproperty("end_time", "end_time_ns")
+	segment = gpsproperty("start", "end")
+
+	@property
+	def start_padded(self):
+		return self.start - self.start_pad
+	@property
+	def end_padded(self):
+		return self.end + self.end_pad
+
+	segment_padded = gpsproperty("start_padded", "end_padded")
 
 
 VetoDefTable.RowType = VetoDef
