@@ -4,6 +4,9 @@ python-ligo-lw (1.6.0-1) unstable; urgency=medium
   * remove .update_column_info() method from table.Table
   * remove abandoned experiment tables from lsctables
   * remove unused "interning" feature from RowBuilder
+  * improve start/stop attribute handling in a variety of lsctables row and
+    table types
+  * (re-)fix printing null-valued table cells in ligolw_print
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  ????
 
