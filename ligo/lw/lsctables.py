@@ -968,15 +968,7 @@ class SnglInspiral(table.Table.RowType):
 
 	# FIXME: how are two inspiral events defined to be the same?
 	def __eq__(self, other):
-		return not (
-			cmp(self.ifo, other.ifo) or
-			cmp(self.end, other.end) or
-			cmp(self.mass1, other.mass1) or
-			cmp(self.mass2, other.mass2) or
-			cmp(self.spin1, other.spin1) or
-			cmp(self.spin2, other.spin2) or
-			cmp(self.search, other.search)
-		)
+		return self.ifo == other.ifo and self.end == other.end and self.mass1 == other.mass1 and self.mass2 == other.mass2 and self.spin1 == other.spin1 and self.spin2 == other.spin2 and self.search == other.search
 
 
 SnglInspiralTable.RowType = SnglInspiral
