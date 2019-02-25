@@ -1,3 +1,12 @@
+python-ligo-lw (1.6.0-1) unstable; urgency=medium
+
+  * remove custom ProcessParamsTable from dbtables
+  * remove .update_column_info() method from table.Table
+  * remove abandoned experiment tables from lsctables
+  * remove unused "interning" feature from RowBuilder
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  ????
+
 python-ligo-lw (1.5.3-1) unstable; urgency=medium
 
   * fix another offsetvector thinko in lsctables.py
