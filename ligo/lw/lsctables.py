@@ -1673,7 +1673,7 @@ class Segment(table.Table.RowType):
 
 	This implementation uses a non-standard extension to encode
 	infinite values for boundaries:  the nanoseconds component is set
-	to 0.xFFFFFFFF and the seconds component set to 0x7FFFFFFF or
+	to 0xFFFFFFFF and the seconds component set to 0x7FFFFFFF or
 	0xFFFFFFFF to indicate positive resp. negative infinity.  For this
 	reason, "denormalized" LIGOTimeGPS objects (objects whose
 	nanoseconds fields contain values exceeding +/-999999999) are
