@@ -300,7 +300,11 @@ class gpsproperty(object):
 		if s is None and ns is None:
 			return None
 		if ns == 0xFFFFFFFF:
-			return segments.PosInfinity if (s, ns) == self.posinf else segments.NegInfinity
+			if s, ns == self.posinf:
+				return segments.PosInfinity
+			elif s, ns == self.neginf:
+				return segments.NegInfinity
+			raise ValueError("unrecognized denormalized number LIGOTimeGPS(%d,%d)" % (s, ns))
 		return LIGOTimeGPS(s, ns)
 
 	def __set__(self, obj, gps):
@@ -321,7 +325,7 @@ class gpsproperty(object):
 				# try converting and going again
 				return self.__set__(obj, LIGOTimeGPS(gps))
 			if abs(ns) > 999999999:
-				raise ValueError("denormalized LIGOTimeGPS not allowed")
+				raise ValueError("denormalized LIGOTimeGPS not allowed: LIGOTimeGPS(%d, %d)" % (s, ns))
 		setattr(obj, self.s_name, s)
 		setattr(obj, self.ns_name, ns)
 
