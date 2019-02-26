@@ -2210,9 +2210,9 @@ class VetoDefTable(table.Table):
 		segments for the (name, category) pair.  If version is None
 		(the default) then the newest version of the segments are
 		reported, otherwise the segments for the requested version
-		are reported.  If padded is False (the default) the
-		non-padded segments are reported, otherwise if padded is
-		True the padded segments are reported.
+		are reported.  If padded is boolean False (the default) the
+		non-padded segments are reported, otherwise the padded
+		segments are reported.
 		"""
 		seglists = segments.segmentlistdict()
 		if version is None:
