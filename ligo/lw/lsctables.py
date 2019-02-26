@@ -2216,7 +2216,9 @@ class VetoDefTable(table.Table):
 		"""
 		seglists = segments.segmentlistdict()
 		if version is None:
-			version = max(self.versions(name, category))
+			# not an error if there are no versions, just means
+			# the segmentlists are empty
+			version = max(self.versions(name, category) or (None,))
 		for row in self:
 			if row.name != name or row.category != category or row.version != version:
 				continue
