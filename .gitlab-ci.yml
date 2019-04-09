@@ -1,0 +1,55 @@
+stages:
+  - docs
+  - deploy
+
+docs:
+  stage: docs
+  image: python
+  variables:
+    PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  before_script:
+    # install docs requirements
+    - python -m pip install sphinx sphinx_rtd_theme
+    # install python-ligo-lw and lalsuite (everything else is in setup.py)
+    - python -m pip install . lalsuite
+  script:
+    - llw_version=$(python setup.py --version)
+    - mkdir -v docs
+    - cd docs
+    # generate docs skeleton
+    - python -m sphinx.ext.apidoc
+          --module-first
+          --separate
+          --full
+          --ext-autodoc
+          --ext-intersphinx
+          --doc-project "python-ligo-lw"
+          --doc-author "Kipp Cannon"
+          --doc-version "${llw_version}"
+          --output-dir .
+          ../ligo
+    # use ligo.lw module page as index
+    - mv -v ligo.lw.rst index.rst
+    - rm -v ligo.rst
+    # use sphinx_rtd_theme
+    - sed -i 's/alabaster/sphinx_rtd_theme/g' conf.py
+    # run sphinx to generate docs
+    - python -m sphinx -M html . build
+  artifacts:
+    paths:
+      - docs/build
+  cache:
+    paths:
+      - .cache/pip
+
+pages:
+  stage: deploy
+  dependencies:
+    - docs
+  only:
+    - tags
+  script:
+    - mv docs/build/html public
+  artifacts:
+    paths:
+      - public
