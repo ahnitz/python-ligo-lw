@@ -300,9 +300,9 @@ class gpsproperty(object):
 		if s is None and ns is None:
 			return None
 		if ns == 0xFFFFFFFF:
-			if s, ns == self.posinf:
+			if (s, ns) == self.posinf:
 				return segments.PosInfinity
-			elif s, ns == self.neginf:
+			elif (s, ns) == self.neginf:
 				return segments.NegInfinity
 			raise ValueError("unrecognized denormalized number LIGOTimeGPS(%d,%d)" % (s, ns))
 		return LIGOTimeGPS(s, ns)
