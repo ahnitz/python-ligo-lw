@@ -88,8 +88,11 @@ setup(
 		"Topic :: Text Processing :: Markup :: XML",
 	],
 	install_requires = [
+		"ligo-segments",
+		"lscsoft-glue",
 		"numpy",
+		"python-dateutil",
+		"pyyaml",
 		"six",
-		"pyyaml"
 	]
 )
