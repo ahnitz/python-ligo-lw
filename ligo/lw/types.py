@@ -47,7 +47,7 @@ while
 In this worst case, storing full precision increases the size of the XML by
 more than an order of magnitude.  If you wish to make a different choice
 for your files, for example if you wish your XML files to be lossless,
-simply include the lines
+simply include the lines::
 
 	ligo.lw.types.FormatFunc.update({
 		"real_4": u"%.9g".__mod__,
