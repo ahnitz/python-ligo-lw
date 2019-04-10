@@ -335,13 +335,15 @@ class gpsproperty_with_gmst(gpsproperty):
 		super(gpsproperty_with_gmst, self).__init__(s_name, ns_name)
 		self.gmst_name = gmst_name
 
-	def set_gmst(self, obj, gmst):
-		return setattr(obj, self.gmst_name, gmst)
-
 	def __set__(self, obj, gps):
 		super(gpsproperty_with_gmst, self).__set__(obj, gps)
-		# re-retrieve the value in case it required type conversion
-		self.set_gmst(obj, None if gps is None else lal.GreenwichMeanSiderealTime(self.__get__(obj)))
+		if gps is None:
+			setattr(obj, self.gmst_name, None)
+		else:
+			# re-retrieve the value in case it required type
+			# conversion
+			gps = self.__get__(obj)
+			setattr(obj, self.gmst_name, lal.GreenwichMeanSiderealTime(gps))
 
 
 class segmentproperty(object):
