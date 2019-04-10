@@ -33,7 +33,8 @@ Recommends:
  lalburst-python
 Conflicts:
  python-glue-ligolw-tools,
- python-glue (<< 2.0)
+ python-glue (<< 2.0),
+ python-pylal
 Replaces:
  python-glue-ligolw-tools
 Provides:
