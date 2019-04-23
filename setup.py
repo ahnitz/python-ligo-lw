@@ -1,7 +1,8 @@
 from distutils.core import setup, Extension
 
 
-version = "1.5.3"
+__version__ = "1.6.0"
+__date__ = "2018-09-30"
 
 
 def macroreplace(filenames, substs):
@@ -26,13 +27,14 @@ macroreplace([
 	"ligo/lw/__init__.py.in",
 	"python-ligo-lw.spec.in",
 ], {
-	"@VERSION@": version,
+	"@VERSION@": __version__,
+	"@DATE@": __date__,
 })
 
 
 setup(
 	name = "python-ligo-lw",
-	version = version,
+	version = __version__,
 	author = "Kipp Cannon",
 	author_email = "kipp.cannon@ligo.org",
 	description = "Python LIGO Light-Weight XML I/O Library",
