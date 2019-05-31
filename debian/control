@@ -21,16 +21,16 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
  ${python:Depends},
- lal-python,
  python-dateutil,
  python-glue,
+ python-lal,
  python-ligo-common,
  python-ligo-segments,
  python-numpy,
  python-six,
  python-yaml
 Recommends:
- lalburst-python
+ python-lalburst
 Conflicts:
  python-glue-ligolw-tools,
  python-glue (<< 2.0),
@@ -51,16 +51,16 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
  ${python3:Depends},
- lal-python3,
  python3-dateutil,
  python3-glue,
+ python3-lal,
  python3-ligo-common,
  python3-ligo-segments,
  python3-numpy,
  python3-six,
  python3-yaml
 Recommends:
- lalburst-python3
+ python3-lalburst
 Conflicts:
  python3-glue-ligolw-tools,
  python3-glue (<< 2.0)
