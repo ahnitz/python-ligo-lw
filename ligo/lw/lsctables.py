@@ -429,7 +429,7 @@ class Process(table.Table.RowType):
 	>>> x.end
 	LIGOTimeGPS(20, 0)
 	>>> x.segment
-	semgent(LIGOTimeGPS(10, 0), LIGOTimeGPS(20, 0))
+	segment(LIGOTimeGPS(10, 0), LIGOTimeGPS(20, 0))
 	"""
 	__slots__ = tuple(map(table.Column.ColumnName, ProcessTable.validcolumns))
 
@@ -450,7 +450,7 @@ class Process(table.Table.RowType):
 	instruments = instrumentsproperty("ifos")
 	start = gpsproperty("start_time", "start_time_ns")
 	end = gpsproperty("end_time", "end_time_ns")
-	segment = gpsproperty("start", "end")
+	segment = segmentproperty("start", "end")
 
 
 ProcessTable.RowType = Process
