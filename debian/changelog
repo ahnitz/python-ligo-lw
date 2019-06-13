@@ -7,8 +7,10 @@ python-ligo-lw (1.6.0-1) unstable; urgency=medium
   * improve start/stop attribute handling in a variety of lsctables row and
     table types
   * (re-)fix printing null-valued table cells in ligolw_print
+  * update lalsuite dependencies on Debian
+  * some test suite and packaging updates from Leo and Duncan
 
- -- Kipp Cannon <kipp.cannon@ligo.org>  ????
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Thu, 13 Jun 2019 18:35:10 +0900
 
 python-ligo-lw (1.5.3-1) unstable; urgency=medium
 
