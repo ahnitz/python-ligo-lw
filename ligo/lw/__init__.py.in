@@ -69,7 +69,7 @@ Example:
 >>> # the GPS end time of the trigger
 >>> for row in sngl_inspiral_table:
 ...	process = index[row.process_id]
-...	print "%s@%s: %s s" % (process.username, process.node, str(row.get_end()))
+...	print "%s@%s: %s s" % (process.username, process.node, str(row.end))
 ...
 >>> # write document.  must explicitly state whether or not the file is to be
 >>> # gzip compressed
