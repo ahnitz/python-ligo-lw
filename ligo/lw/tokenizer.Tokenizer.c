@@ -276,7 +276,7 @@ static int unescape(Py_UNICODE *s, Py_UNICODE **end, const Py_UNICODE *escapable
 	 */
 
 	if(escaped) {
-		parse_error(PyExc_RuntimeError, start, *end - start - 1, *end - 1, "internal error: impossible unescaped escape character at end of string, please report problem to Glue library maintainer");
+		parse_error(PyExc_RuntimeError, start, *end - start - 1, *end - 1, "internal error: unescaped escape character at end of string");
 		return -1;
 	}
 
