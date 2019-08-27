@@ -1262,6 +1262,16 @@ class SimInspiral(table.Table.RowType):
 	600000000
 	>>> print(round(x.end_time_gmst, 8))
 	-2238.39417156
+	>>> x.distance = 100e6
+	>>> x.ra_dec = 0., 0.
+	>>> x.inclination = 0.
+	>>> x.polarization = 0.
+	>>> x.snr_geometry_factors(("H1",))
+	{'H1': 0.6773046071543202}
+	>>> x.effective_distances(("H1",))
+	{'H1': 147644056.9630077}
+	>>> x.expected_snrs({"H1": 150e6})
+	{'H1': 8.127655285851842}
 	"""
 	__slots__ = tuple(map(table.Column.ColumnName, SimInspiralTable.validcolumns))
 
@@ -1333,6 +1343,72 @@ class SimInspiral(table.Table.RowType):
 		t_geocent = self.time_geocent - offsetvector[instrument]
 		ra, dec = self.ra_dec
 		return t_geocent + lal.TimeDelayFromEarthCenter(lal.cached_detector_by_prefix[instrument].location, ra, dec, t_geocent)
+
+	def snr_geometry_factors(self, instruments):
+		"""
+		Compute and return a dictionary of the ratios of the
+		source's physical distance to its effective distances for
+		each of the given instruments.  The expected SNR in a
+		detector is
+
+		rho_{0} = 8 * (D_horizon / D) * snr_geometry_factor,
+
+		where D_horizon is the detector's horizon distance for this
+		waveform (computed from the detector's noise spectral
+		density), and D is the source's physical distance.  The
+		geometry factor (what this method computes) depends on the
+		direction to the source with respect to the antenna beam,
+		the inclination of the source's orbital plane, and the wave
+		frame's polarization.  The combination (D / geometry
+		factor) is called the effective distance.  See Equation
+		(4.3) of arXiv:0705.1514.
+
+		See also .effective_distances(), .expected_snrs().
+		"""
+		cos2i = math.cos(self.inclination)**2.
+		# don't rely on self.gmst to be set properly
+		gmst = lal.GreenwichMeanSiderealTime(self.time_geocent)
+		snr_geometry_factors = {}
+		for instrument in instruments:
+			fp, fc = lal.ComputeDetAMResponse(
+				lal.cached_detector_by_prefix[instrument].response,
+				self.longitude, self.latitude,
+				self.polarization,
+				gmst
+			)
+			snr_geometry_factors[instrument] = math.sqrt(fp**2. * (1. + cos2i)**2. / 4. + fc**2. * cos2i)
+		return snr_geometry_factors
+
+	def effective_distances(self, instruments):
+		"""
+		Compute and return a dictionary of the effective distances
+		for this injection for the given instruments.  The expected
+		SNR in a detector is
+
+		rho_{0} = 8 * D_horizon / D_effective
+
+		where D_effective, the effective distance, is related to
+		the physical distance, D, by geometry factors
+
+		D_effective = D / (geometry factors).
+
+		See also .snr_geometry_factors(), .expected_snrs().
+		"""
+		return {instrument: self.distance / snr_geometry_factor for instrument, snr_geometry_factor in self.snr_geometry_factors(instruments).items()}
+
+	def expected_snrs(self, horizon_distances):
+		"""
+		Compute and return a dictionary of the expected SNRs for
+		this injection in the given instruments.  horizon_distances
+		is a dictionary giving the horizon distance for each of the
+		detectors for which an expected SNR is to be computed.  The
+		expected SNR in a detector is
+
+		rho_{0} = 8 * D_horizon / D_effective.
+
+		See also .effective_distances().
+		"""
+		return {instrument: 8. * horizon_distances[instrument] / effective_distance for instrument, effective_distance in self.effective_distances(horizon_distances).items()}
 
 
 SimInspiralTable.RowType = SimInspiral
