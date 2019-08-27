@@ -1322,8 +1322,9 @@ class SimInspiral(table.Table.RowType):
 		displacement at the equator, or 33 light-ns.  Therefore,
 		the failure to do a proper retarded time calculation here
 		results in errors as large as 33 ns.  This is insignificant
-		for burst searches, but be aware that this approximation is
-		being made if the return value is used in other contexts.
+		in present applications, but be aware that this
+		approximation is being made if the return value is used in
+		other contexts.
 		"""
 		# the offset is subtracted from the time of the injection.
 		# injections are done this way so that when the triggers
