@@ -240,7 +240,6 @@ def insert_from_xmldoc(connection, source_xmldoc, preserve_ids = False, verbose 
 
 			for row in tbl:
 				dbtbl.append(row)
-			dbtbl._end_of_rows()
 
 		#
 		# update references to row IDs and clean up ID remapping

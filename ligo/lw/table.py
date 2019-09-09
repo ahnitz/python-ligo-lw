@@ -416,8 +416,6 @@ class TableStream(ligolw.Stream):
 		# now we're done with these
 		del self._tokenizer
 		del self._rowbuilder
-		# call parent's _end_of_rows() hook.
-		self.parentNode._end_of_rows()
 
 	def write(self, fileobj = sys.stdout, indent = u""):
 		# retrieve the .write() method of the file object to avoid
@@ -641,7 +639,6 @@ class Table(ligolw.Table, list):
 			new.appendChild(copy.copy(elem))
 		del new[:]
 		new._end_of_columns()
-		new._end_of_rows()
 		return new
 
 
@@ -812,15 +809,6 @@ class Table(ligolw.Table, list):
 		"""
 		pass
 
-	def _end_of_rows(self):
-		"""
-		Called during parsing to indicate that the last row has
-		been added.  Subclasses can override this to perform any
-		special action that should occur following the addition of
-		the last row.
-		"""
-		pass
-
 	def unlink(self):
 		"""
 		Break internal references within the document tree rooted
@@ -831,11 +819,10 @@ class Table(ligolw.Table, list):
 
 	def endElement(self):
 		# Table elements are allowed to contain 0 Stream children,
-		# but _end_of_columns() and _end_of_rows() hooks must be
-		# called regardless, so we do that here if needed.
+		# but _end_of_columns() hook must be called regardless, so
+		# we do that here if needed.
 		if self.childNodes[-1].tagName != ligolw.Stream.tagName:
 			self._end_of_columns()
-			self._end_of_rows()
 
 
 	#

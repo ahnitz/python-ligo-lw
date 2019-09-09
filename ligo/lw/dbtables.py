@@ -573,6 +573,14 @@ def get_xml(connection, table_names = None):
 #
 
 
+# FIXME:  is this needed?
+class DBTableStream(table.TableStream):
+	def endElement(self):
+		super(DBTableStream, self).endElement()
+		if hasattr(self.parentNode, "connection"):
+			self.parentNode.connection.commit()
+
+
 class DBTable(table.Table):
 	"""
 	A version of the Table class using an SQL database for storage.
@@ -710,11 +718,6 @@ class DBTable(table.Table):
 		}[connection_db_type(self.connection)]
 		self.append_statement = "INSERT INTO %s (%s) VALUES (%s)" % (self.Name, ",".join(self.dbcolumnnames), params)
 		self.append_attrgetter = operator.attrgetter(*self.dbcolumnnames)
-
-	def _end_of_rows(self):
-		# FIXME:  is this needed?
-		table.Table._end_of_rows(self)
-		self.connection.commit()
 
 	def sync_next_id(self):
 		if self.next_id is not None:
@@ -1047,12 +1050,19 @@ def use_in(ContentHandler):
 	"""
 	ContentHandler = lsctables.use_in(ContentHandler)
 
+	def startStream(self, parent, attrs, __orig_startStream = ContentHandler.startStream):
+		if parent.tagName == ligolw.Table.tagName:
+			parent._end_of_columns()
+			return DBTableStream(attrs).config(parent)
+		return __orig_startStream(self, parent, attrs)
+
 	def startTable(self, parent, attrs):
 		name = table.Table.TableName(attrs[u"Name"])
 		if name in TableByName:
 			return TableByName[name](attrs, connection = self.connection)
 		return DBTable(attrs, connection = self.connection)
 
+	ContentHandler.startStream = startStream
 	ContentHandler.startTable = startTable
 
 	return ContentHandler
