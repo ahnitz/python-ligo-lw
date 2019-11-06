@@ -26,13 +26,11 @@ endef
 
 SERVEFILESPORT := 16543
 
-define servefilesstart
-{ $(PYTHON) -c "from six.moves import socketserver as SocketServer ; from six.moves import SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & SERVERPID=$${!} ; sleep 1 ; }
-# Python 2 version
-# { $(PYTHON) -c "import SocketServer, SimpleHTTPServer ; SocketServer.TCPServer(('127.0.0.1', $(SERVEFILESPORT)), SimpleHTTPServer.SimpleHTTPRequestHandler).handle_request()" & SERVERPID=$${!} ; sleep 1 ; }
+define servefilestart
+{ $(PYTHON) -c "import http.server ; http.server.HTTPServer(('127.0.0.1', $(SERVEFILESPORT)), http.server.SimpleHTTPRequestHandler).handle_request()" & sleep 1 ; }
 endef
-define servefilesstop
-kill $${SERVERPID}
+define servefilestop
+wait
 endef
 
 ligolw_test03a :
@@ -52,8 +50,8 @@ ligolw_test03b :
 ligolw_test03c :
 	@echo "=== start $@ ===>"
 	# test reading compressed and non-compressed files from http:// URLs
-	$(servefilesstart) && { ligolw_print http://127.0.0.1:$(SERVEFILESPORT)/inspiral_event_id_test_in1.xml.gz >/dev/null && $(printpassfail) ; } ; $(servefilesstop)
-	$(servefilesstart) && { ligolw_print http://127.0.0.1:$(SERVEFILESPORT)/inspiral_event_id_test_in2.xml >/dev/null && $(printpassfail) ; } ; $(servefilesstop)
+	$(servefilestart) && { ligolw_print http://127.0.0.1:$(SERVEFILESPORT)/inspiral_event_id_test_in1.xml.gz >/dev/null && $(printpassfail) ; $(servefilestop) ; }
+	$(servefilestart) && { ligolw_print http://127.0.0.1:$(SERVEFILESPORT)/inspiral_event_id_test_in2.xml >/dev/null && $(printpassfail) ; $(servefilestop) ; }
 	@echo "<=== end $@ ==="
 
 ligolw_test04 :
