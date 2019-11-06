@@ -1,7 +1,5 @@
 from __future__ import print_function
 import matplotlib
-from six.moves import map
-from six.moves import range
 matplotlib.use("Agg")
 from matplotlib import figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
