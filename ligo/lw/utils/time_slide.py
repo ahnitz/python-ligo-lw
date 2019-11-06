@@ -87,8 +87,7 @@ def time_slides_vacuum(time_slides, verbose = False):
 	"""
 	Given a dictionary mapping time slide IDs to instrument-->offset
 	mappings, for example as returned by the as_dict() method of the
-	TimeSlideTable class in ligo.lw.lsctables or by the
-	load_time_slides() function in this module, construct and return a
+	TimeSlideTable class in ligo.lw.lsctables, construct and return a
 	mapping indicating time slide equivalences.  This can be used to
 	delete redundant time slides from a time slide table, and then also
 	used via the applyKeyMapping() method of ligo.lw.table.Table
