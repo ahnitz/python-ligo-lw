@@ -1,4 +1,4 @@
-# Copyright (C) 2012,2013,2015  Kipp Cannon
+# Copyright (C) 2012,2013,2015,2017,2019  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -49,24 +49,22 @@ def append_search_summary(xmldoc, process, shared_object = "standalone", lalwrap
 	to the search summary table in xmldoc.  Returns the newly-created
 	search_summary table row.
 	"""
-	row = lsctables.SearchSummary()
-	row.process_id = process.process_id
-	row.shared_object = shared_object
-	row.lalwrapper_cvs_tag = lalwrapper_cvs_tag
-	row.lal_cvs_tag = lal_cvs_tag
-	row.comment = comment or process.comment
-	row.instruments = ifos if ifos is not None else process.instruments
-	row.in_segment = inseg
-	row.out_segment = outseg
-	row.nevents = nevents
-	row.nnodes = nnodes
-
 	try:
 		tbl = lsctables.SearchSummaryTable.get_table(xmldoc)
 	except ValueError:
 		tbl = xmldoc.childNodes[0].appendChild(lsctables.New(lsctables.SearchSummaryTable))
-	tbl.append(row)
-
+	tbl.append(tbl.RowType(
+		process_id = process.process_id,
+		shared_object = shared_object,
+		lalwrapper_cvs_tag = lalwrapper_cvs_tag,
+		lal_cvs_tag = lal_cvs_tag,
+		comment = comment or process.comment,
+		instruments = ifos if ifos is not None else process.instruments,
+		in_segment = inseg,
+		out_segment = outseg,
+		nevents = nevents,
+		nnodes = nnodes
+	))
 	return row
 
 
@@ -82,9 +80,7 @@ def segmentlistdict_fromsearchsummary_in(xmldoc, program = None):
 	coalesced, they contain the segments as they appear in the
 	search_summary table.
 	"""
-	stbl = lsctables.SearchSummaryTable.get_table(xmldoc)
-	ptbl = lsctables.ProcessTable.get_table(xmldoc)
-	return stbl.get_in_segmentlistdict(program and ptbl.get_ids_by_program(program))
+	return lsctables.SearchSummaryTable.get_table(xmldoc).get_in_segmentlistdict(program and lsctables.ProcessTable.get_table(xmldoc).get_ids_by_program(program))
 
 
 def segmentlistdict_fromsearchsummary_out(xmldoc, program = None):
@@ -99,6 +95,4 @@ def segmentlistdict_fromsearchsummary_out(xmldoc, program = None):
 	coalesced, they contain the segments as they appear in the
 	search_summary table.
 	"""
-	stbl = lsctables.SearchSummaryTable.get_table(xmldoc)
-	ptbl = lsctables.ProcessTable.get_table(xmldoc)
-	return stbl.get_out_segmentlistdict(program and ptbl.get_ids_by_program(program))
+	return lsctables.SearchSummaryTable.get_table(xmldoc).get_out_segmentlistdict(program and lsctables.ProcessTable.get_table(xmldoc).get_ids_by_program(program))
