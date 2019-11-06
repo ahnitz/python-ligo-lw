@@ -1,4 +1,4 @@
-# Copyright (C) 2006--2013,2015  Kipp Cannon
+# Copyright (C) 2006--2013,2015,2017,2019  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -30,20 +30,8 @@ process and process_params tables in LIGO Light-Weight XML documents.
 """
 
 
-import os
-import socket
-from six import StringIO
-import time
-
-
 from .. import __author__, __date__, __version__
-from .. import ligolw
 from .. import lsctables
-from .. import types as ligolwtypes
-import six
-
-
-from lal import UTCToGPS
 
 
 #
@@ -55,38 +43,13 @@ from lal import UTCToGPS
 #
 
 
-def get_username():
+def append_process(xmldoc, **kwargs):
 	"""
-	Try to retrieve the username from a variety of sources.  First the
-	environment variable LOGNAME is tried, if that is not set the
-	environment variable USERNAME is tried, if that is not set the
-	password database is consulted (only on Unix systems, if the import
-	of the pwd module succeeds), finally if that fails KeyError is
-	raised.
-	"""
-	try:
-		return os.environ["LOGNAME"]
-	except KeyError:
-		pass
-	try:
-		return os.environ["USERNAME"]
-	except KeyError:
-		pass
-	try:
-		import pwd
-		return pwd.getpwuid(os.getuid())[0]
-	except (ImportError, KeyError):
-		raise KeyError
-
-
-def append_process(xmldoc, program = None, version = None, cvs_repository = None, cvs_entry_time = None, comment = None, is_online = False, jobid = 0, domain = None, ifos = None):
-	"""
-	Add an entry to the process table in xmldoc.  program, version,
-	cvs_repository, comment, and domain should all be strings or
-	unicodes.  cvs_entry_time should be a string or unicode in the
-	format "YYYY/MM/DD HH:MM:SS".  is_online should be a boolean, jobid
-	an integer.  ifos should be an iterable (set, tuple, etc.) of
-	instrument names.
+	Ensure the document has a sensible process table, synchronize the
+	ID generator, and add a new row to the table for the current
+	process.  The new row object is returned.  Any keyword arguments
+	are passed to lsctables.Process.initialized(), see that method for
+	more information.
 
 	See also register_to_xmldoc().
 	"""
@@ -95,37 +58,8 @@ def append_process(xmldoc, program = None, version = None, cvs_repository = None
 	except ValueError:
 		proctable = lsctables.New(lsctables.ProcessTable)
 		xmldoc.childNodes[0].appendChild(proctable)
-
 	proctable.sync_next_id()
-
-	process = proctable.RowType()
-	process.program = program
-	process.version = version
-	process.cvs_repository = cvs_repository
-	# FIXME:  remove the "" case when the git versioning business is
-	# sorted out
-	if cvs_entry_time is not None and cvs_entry_time != "":
-		try:
-			# try the git_version format first
-			process.cvs_entry_time = UTCToGPS(time.strptime(cvs_entry_time, "%Y-%m-%d %H:%M:%S +0000"))
-		except ValueError:
-			# fall back to the old cvs format
-			process.cvs_entry_time = UTCToGPS(time.strptime(cvs_entry_time, "%Y/%m/%d %H:%M:%S"))
-	else:
-		process.cvs_entry_time = None
-	process.comment = comment
-	process.is_online = int(is_online)
-	process.node = socket.gethostname()
-	try:
-		process.username = get_username()
-	except KeyError:
-		process.username = None
-	process.unix_procid = os.getpid()
-	process.start_time = UTCToGPS(time.gmtime())
-	process.end_time = None
-	process.jobid = jobid
-	process.domain = domain
-	process.instruments = ifos
+	process = proctable.RowType.initialized(**kwargs)
 	process.process_id = proctable.get_next_id()
 	proctable.append(process)
 	return process
@@ -133,9 +67,10 @@ def append_process(xmldoc, program = None, version = None, cvs_repository = None
 
 def set_process_end_time(process):
 	"""
-	Set the end time in a row in a process table to the current time.
+	Deprecated.  Use .set_end_time_now() method of the Process object.
 	"""
-	process.end_time = UTCToGPS(time.gmtime())
+	# FIXME:  delete when nothing needs this.
+	process.set_end_time_now()
 	return process
 
 
@@ -143,7 +78,7 @@ def append_process_params(xmldoc, process, params):
 	"""
 	xmldoc is an XML document tree, process is the row in the process
 	table for which these are the parameters, and params is a list of
-	(name, type, value) tuples one for each parameter.
+	(name, value) tuples one for each parameter.
 
 	See also process_params_from_dict(), register_to_xmldoc().
 	"""
@@ -152,23 +87,13 @@ def append_process_params(xmldoc, process, params):
 	except ValueError:
 		paramtable = lsctables.New(lsctables.ProcessParamsTable)
 		xmldoc.childNodes[0].appendChild(paramtable)
-
-	for name, typ, value in params:
-		row = paramtable.RowType()
-		row.program = process.program
-		row.process_id = process.process_id
-		row.param = six.text_type(name)
-		if typ is not None:
-			row.type = six.text_type(typ)
-			if row.type not in ligolwtypes.Types:
-				raise ValueError("invalid type '%s' for parameter '%s'" % (row.type, row.param))
-		else:
-			row.type = None
-		if value is not None:
-			row.value = six.text_type(value)
-		else:
-			row.value = None
-		paramtable.append(row)
+	for name, value in params:
+		paramtable.append(paramtable.RowType(
+			program = process.program,
+			process_id = process.process_id,
+			param = name,
+			pyvalue = value
+		))
 	return process
 
 
@@ -201,32 +126,34 @@ def doc_includes_process(xmldoc, program):
 
 def process_params_from_dict(paramdict):
 	"""
-	Generator function yields (name, type, value) tuples constructed
+	Generator function yields (name, value) tuples constructed
 	from a dictionary of name/value pairs.  The tuples are suitable for
 	input to append_process_params().  This is intended as a
 	convenience for converting command-line options into process_params
 	rows.  The name values in the output have "--" prepended to them
-	and all "_" characters replaced with "-".  The type strings are
-	guessed from the Python types of the values.  If a value is a
-	Python list (or instance of a subclass thereof), then one tuple is
+	and all "_" characters replaced with "-".  If a value is a Python
+	list (or instance of a subclass thereof), then one tuple is
 	produced for each of the items in the list.
 
 	Example:
 
 	>>> list(process_params_from_dict({"verbose": True, "window": 4.0, "include": ["/tmp", "/var/tmp"]}))
-	[(u'--window', u'real_8', 4.0), (u'--verbose', None, None), (u'--include', u'lstring', '/tmp'), (u'--include', u'lstring', '/var/tmp')]
+	[(u'--window', 4.0), (u'--verbose', None), (u'--include', '/tmp'), (u'--include', '/var/tmp')]
 	"""
 	for name, values in paramdict.items():
-		# change the name back to the form it had on the command line
+		# change the name back to the form it had on the command
+		# line
 		name = u"--%s" % name.replace("_", "-")
 
-		if values is True or values is False:
-			yield (name, None, None)
-		elif values is not None:
-			if not isinstance(values, list):
-				values = [values]
+		if values is None:
+			continue
+		elif values is True or values is False:
+			yield (name, None)
+		elif not isinstance(values, list):
+			yield (name, values)
+		else:
 			for value in values:
-				yield (name, ligolwtypes.FromPyType[type(value)], value)
+				yield (name, value)
 
 
 def register_to_xmldoc(xmldoc, program, paramdict, **kwargs):
@@ -239,25 +166,4 @@ def register_to_xmldoc(xmldoc, program, paramdict, **kwargs):
 	are passed to append_process().  Returns the new row from the
 	process table.
 	"""
-	process = append_process(xmldoc, program = program, **kwargs)
-	append_process_params(xmldoc, process, process_params_from_dict(paramdict))
-	return process
-
-
-# The tables in the segment database declare most fields "NOT NULL", so provide stub values
-def register_to_ldbd(client, program, paramdict, version = u'0', cvs_repository = u'-', cvs_entry_time = 0, comment = u'-', is_online = False, jobid = 0, domain = None, ifos = u'-'):
-	"""
-	Register the current process and params to a database via a
-	LDBDClient.  The program and paramdict arguments and any additional
-	keyword arguments are the same as those for register_to_xmldoc().
-	Returns the new row from the process table.
-	"""
-	xmldoc = ligolw.Document()
-	xmldoc.appendChild(ligolw.LIGO_LW())
-	process = register_to_xmldoc(xmldoc, program, paramdict, version = version, cvs_repository = cvs_repository, cvs_entry_time = cvs_entry_time, comment = comment, is_online = is_online, jobid = jobid, domain = domain, ifos = ifos)
-
-	fake_file = StringIO()
-	xmldoc.write(fake_file)
-	client.insert(fake_file.getvalue())
-
-	return process
+	return append_process_params(xmldoc, append_process(xmldoc, program = program, **kwargs), process_params_from_dict(paramdict))

@@ -1,4 +1,4 @@
-# Copyright (C) 2006--2017  Kipp Cannon
+# Copyright (C) 2006--2019  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -77,6 +77,9 @@ import itertools
 import math
 import numpy
 import operator
+import os
+import socket
+import time
 import warnings
 from xml import sax
 
@@ -412,6 +415,30 @@ class ProcessTable(table.Table):
 		"""
 		return set(row.process_id for row in self if row.program == program)
 
+	@staticmethod
+	def get_username():
+		"""
+		Utility to help retrieve a sensible value for the current
+		username.  First the environment variable LOGNAME is tried,
+		if that is not set the environment variable USERNAME is
+		tried, if that is not set the password database is
+		consulted (only on Unix systems, if the import of the pwd
+		module succeeds), finally if that fails KeyError is raised.
+		"""
+		try:
+			return os.environ["LOGNAME"]
+		except KeyError:
+			pass
+		try:
+			return os.environ["USERNAME"]
+		except KeyError:
+			pass
+		try:
+			import pwd
+			return pwd.getpwuid(os.getuid())[0]
+		except (ImportError, KeyError):
+			raise KeyError
+
 
 class Process(table.Table.RowType):
 	"""
@@ -452,6 +479,59 @@ class Process(table.Table.RowType):
 	end = gpsproperty("end_time", "end_time_ns")
 	segment = segmentproperty("start", "end")
 
+	@classmethod
+	def initialized(cls, program = None, version = None, cvs_repository = None, cvs_entry_time = None, comment = None, is_online = False, jobid = 0, domain = None, instruments = None, process_id = None):
+		"""
+		Create a new Process object and initialize its attributes
+		to sensible defaults.  If not None, program, version,
+		cvs_repository, comment, and domain should all be strings
+		or unicodes.  If cvs_entry_time is not None, it must be a
+		string or unicode in the format "YYYY-MM-DD HH:MM:SS".
+		is_online should be boolean, jobid an integer.  If not
+		None, instruments must be an iterable (set, tuple, etc.) of
+		instrument names (strings or unicodes).
+
+		In addition, .node is set to the current hostname,
+		.unix_procid is set to the current process ID, .username is
+		set to the current user's name, .start_time is set to the
+		current GPS time.
+
+		Note:  if the process_id keyword argument is None (the
+		default), then the process_id attribute is not set, it is
+		left uninitialized rather than setting it to None.  It must
+		be initialized before the row object can be written to a
+		file, and so in this way the calling code is required to
+		provide a proper value for it.
+		"""
+		self = cls(
+			program = program,
+			version = version,
+			cvs_repository = cvs_repository,
+			cvs_entry_time = lal.UTCToGPS(time.strptime(cvs_entry_time, "%Y-%m-%d %H:%M:%S +0000")) if cvs_entry_time is not None else None,
+			comment = comment,
+			is_online = int(is_online),
+			node = socket.gethostname(),
+			unix_procid = os.getpid(),
+			start_time = lal.UTCToGPS(time.gmtime()),
+			end_time = None,
+			jobid = jobid,
+			domain = domain,
+			instruments = ifos
+		)
+		try:
+			self.username = ProcessTable.get_username()
+		except KeyError:
+			self.username = None
+		if process_id is not None:
+			self.process_id = process_id
+		return self
+
+	def set_end_time_now(self):
+		"""
+		Set .end_time to the current GPS time.
+		"""
+		self.end_time = lal.UTCToGPS(time.gmtime())
+
 
 ProcessTable.RowType = Process
 
@@ -484,7 +564,7 @@ class ProcessParamsTable(table.Table):
 
 	def append(self, row):
 		if row.type is not None and row.type not in ligolwtypes.Types:
-			raise ligolw.ElementError("unrecognized type '%s'" % row.type)
+			raise ligolw.ElementError("unrecognized type '%s' for process %d param '%s'" % (row.type, row.process_id, row.param))
 		super(ProcessParamsTable, self).append(row)
 
 
