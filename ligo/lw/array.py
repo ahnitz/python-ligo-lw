@@ -1,4 +1,4 @@
-# Copyright (C) 2006--2017  Kipp Cannon
+# Copyright (C) 2006--2019  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -108,7 +108,7 @@ class ArrayStream(ligolw.Stream):
 		# some initialization that can only be done once parentNode
 		# has been set.
 		self._tokenizer.set_types([ligolwtypes.ToPyType[parentNode.Type]])
-		parentNode.array = numpy.zeros(parentNode.get_shape(), ligolwtypes.ToNumPyType[parentNode.Type])
+		parentNode.array = numpy.zeros(parentNode.shape, ligolwtypes.ToNumPyType[parentNode.Type])
 		self._array_view = parentNode.array.T.flat
 		self._index = 0
 		return self
@@ -132,28 +132,90 @@ class ArrayStream(ligolw.Stream):
 
 	def write(self, fileobj = sys.stdout, indent = u""):
 		# avoid symbol and attribute look-ups in inner loop
-		linelen = self.parentNode.array.shape[0]
-		lines = self.parentNode.array.size // linelen if self.parentNode.array.size else 0
-		tokens = iter(map(ligolwtypes.FormatFunc[self.parentNode.Type], self.parentNode.array.T.flat))
-		islice = itertools.islice
-		join = self.Delimiter.join
 		w = fileobj.write
-
 		w(self.start_tag(indent))
-		if lines:
-			newline = u"\n" + indent + ligolw.Indent
-			w(newline)
-			w(xmlescape(join(islice(tokens, linelen))))
-			newline = self.Delimiter + newline
-			for i in range(lines - 1):
+
+		array = self.parentNode.array
+		if array is not None:
+			# avoid symbol and attribute look-ups in inner
+			# loop.  we use self.parentNode.shape to retrieve
+			# the array's shape, rather than just asking the
+			# array, to induce a sanity check that the Dim
+			# elements are correct for the array
+			linelen = self.parentNode.shape[0]
+			lines = array.size // linelen if array.size else 0
+			tokens = iter(map(ligolwtypes.FormatFunc[self.parentNode.Type], array.T.flat))
+			islice = itertools.islice
+			join = self.Delimiter.join
+
+			if lines:
+				newline = u"\n" + indent + ligolw.Indent
 				w(newline)
 				w(xmlescape(join(islice(tokens, linelen))))
+				newline = self.Delimiter + newline
+				for i in range(lines - 1):
+					w(newline)
+					w(xmlescape(join(islice(tokens, linelen))))
 		w(u"\n" + self.end_tag(indent) + u"\n")
 
 
 class Array(ligolw.Array):
 	"""
 	High-level Array element.
+
+	Examples:
+
+	>>> import numpy
+	>>> x = numpy.mgrid[0:5,0:3][0]
+	>>> x
+	array([[0, 0, 0],
+	       [1, 1, 1],
+	       [2, 2, 2],
+	       [3, 3, 3],
+	       [4, 4, 4]])
+	>>> x.shape
+	(5, 3)
+	>>> elem = Array.build("test", x, ["dim0", "dim1"])
+	>>> elem.shape
+	(5, 3)
+	>>> import sys
+	>>> elem.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
+	<Array Type="int_8s" Name="test:array">
+		<Dim Name="dim1">3</Dim>
+		<Dim Name="dim0">5</Dim>
+		<Stream Delimiter=" " Type="Local">
+			0 1 2 3 4
+			0 1 2 3 4
+			0 1 2 3 4
+		</Stream>
+	</Array>
+	>>> # change the Array shape.  the internal array is changed, too
+	>>> elem.shape = 15
+	>>> elem.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
+	<Array Type="int_8s" Name="test:array">
+		<Dim Name="dim0">15</Dim>
+		<Stream Delimiter=" " Type="Local">
+			0 0 0 1 1 1 2 2 2 3 3 3 4 4 4
+		</Stream>
+	</Array>
+	>>> # replace the internal array with one with a different number
+	>>> # of dimensions.  assign to .array first, then fix .shape
+	>>> elem.array = numpy.mgrid[0:4,0:3,0:2][0]
+	>>> elem.shape = elem.array.shape
+	>>> elem.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
+	<Array Type="int_8s" Name="test:array">
+		<Dim>2</Dim>
+		<Dim>3</Dim>
+		<Dim Name="dim0">4</Dim>
+		<Stream Delimiter=" " Type="Local">
+			0 1 2 3
+			0 1 2 3
+			0 1 2 3
+			0 1 2 3
+			0 1 2 3
+			0 1 2 3
+		</Stream>
+	</Array>
 	"""
 	class ArrayName(ligolw.LLWNameAttr):
 		dec_pattern = re.compile(r"(?P<Name>[a-zA-Z0-9_:]+):array\Z")
@@ -168,14 +230,77 @@ class Array(ligolw.Array):
 		super(Array, self).__init__(*args)
 		self.array = None
 
-	def get_shape(self):
+	@property
+	def shape(self):
 		"""
-		Return a tuple of this array's dimensions.  This is done by
-		querying the Dim children.  Note that once it has been
-		created, it is also possible to examine an Array object's
-		.array attribute directly, and doing that is much faster.
+		The Array's dimensions.  If the shape described by the Dim
+		child elements is not consistent with the shape of the
+		internal array object then ValueError is raised.
+
+		When assigning to this property, the internal array object
+		is adjusted as well, and an error will be raised if the
+		re-shape is not allowed (see numpy documentation for the
+		rules).  If the number of dimensions is being changed, and
+		the Array object requires additional Dim child elements to
+		be added, they are created with higher ranks than the
+		existing dimensions, with no Name attributes assigned;
+		likewise if Dim elements need to be removed, the highest
+		rank dimensions are removed first.  NOTE: Dim elements are
+		stored in reverse order, so the highest rank dimension
+		corresponds to the first Dim element in the XML tree.
+
+		NOTE:  the shape of the internal numpy array and the shape
+		described by the Dim child elements are only weakly related
+		to one another.  There are some sanity checks watching out
+		for inconsistencies, for example when retrieving the value
+		of this property, or when writing the XML tree to a file,
+		but in general there is no mechanism preventing
+		sufficiently quirky code from getting the .array attribute
+		out of sync with the Dim child elements.  Calling code
+		should ensure it contains its own safety checks where
+		needed.
 		"""
-		return tuple(c.n for c in self.getElementsByTagName(ligolw.Dim.tagName))[::-1]
+		shape = tuple(c.n for c in self.getElementsByTagName(ligolw.Dim.tagName))[::-1]
+		if self.array is not None and self.array.shape != shape:
+			raise ValueError("shape of Dim children not consistent with shape of .array:  %s != %s" % (str(shape), str(self.array.shape)))
+		return shape
+
+	@shape.setter
+	def shape(self, shape):
+		# adjust the internal array.  this has the side effect of
+		# testing that the new shape is permitted
+		if self.array is not None:
+			self.array.shape = shape
+
+		# make sure we have the correct number of Dim elements.
+		# Dim elements are in the reverse order relative to the
+		# entries in shape, so we remove extra ones or add extra
+		# ones at the start of the list to preseve the metadata of
+		# the lower-indexed dimensions
+		dims = self.getElementsByTagName(ligolw.Dim.tagName)
+		try:
+			len(shape)
+		except TypeError:
+			shape = (shape,)
+		while len(dims) > len(shape):
+			self.removeChild(dims.pop(0)).unlink()
+		while len(dims) < len(shape):
+			if dims:
+				# prepend new Dim elements
+				dim = self.insertBefore(ligolw.Dim(), dims[0])
+			elif self.childNodes:
+				# there are no Dim children, only other
+				# allowed child is a single Stream, and
+				# Dim children must come before it
+				assert len(self.childNodes) == 1 and self.childNodes[-1].tagName == ligolw.Stream.tagName, "invalid children"
+				dim = self.insertBefore(ligolw.Dim(), self.childNodes[-1])
+			else:
+				dim = self.appendChild(ligolw.Dim())
+			dims.insert(0, dim)
+
+		# set the dimension sizes of the Dim elements
+		for dim, n in zip(dims, reversed(shape)):
+			dim.n = n
 
 	@classmethod
 	def build(cls, name, array, dim_names = None):
@@ -202,20 +327,17 @@ class Array(ligolw.Array):
 		# Type must be set for .__init__();  easier to set Name
 		# afterwards to take advantage of encoding handled by
 		# attribute proxy
-		elem = cls(Attributes({u"Type": ligolwtypes.FromNumPyType[str(array.dtype)]}))
-		elem.Name = name
-		if dim_names is None:
-			dim_names = [None] * len(array.shape)
-		elif len(dim_names) != len(array.shape):
-			raise ValueError("dim_names must be same length as number of dimensions")
-		for name, n in reversed(list(zip(dim_names, array.shape))):
-			child = elem.appendChild(ligolw.Dim())
-			if name is not None:
+		self = cls(Attributes({u"Type": ligolwtypes.FromNumPyType[str(array.dtype)]}))
+		self.Name = name
+		self.shape = array.shape
+		if dim_names is not None:
+			if len(dim_names) != len(array.shape):
+				raise ValueError("dim_names must be same length as number of dimensions")
+			for child, name in zip(self.getElementsByTagName(ligolw.Dim.tagName), reversed(dim_names)):
 				child.Name = name
-			child.n = n
-		elem.appendChild(ArrayStream(Attributes({u"Type": ArrayStream.Type.default, u"Delimiter": ArrayStream.Delimiter.default})))
-		elem.array = array
-		return elem
+		self.appendChild(ArrayStream(Attributes({u"Type": ArrayStream.Type.default, u"Delimiter": ArrayStream.Delimiter.default})))
+		self.array = array
+		return self
 
 	@classmethod
 	def getArraysByName(cls, elem, name):
