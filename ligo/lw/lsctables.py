@@ -285,7 +285,27 @@ class instrumentsproperty(object):
 class gpsproperty(object):
 	"""
 	Descriptor used internally to implement LIGOTimeGPS-valued
-	properties.
+	properties using pairs of integer attributes on row objects, one
+	for the integer seconds part of the GPS time and one for the
+	integer nanoseconds part.
+
+	Non-LIGOTimeGPS values are converted to LIGOTimeGPS before encoding
+	them into the integer attributes.  None is allowed as a special
+	case, which is encoded by setting both column attributes to None.
+
+	For the purpose of representing the boundaries of unbounded
+	segments (open-ended time intervals), +inf and -inf are also
+	allowed, and will be encoded into and decoded out of the integer
+	attributes.  To do so, a non-standard encoding is used that makes
+	use of denormalized GPS times, that is times whose nanosecond
+	component has a magnitude greater than 999999999.  Two such values
+	are reserved for +/- infinity.  To guard against the need for
+	additional special encodings in the future, this descriptor
+	reserves all denormalized values and will not allow calling code to
+	set GPS times to those values.  Calling code must provide
+	normalized GPS times, times with nanosecond components whose
+	magnitudes are not greater than 999999999.  When decoded, the
+	values reported are segments.PosInfinity or segments.NegInfinity.
 	"""
 	def __init__(self, s_name, ns_name):
 		self.s_name = s_name
@@ -334,6 +354,19 @@ class gpsproperty(object):
 
 
 class gpsproperty_with_gmst(gpsproperty):
+	"""
+	Variant of the gpsproperty descriptor, adding support for a third
+	"GMST" column.  When assigning a time to the GPS-valued descriptor,
+	after the pair of integer attributes are set to the encoded form of
+	the GPS time, the value is retrieved and the GMST column is set to
+	the Greenwhich mean sidereal time corresponding to that GPS time.
+	Note that the conversion to sidereal time is performed after
+	encoding the GPS time into the integer seconds and nanoseconds
+	attributes, so the sidereal time will reflect any rounding that has
+	occured as a result of that encoding.  If the GPS time is set to
+	None or +inf or -inf, the sidereal time is set to that value as
+	well.
+	"""
 	def __init__(self, s_name, ns_name, gmst_name):
 		super(gpsproperty_with_gmst, self).__init__(s_name, ns_name)
 		self.gmst_name = gmst_name
@@ -346,13 +379,28 @@ class gpsproperty_with_gmst(gpsproperty):
 			# re-retrieve the value in case it required type
 			# conversion
 			gps = self.__get__(obj)
-			setattr(obj, self.gmst_name, lal.GreenwichMeanSiderealTime(gps))
+			if not isinstance(gps, segments.infinity):
+				setattr(obj, self.gmst_name, lal.GreenwichMeanSiderealTime(gps))
+			elif gps > 0:
+				setattr(obj, self.gmst_name, float("+inf"))
+			elif gps < 0:
+				setattr(obj, self.gmst_name, float("-inf"))
+			else:
+				# this should be impossible
+				raise ValueError(gps)
 
 
 class segmentproperty(object):
 	"""
 	Descriptor used internally to expose pairs of GPS-valued properties
-	as segment-valued properties.
+	as segment-valued properties.  A segment may be set to None, which
+	is encoded by setting both GPS-valued properties to None.  Likewise
+	if both GPS-valued properties are set to None then the value
+	reported by this descriptor is None, not (None, None).
+
+	See the documentation for gpsproperty for more information on the
+	encodings it uses for special values and the limitations they
+	create.
 	"""
 	def __init__(self, start_name, stop_name):
 		self.start = start_name
@@ -1850,13 +1898,8 @@ class Segment(table.Table.RowType):
 	>>> segments.segmentlist(map(Segment, x & y))	# doctest: +ELLIPSIS
 	[<ligo.lw.lsctables.Segment object at 0x...>, <ligo.lw.lsctables.Segment object at 0x...>]
 
-	This implementation uses a non-standard extension to encode
-	infinite values for boundaries:  the nanoseconds component is set
-	to 0xFFFFFFFF and the seconds component set to 0x7FFFFFFF or
-	0xFFFFFFFF to indicate positive resp. negative infinity.  For this
-	reason, "denormalized" LIGOTimeGPS objects (objects whose
-	nanoseconds fields contain values exceeding +/-999999999) are
-	disallowed for use with this class.
+	Unbounded intervals are permitted.  See gpsproperty for information
+	on the encoding scheme used internally, and its limitations.
 
 	Example:
 
