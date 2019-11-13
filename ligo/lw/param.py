@@ -1,4 +1,4 @@
-# Copyright (C) 2006--2009,2012--2018  Kipp Cannon
+# Copyright (C) 2006--2009,2012--2019  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -32,7 +32,6 @@ High-level support for Param elements.
 import re
 import sys
 from xml.sax.saxutils import escape as xmlescape
-from xml.sax.xmlreader import AttributesImpl as Attributes
 import yaml
 
 
