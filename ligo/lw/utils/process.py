@@ -43,57 +43,12 @@ from .. import lsctables
 #
 
 
-def append_process(xmldoc, **kwargs):
-	"""
-	Ensure the document has a sensible process table, synchronize the
-	ID generator, and add a new row to the table for the current
-	process.  The new row object is returned.  Any keyword arguments
-	are passed to lsctables.Process.initialized(), see that method for
-	more information.
-
-	See also register_to_xmldoc().
-	"""
-	try:
-		proctable = lsctables.ProcessTable.get_table(xmldoc)
-	except ValueError:
-		proctable = lsctables.New(lsctables.ProcessTable)
-		xmldoc.childNodes[0].appendChild(proctable)
-	proctable.sync_next_id()
-	process = proctable.RowType.initialized(**kwargs)
-	process.process_id = proctable.get_next_id()
-	proctable.append(process)
-	return process
-
-
 def set_process_end_time(process):
 	"""
 	Deprecated.  Use .set_end_time_now() method of the Process object.
 	"""
 	# FIXME:  delete when nothing needs this.
 	process.set_end_time_now()
-	return process
-
-
-def append_process_params(xmldoc, process, params):
-	"""
-	xmldoc is an XML document tree, process is the row in the process
-	table for which these are the parameters, and params is a list of
-	(name, value) tuples one for each parameter.
-
-	See also process_params_from_dict(), register_to_xmldoc().
-	"""
-	try:
-		paramtable = lsctables.ProcessParamsTable.get_table(xmldoc)
-	except ValueError:
-		paramtable = lsctables.New(lsctables.ProcessParamsTable)
-		xmldoc.childNodes[0].appendChild(paramtable)
-	for name, value in params:
-		paramtable.append(paramtable.RowType(
-			program = process.program,
-			process_id = process.process_id,
-			param = name,
-			pyvalue = value
-		))
 	return process
 
 
@@ -124,46 +79,54 @@ def doc_includes_process(xmldoc, program):
 	return program in lsctables.ProcessTable.get_table(xmldoc).getColumnByName(u"program")
 
 
-def process_params_from_dict(paramdict):
+def register_to_xmldoc(xmldoc, program, paramdict, **kwargs):
 	"""
-	Generator function yields (name, value) tuples constructed
-	from a dictionary of name/value pairs.  The tuples are suitable for
-	input to append_process_params().  This is intended as a
-	convenience for converting command-line options into process_params
-	rows.  The name values in the output have "--" prepended to them
-	and all "_" characters replaced with "-".  If a value is a Python
-	list (or instance of a subclass thereof), then one tuple is
-	produced for each of the items in the list.
-
-	Example:
-
-	>>> list(process_params_from_dict({"verbose": True, "window": 4.0, "include": ["/tmp", "/var/tmp"]}))
-	[(u'--window', 4.0), (u'--verbose', None), (u'--include', '/tmp'), (u'--include', '/var/tmp')]
+	Ensure the document has sensible process and process_params tables,
+	synchronize the process table's ID generator, add a new row to the
+	table for the current process, and add rows to the process_params
+	table describing the options in paramdict.  program is the name of
+	the program.  paramdict is expected to be the .__dict__ contents of
+	an optparse.OptionParser options object, or the equivalent.  Any
+	keyword arguments are passed to lsctables.Process.initialized(),
+	see that method for more information.  The new process row object
+	is returned.
 	"""
-	for name, values in paramdict.items():
+	try:
+		proctable = lsctables.ProcessTable.get_table(xmldoc)
+	except ValueError:
+		proctable = lsctables.New(lsctables.ProcessTable)
+		xmldoc.childNodes[0].appendChild(proctable)
+
+	proctable.sync_next_id()
+	process = proctable.RowType.initialized(program = program, process_id = proctable.get_next_id(), **kwargs)
+	proctable.append(process)
+
+	try:
+		paramtable = lsctables.ProcessParamsTable.get_table(xmldoc)
+	except ValueError:
+		paramtable = lsctables.New(lsctables.ProcessParamsTable)
+		xmldoc.childNodes[0].appendChild(paramtable)
+
+	for name, values in paramdict:
 		# change the name back to the form it had on the command
 		# line
 		name = u"--%s" % name.replace("_", "-")
 
+		# skip options that aren't set;  ensure values is something
+		# that can be iterated over even if there is only one value
 		if values is None:
 			continue
 		elif values is True or values is False:
-			yield (name, None)
+			# boolen options have no value recorded
+			values = [None]
 		elif not isinstance(values, list):
-			yield (name, values)
-		else:
-			for value in values:
-				yield (name, value)
+			values = [values]
 
-
-def register_to_xmldoc(xmldoc, program, paramdict, **kwargs):
-	"""
-	Register the current process and params to an XML document.
-	program is the name of the program.  paramdict is a dictionary of
-	name/value pairs that will be used to populate the process_params
-	table;  see process_params_from_dict() for information on how these
-	name/value pairs are interpreted.  Any additional keyword arguments
-	are passed to append_process().  Returns the new row from the
-	process table.
-	"""
-	return append_process_params(xmldoc, append_process(xmldoc, program = program, **kwargs), process_params_from_dict(paramdict))
+		for value in values:
+			paramtable.append(paramtable.RowType(
+				program = process.program,
+				process_id = process.process_id,
+				param = name,
+				pyvalue = value
+			))
+	return process
