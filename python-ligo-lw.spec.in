@@ -1,14 +1,31 @@
-Name: 		python-ligo-lw
+%global shortname ligo-lw
+
+Name: 		python-%{shortname}
 Summary:	LIGO Light-Weight XML I/O Library
 Version:	@VERSION@
 Release:	1%{?dist}
-License:	GPL
-Group:		Development/Libraries
-Source:		%{name}-%{version}.tar.gz
+License:	GPL-3.0-or-later
+Source:		http://software.ligo.org/lscsoft/source/%{name}-%{version}.tar.gz
 Url:		https://git.ligo.org/kipp.cannon/python-ligo-lw
-BuildRoot:	%{_tmppath}/%{name}-%{version}-root
-BuildRequires:  python-devel
-BuildRequires:  python2-ligo-common
+Prefix:		%{_prefix}
+
+BuildRequires:	python-rpm-macros
+BuildRequires:	python-srpm-macros
+BuildRequires:	python2-rpm-macros
+BuildRequires:	python3-rpm-macros
+BuildRequires:	epel-rpm-macros
+
+BuildRequires:	python-devel
+BuildRequires:	python%{python3_pkgversion}-devel
+
+%description
+The LIGO Light-Weight XML format is widely used within gravitational-wave
+data analysis pipelines.  This package provides Python libraries
+to read, write, and interact with documents in this format, as well as
+several programs to perform common, basic, manipulations of files in this format.
+
+%package -n python2-%{shortname}
+Summary:	LIGO Light-Weight XML I/O Library (python%{python2_version})
 Requires:	glue
 Requires:	python >= 2.7
 Requires:	python-dateutil
@@ -24,15 +41,34 @@ Requires:	PyYAML
 # temporary dependency to ensure -bin package is installed.  remove when
 # other things, like gstlal, depend on -bin themselves
 Requires:	%{name}-bin
-Prefix:         %{_prefix}
-%description
+%{?python_provide:%python_provide python2-%{shortname}}
+%description -n python2-%{shortname}
+The LIGO Light-Weight XML format is widely used within gravitational-wave
+data analysis pipelines.  This package provides a Python library to read,
+write, and interact with documents in this format.
+
+%package -n python%{python3_pkgversion}-%{shortname}
+Summary:	LIGO Light-Weight XML I/O Library (python%{python3_version})
+Requires:	python%{python3_pkgversion}
+Requires:	python%{python3_pkgversion}-dateutil
+Requires:	python%{python3_pkgversion}-glue
+Requires:	python%{python3_pkgversion}-lal
+# temporarily commented out to break cyclic dependency.  lalburst is an
+# optional dependency, but the rpm version at CIT is too old for that
+# feature
+#Requires:	python%{python3_pkgversion}-lalburst
+Requires:	python%{python3_pkgversion}-ligo-common
+Requires:	python%{python3_pkgversion}-ligo-segments
+Requires:	python%{python3_pkgversion}-six
+Requires:	python%{python3_pkgversion}-PyYAML
+%{?python_provide:%python_provide python%{python3_pkgversion}-%{shortname}}
+%description -n python%{python3_pkgversion}-%{shortname}
 The LIGO Light-Weight XML format is widely used within gravitational-wave
 data analysis pipelines.  This package provides a Python library to read,
 write, and interact with documents in this format.
 
 %package bin
 Summary:	Programs for manipulating LIGO Light-Weight XML files
-Group:
 Requires:	%{name} = %{version}
 Requires:	glue
 Requires:	python >= 2.7
@@ -51,27 +87,25 @@ performe common, basic, manipulations of files in this format.
 %setup
 
 %build
-CFLAGS="%{optflags}" %{__python} setup.py build
+%py2_build
+%py3_build
 
 %install
-rm -rf %{buildroot}
-%{__python} setup.py install -O1 \
-        --skip-build \
-        --root=%{buildroot} \
-        --prefix=%{_prefix}
-rm -rf $RPM_BUILD_ROOT/%{_prefix}/lib*/python*/site-packages/ligo/*.*
-rm -rf $RPM_BUILD_ROOT/%{_prefix}/lib*/python*/site-packages/*.egg-info
+# install python3 first so that /bin/ is populated by python2
+%py3_install
+%py2_install
 
-%clean
-rm -rf $RPM_BUILD_ROOT
+%files -n python2-%{shortname}
+%license LICENSE
+%{python2_sitearch}
 
-%files
-%defattr(-,root,root)
-%{_prefix}/lib*/python*/site-packages/ligo/lw
+%files -n python%{python3_pkgversion}-%{shortname}
+%license LICENSE
+%{python3_sitearch}
 
 %files bin
-%defattr(-,root,root)
-%{_prefix}/bin/*
+%license LICENSE
+%{_bindir}/*
 
 %changelog
 *  Tue May 8 2018 Kipp Cannon <kipp.cannon@ligo.org>
