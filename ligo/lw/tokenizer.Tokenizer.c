@@ -26,6 +26,9 @@
  */
 
 
+/* Silence warning in Python 3.8. See https://bugs.python.org/issue36381 */
+#define PY_SSIZE_T_CLEAN
+
 #include <Python.h>
 #include <ctype.h>
 #include <stddef.h>
