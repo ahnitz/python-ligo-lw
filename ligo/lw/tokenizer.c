@@ -32,7 +32,6 @@
 #include <stdlib.h>
 #include <wchar.h>
 #include <tokenizer.h>
-#include "six.h"
 
 
 /*
@@ -110,15 +109,19 @@ PyObject *llwtokenizer_build_formats(PyObject *sequence)
 "elements, as well as other utilities to assist in packing parsed tokens into\n" \
 "various data storage units."
 
-static PyModuleDef moduledef = {
-	PyModuleDef_HEAD_INIT,
-	MODULE_NAME, MODULE_DOC, -1, NULL
-};
 
-
+#if PY_MAJOR_VERSION < 3
+PyMODINIT_FUNC inittokenizer(void); /* Silence -Wmissing-prototypes */
+PyMODINIT_FUNC inittokenizer(void)
+#else
 PyMODINIT_FUNC PyInit_tokenizer(void); /* Silence -Wmissing-prototypes */
 PyMODINIT_FUNC PyInit_tokenizer(void)
+#endif
 {
+	static PyModuleDef moduledef = {
+		PyModuleDef_HEAD_INIT,
+		MODULE_NAME, MODULE_DOC, -1, NULL
+	};
 	PyObject *module = NULL;
 
 	if(PyType_Ready(&ligolw_Tokenizer_Type) < 0)
@@ -158,8 +161,9 @@ PyMODINIT_FUNC PyInit_tokenizer(void)
 	PyModule_AddObject(module, "RowDumper", (PyObject *) &ligolw_RowDumper_Type);
 
 done:
+#if PY_MAJOR_VERSION < 3
+	return;
+#else
 	return module;
+#endif
 }
-
-
-SIX_COMPAT_MODULE(tokenizer)

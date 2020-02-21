@@ -31,7 +31,6 @@
 #include <stdlib.h>
 #include <wchar.h>
 #include <ilwd.h>
-#include "six.h"
 
 
 #define MODULE_NAME "ligo.lw._ilwd"
@@ -448,14 +447,18 @@ PyTypeObject ligolw_ilwdchar_Type = {
  */
 
 
-static PyModuleDef moduledef = {
-	PyModuleDef_HEAD_INIT,
-	MODULE_NAME, MODULE_DOC, -1, NULL
-};
-
+#if PY_MAJOR_VERSION < 3
+PyMODINIT_FUNC init_ilwd(void); /* Silence -Wmissing-prototypes */
+PyMODINIT_FUNC init_ilwd(void)
+#else
 PyMODINIT_FUNC PyInit__ilwd(void); /* Silence -Wmissing-prototypes */
 PyMODINIT_FUNC PyInit__ilwd(void)
+#endif
 {
+	static PyModuleDef moduledef = {
+		PyModuleDef_HEAD_INIT,
+		MODULE_NAME, MODULE_DOC, -1, NULL
+	};
 	PyObject *module = NULL;
 
 	if(PyType_Ready(&ligolw_ilwdchar_Type) < 0)
@@ -485,8 +488,9 @@ PyMODINIT_FUNC PyInit__ilwd(void)
 	column_name = PyUnicode_FromString("column_name");
 
 done:
+#if PY_MAJOR_VERSION < 3
+	return;
+#else
 	return module;
+#endif
 }
-
-
-SIX_COMPAT_MODULE(_ilwd)
