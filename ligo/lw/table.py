@@ -441,7 +441,7 @@ class TableStream(ligolw.Stream):
 			# an XML parser when the file is read.  turning
 			# "&lt;" back into "<" during file reading is
 			# handled by the XML parser, so there is no code
-			# in Glue related to that.
+			# in this library related to that.
 			w(xmlescape(line))
 			# now add delimiter and write the remaining rows
 			newline = rowdumper.delimiter + newline
