@@ -1,3 +1,17 @@
+python-ligo-lw (1.7.0-1) unstable; urgency=medium
+
+  * implement ligolw_no_ilwdchar as a module for reuse
+  * move programs into separate -bin package on Debian
+  * expand SimInspiral row type:  add methods to compute effective distance instead of relying on columns with these numbers precomputed;  doing this to allow analysis codes to add support for KAGRA in a way that is uniform across detectors
+  * remove table.Table._end_of_rows() hook
+  * reimplement most of ligo.lw.utils.process as methods and feature improvements within Process and ProcessParams
+  * array.Array:  add .shape property
+  * add support for +/-inf to lsctables.gpsproperty_with_gmst
+  * convert C modules to native Python 2 & 3 versions and remove six.h from build
+  * various documentation and test suite improvements
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Wed, 26 Frb 2020 18:00:50 +0900
+
 python-ligo-lw (1.6.0-1) unstable; urgency=medium
 
   * remove custom ProcessParamsTable from dbtables
