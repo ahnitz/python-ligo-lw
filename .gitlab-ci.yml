@@ -62,7 +62,6 @@ docs:
 pages:
   stage: deploy
   dependencies:
-    - build-python37
     - docs
   only:
     - tags
