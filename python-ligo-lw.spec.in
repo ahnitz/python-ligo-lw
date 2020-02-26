@@ -26,9 +26,9 @@ several programs to perform common, basic, manipulations of files in this format
 
 %package -n python2-%{shortname}
 Summary:	LIGO Light-Weight XML I/O Library (python%{python2_version})
-Requires:	glue
 Requires:	python >= 2.7
 Requires:	python2-dateutil
+Requires:	python2-glue
 Requires:	python2-lal
 # temporarily commented out to break cyclic dependency.  lalburst is an
 # optional dependency, but the rpm version at CIT is too old for that
@@ -40,7 +40,7 @@ Requires:	python2-pyyaml
 Requires:	python2-six
 # temporary dependency to ensure -bin package is installed.  remove when
 # other things, like gstlal, depend on -bin themselves
-Requires:	%{name}-bin
+Requires:	python%{python3_pkgversion}-%{shortname}-bin
 %{?python_provide:%python_provide python2-%{shortname}}
 %description -n python2-%{shortname}
 The LIGO Light-Weight XML format is widely used within gravitational-wave
@@ -67,18 +67,18 @@ The LIGO Light-Weight XML format is widely used within gravitational-wave
 data analysis pipelines.  This package provides a Python %{python3_version}
 library to read, write, and interact with documents in this format.
 
-%package bin
+%package -n python%{python3_pkgversion}-%{shortname}-bin
 Summary:	Programs for manipulating LIGO Light-Weight XML files
-Requires:	%{name} = %{version}
-Requires:	glue
-Requires:	python >= 2.7
-Requires:	python2-lal
-Requires:	python2-ligo-segments
+Requires:	python%{python3_pkgversion}-%{shortname} = %{version}
+Requires:	python%{python3_pkgversion}
+Requires:	python%{python3_pkgversion}-glue
+Requires:	python%{python3_pkgversion}-lal
+Requires:	python%{python3_pkgversion}-ligo-segments
 Conflicts:	glue-ligolw-tools
 Obsoletes:	glue-ligolw-tools
 Provides:	glue-ligolw-tools
 Conflicts:	glue < 2.0 python-pylal
-%description bin
+%description -n python%{python3_pkgversion}-%{shortname}-bin
 The LIGO Light-Weight XML format is widely used within gravitational-wave
 data analysis pipelines.  This package provides several programs to
 performe common, basic, manipulations of files in this format.
@@ -91,9 +91,9 @@ performe common, basic, manipulations of files in this format.
 %py3_build
 
 %install
-# install python3 first so that /bin/ is populated by python2
-%py3_install
+# install python2 first so that /bin/ is populated by python3
 %py2_install
+%py3_install
 
 %clean
 rm -rf %{buildroot}
@@ -111,7 +111,7 @@ rm -rf %{buildroot}
 %exclude %{python3_sitearch}/ligo/__init__.py*
 %exclude %{python3_sitearch}/ligo/__pycache__/__init__.*
 
-%files bin
+%files -n python%{python3_pkgversion}-%{shortname}-bin
 %license LICENSE
 %{_bindir}/*
 
