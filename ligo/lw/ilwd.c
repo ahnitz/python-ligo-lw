@@ -463,20 +463,19 @@ PyMODINIT_FUNC PyInit__ilwd(void); /* Silence -Wmissing-prototypes */
 PyMODINIT_FUNC PyInit__ilwd(void)
 #endif
 {
-	static PyModuleDef moduledef = {
-		PyModuleDef_HEAD_INIT,
-		MODULE_NAME, MODULE_DOC, -1, NULL
-	};
-	PyObject *module = NULL;
-
-	if(PyType_Ready(&ligolw_ilwdchar_Type) < 0)
-		goto done;
-
 	/*
 	 * Create the module.
 	 */
 
-	module = PyModule_Create(&moduledef);
+#if PY_MAJOR_VERSION < 3
+	PyObject *module = Py_InitModule3(MODULE_NAME, NULL, MODULE_DOC);
+#else
+	static PyModuleDef moduledef = {
+		PyModuleDef_HEAD_INIT,
+		MODULE_NAME, MODULE_DOC, -1, NULL
+	};
+	PyObject *module = PyModule_Create(&moduledef);
+#endif
 	if (!module)
 		goto done;
 
@@ -484,6 +483,8 @@ PyMODINIT_FUNC PyInit__ilwd(void)
 	 * Add the ilwdchar class.
 	 */
 
+	if(PyType_Ready(&ligolw_ilwdchar_Type) < 0)
+		goto done;
 	Py_INCREF(&ligolw_ilwdchar_Type);
 	PyModule_AddObject(module, "ilwdchar", (PyObject *) &ligolw_ilwdchar_Type);
 

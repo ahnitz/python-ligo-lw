@@ -118,25 +118,31 @@ PyMODINIT_FUNC PyInit_tokenizer(void); /* Silence -Wmissing-prototypes */
 PyMODINIT_FUNC PyInit_tokenizer(void)
 #endif
 {
+	/*
+	 * Create the module.
+	 */
+
+#if PY_MAJOR_VERSION < 3
+	PyObject *module = Py_InitModule3(MODULE_NAME, NULL, MODULE_DOC);
+#else
 	static PyModuleDef moduledef = {
 		PyModuleDef_HEAD_INIT,
 		MODULE_NAME, MODULE_DOC, -1, NULL
 	};
-	PyObject *module = NULL;
+	PyObject *module = PyModule_Create(&moduledef);
+#endif
+	if (!module)
+		goto done;
+
+	/*
+	 * Initialize the classes
+	 */
 
 	if(PyType_Ready(&ligolw_Tokenizer_Type) < 0)
 		goto done;
 	if(PyType_Ready(&ligolw_RowBuilder_Type) < 0)
 		goto done;
 	if(PyType_Ready(&ligolw_RowDumper_Type) < 0)
-		goto done;
-
-	/*
-	 * Create the module.
-	 */
-
-	module = PyModule_Create(&moduledef);
-	if (!module)
 		goto done;
 
 	/*
@@ -159,6 +165,10 @@ PyMODINIT_FUNC PyInit_tokenizer(void)
 
 	Py_INCREF(&ligolw_RowDumper_Type);
 	PyModule_AddObject(module, "RowDumper", (PyObject *) &ligolw_RowDumper_Type);
+
+	/*
+	 * Done.
+	 */
 
 done:
 #if PY_MAJOR_VERSION < 3
