@@ -1,7 +1,7 @@
 Source: python-ligo-lw
 Section: python
 Priority: optional
-Maintainer: Steffen Grunewald <steffen.grunewald@aei.mpg.de>
+Maintainer: Kipp Cannon <kipp.cannon@ligo.org>
 Build-Depends:
  debhelper (>= 9),
  dh-python,
