@@ -298,9 +298,17 @@ static PyObject *ligolw_ilwdchar___str__(PyObject *self)
 		Py_ssize_t tbl_len = PyUnicode_GetSize(tbl);
 		Py_ssize_t col_len = PyUnicode_GetSize(col);
 		wchar_t buff[tbl_len + col_len + 23];
+#if PY_MAJOR_VERSION < 3
 		PyUnicode_AsWideChar((PyUnicodeObject *) tbl, buff, tbl_len);
+#else
+		PyUnicode_AsWideChar(tbl, buff, tbl_len);
+#endif
 		buff[tbl_len] = L':';
+#if PY_MAJOR_VERSION < 3
 		PyUnicode_AsWideChar((PyUnicodeObject *) col, buff + tbl_len + 1, col_len);
+#else
+		PyUnicode_AsWideChar(col, buff + tbl_len + 1, col_len);
+#endif
 		buff[tbl_len + 1 + col_len] = L':';
 		swprintf(&buff[tbl_len + 1 + col_len], tbl_len + col_len + 23, L":%ld", ilwd->i);
 		result = PyUnicode_FromWideChar(buff, wcslen(buff));
