@@ -75,7 +75,9 @@ def strip_ilwdchar(xmldoc):
 		logging.info("converting ID column(s) %s" % ", ".join(sorted(idattrs)))
 		for row in table:
 			for attr in idattrs:
-				setattr(row, attr, int(getattr(row, attr)))
+				new_value = getattr(row, attr)
+				if new_value is not None:
+					setattr(row, attr, int(new_value))
 
 		# update the column types
 		for attr in idattrs:
