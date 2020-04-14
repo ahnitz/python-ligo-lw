@@ -564,7 +564,7 @@ class Process(table.Table.RowType):
 			end_time = None,
 			jobid = jobid,
 			domain = domain,
-			instruments = ifos
+			instruments = instruments
 		)
 		try:
 			self.username = ProcessTable.get_username()
