@@ -107,7 +107,7 @@ def register_to_xmldoc(xmldoc, program, paramdict, **kwargs):
 		paramtable = lsctables.New(lsctables.ProcessParamsTable)
 		xmldoc.childNodes[0].appendChild(paramtable)
 
-	for name, values in paramdict:
+	for name, values in paramdict.items():
 		# change the name back to the form it had on the command
 		# line
 		name = u"--%s" % name.replace("_", "-")
