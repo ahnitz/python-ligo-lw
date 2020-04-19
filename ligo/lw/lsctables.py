@@ -550,6 +550,10 @@ class Process(table.Table.RowType):
 		be initialized before the row object can be written to a
 		file, and so in this way the calling code is required to
 		provide a proper value for it.
+
+		Example:
+
+		>>> process = Process.initialized()
 		"""
 		self = cls(
 			program = program,
