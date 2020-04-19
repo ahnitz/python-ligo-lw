@@ -17,6 +17,7 @@ check : \
 	test_table \
 	test_tokenizer \
 	test_utils \
+	test_utils_process \
 	test_utils_segments
 	@echo "All Tests Passed"
 
@@ -70,7 +71,7 @@ ligolw_print_test ligolw_sqlite_test :
 	sh $@.sh && $(printpassfail)
 	@echo "<=== end $@ ==="
 
-ligo_lw_test_01 test_array test_ilwd test_ligolw test_lsctables test_param test_table test_tokenizer test_utils test_utils_segments :
+ligo_lw_test_01 test_array test_ilwd test_ligolw test_lsctables test_param test_table test_tokenizer test_utils test_utils_process test_utils_segments :
 	@echo "=== start $@ ===>"
 	$(PYTHON) $@.py && $(printpassfail)
 	@echo "<=== end $@ ==="

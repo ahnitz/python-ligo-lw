@@ -1,4 +1,4 @@
-# Copyright (C) 2006--2013,2015,2017,2019  Kipp Cannon
+# Copyright (C) 2006--2013,2015,2017,2019,2020  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -90,6 +90,14 @@ def register_to_xmldoc(xmldoc, program, paramdict, **kwargs):
 	keyword arguments are passed to lsctables.Process.initialized(),
 	see that method for more information.  The new process row object
 	is returned.
+
+	Example
+
+	>>> from ligo.lw import ligolw
+	>>> xmldoc = ligolw.Document()
+	>>> xmldoc.appendChild(ligolw.LIGO_LW())	# doctest: +ELLIPSIS
+	<ligo.lw.ligolw.LIGO_LW object at ...>
+	>>> process = register_to_xmldoc(xmldoc, "program_name", {"verbose": True})
 	"""
 	try:
 		proctable = lsctables.ProcessTable.get_table(xmldoc)
