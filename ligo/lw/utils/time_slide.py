@@ -24,7 +24,7 @@
 #
 
 
-from glue.text_progress_bar import ProgressBar
+from tqdm import tqdm
 from .. import __author__, __date__, __version__
 from .. import lsctables
 
@@ -110,31 +110,26 @@ def time_slides_vacuum(time_slides, verbose = False):
 	"""
 	# convert offsets to deltas
 	time_slides = dict((time_slide_id, offsetvect.deltas) for time_slide_id, offsetvect in time_slides.items())
-	if verbose:
-		progressbar = ProgressBar(max = len(time_slides))
-	else:
-		progressbar = None
-	# old --> new mapping
-	mapping = {}
-	# while there are time slide offset dictionaries remaining
-	while time_slides:
-		# pick an ID/offset dictionary pair at random
-		id1, deltas1 = time_slides.popitem()
-		# for every other ID/offset dictionary pair in the time
-		# slides
-		ids_to_delete = []
-		for id2, deltas2 in time_slides.items():
-			# if the relative offset dictionaries are
-			# equivalent record in the old --> new mapping
-			if deltas2 == deltas1:
-				mapping[id2] = id1
-				ids_to_delete.append(id2)
-		for id2 in ids_to_delete:
-			time_slides.pop(id2)
-		if progressbar is not None:
-			progressbar.update(progressbar.max - len(time_slides))
+	with tqdm(total=len(time_slides), disable=not verbose) as progressbar:
+		# old --> new mapping
+		mapping = {}
+		# while there are time slide offset dictionaries remaining
+		while time_slides:
+			# pick an ID/offset dictionary pair at random
+			id1, deltas1 = time_slides.popitem()
+			# for every other ID/offset dictionary pair in the time
+			# slides
+			ids_to_delete = []
+			for id2, deltas2 in time_slides.items():
+				# if the relative offset dictionaries are
+				# equivalent record in the old --> new mapping
+				if deltas2 == deltas1:
+					mapping[id2] = id1
+					ids_to_delete.append(id2)
+			for id2 in ids_to_delete:
+				time_slides.pop(id2)
+			progressbar.update(progressbar.total - len(time_slides))
 	# done
-	del progressbar
 	return mapping
 
 

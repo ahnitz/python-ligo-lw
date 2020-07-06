@@ -34,7 +34,7 @@ import sys
 from six.moves import urllib
 
 
-from glue.text_progress_bar import ProgressBar
+from tqdm import tqdm
 from .. import __author__, __date__, __version__
 from .. import ligolw
 from .. import table
@@ -94,13 +94,9 @@ def reassign_ids(doc, verbose = False):
 	"""
 	# Can't simply run reassign_ids() on doc because we need to
 	# construct a fresh old --> new mapping within each LIGO_LW block.
-	progressbar = ProgressBar("reassigning row IDs", max = len(doc.childNodes)) if verbose else None
-	for elem in doc.childNodes:
-		if progressbar is not None:
-			progressbar.increment()
+	for elem in tqdm(doc.childNodes, desc='reassigning row IDs', disable=not verbose):
 		if elem.tagName == ligolw.LIGO_LW.tagName:
 			table.reassign_ids(elem)
-	del progressbar
 	return doc
 
 

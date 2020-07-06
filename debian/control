@@ -32,6 +32,7 @@ Depends:
  python-ligo-segments,
  python-numpy,
  python-six,
+ python-tqdm,
  python-yaml
 Recommends:
  python-lalburst,
@@ -79,6 +80,7 @@ Depends:
  python3-ligo-segments,
  python3-numpy,
  python3-six,
+ python3-tqdm,
  python3-yaml
 Recommends:
  python3-lalburst,

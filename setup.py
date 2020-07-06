@@ -96,5 +96,6 @@ setup(
 		"python-dateutil",
 		"pyyaml",
 		"six",
+		"tqdm"
 	]
 )
