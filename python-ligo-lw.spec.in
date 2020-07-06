@@ -28,11 +28,11 @@ several programs to perform common, basic, manipulations of files in this format
 Summary:	LIGO Light-Weight XML I/O Library (python%{python2_version})
 Requires:	python >= 2.7
 Requires:	python2-dateutil
-Requires:	python2-glue
-Requires:	python2-lal
-# temporarily commented out to break cyclic dependency.  lalburst is an
-# optional dependency, but the rpm version at CIT is too old for that
+# temporarily commented out to break cyclic dependency.  The following are
+# optional dependencies, but the rpm version at CIT is too old for that
 # feature
+#Requires:	python2-glue
+#Requires:	python2-lal
 #Requires:	python2-lalburst
 Requires:	python2-ligo-common
 Requires:	python2-ligo-segments
@@ -52,11 +52,11 @@ library to read, write, and interact with documents in this format.
 Summary:	LIGO Light-Weight XML I/O Library (python%{python3_version})
 Requires:	python%{python3_pkgversion}
 Requires:	python%{python3_pkgversion}-dateutil
-Requires:	python%{python3_pkgversion}-glue
-Requires:	python%{python3_pkgversion}-lal
-# temporarily commented out to break cyclic dependency.  lalburst is an
-# optional dependency, but the rpm version at CIT is too old for that
+# temporarily commented out to break cyclic dependency.  The following are
+# optional dependencies, but the rpm version at CIT is too old for that
 # feature
+#Requires:	python%{python3_pkgversion}-glue
+#Requires:	python%{python3_pkgversion}-lal
 #Requires:	python%{python3_pkgversion}-lalburst
 Requires:	python%{python3_pkgversion}-ligo-common
 Requires:	python%{python3_pkgversion}-ligo-segments
@@ -73,8 +73,11 @@ library to read, write, and interact with documents in this format.
 Summary:	Programs for manipulating LIGO Light-Weight XML files
 Requires:	python%{python3_pkgversion}-%{shortname} = %{version}
 Requires:	python%{python3_pkgversion}
-Requires:	python%{python3_pkgversion}-glue
-Requires:	python%{python3_pkgversion}-lal
+# temporarily commented out to break cyclic dependency.  The following are
+# optional dependencies, but the rpm version at CIT is too old for that
+# feature
+#Requires:	python%{python3_pkgversion}-glue
+#Requires:	python%{python3_pkgversion}-lal
 Requires:	python%{python3_pkgversion}-ligo-segments
 Conflicts:	glue-ligolw-tools
 Obsoletes:	glue-ligolw-tools

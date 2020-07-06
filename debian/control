@@ -26,8 +26,6 @@ Depends:
  ${misc:Depends},
  ${python:Depends},
  python-dateutil,
- python-glue,
- python-lal,
  python-ligo-common,
  python-ligo-segments,
  python-numpy,
@@ -35,6 +33,8 @@ Depends:
  python-tqdm,
  python-yaml
 Recommends:
+ python-glue,
+ python-lal,
  python-lalburst,
  python-ligo-lw-bin
 Description: LIGO Light-Weight XML I/O library
@@ -49,10 +49,11 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
  ${python:Depends},
- python-glue,
- python-lal,
  python-ligo-lw,
  python-ligo-segments
+Recommends:
+ python-glue,
+ python-lal
 Conflicts:
  python-glue-ligolw-tools,
  python-glue (<< 2.0),
@@ -74,8 +75,6 @@ Depends:
  ${misc:Depends},
  ${python3:Depends},
  python3-dateutil,
- python3-glue,
- python3-lal,
  python3-ligo-common,
  python3-ligo-segments,
  python3-numpy,
@@ -83,6 +82,8 @@ Depends:
  python3-tqdm,
  python3-yaml
 Recommends:
+ python3-glue,
+ python3-lal,
  python3-lalburst,
  python3-ligo-lw-bin
 Description: LIGO Light-Weight XML I/O library
@@ -97,10 +98,11 @@ Depends:
  ${shlibs:Depends},
  ${misc:Depends},
  ${python3:Depends},
- python3-glue,
- python3-lal,
  python3-ligo-lw,
  python3-ligo-segments
+Recommends:
+ python3-glue,
+ python3-lal
 Conflicts:
  python3-glue-ligolw-tools,
  python3-glue (<< 2.0),
