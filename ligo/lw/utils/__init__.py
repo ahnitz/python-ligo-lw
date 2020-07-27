@@ -309,17 +309,34 @@ class SignalsTrap(object):
 		return False
 
 
-def load_fileobj(fileobj, gz = None, xmldoc = None, contenthandler = None):
+def _normalize_compress_kwarg(compress = None, gz = None):
+	if gz is not None:
+		warnings.warn(
+			'The gz keyword argument is deprecated. '
+			'Use the compress keyword argument instead.',
+			DeprecationWarning,
+			stacklevel=3)
+		if compress is not None:
+			raise ValueError(
+				'must not specify both compress and gz keyword arguments')
+		if gz:
+			compress = 'gz'
+		else:
+			compress = False
+	return compress
+
+
+def load_fileobj(fileobj, compress = None, gz = None, xmldoc = None, contenthandler = None):
 	"""
 	Parse the contents of the file object fileobj, and return the
 	contents as a LIGO Light Weight document tree.  The file object
 	does not need to be seekable.  The file object must be in binary
 	mode.
 
-	If the gz parameter is None (the default) then gzip compressed data
+	If the compress parameter is None (the default) then gzip compressed data
 	will be automatically detected and decompressed, otherwise
-	decompression can be forced on or off by setting gz to True or
-	False respectively.
+	decompression can be forced on by setting compress to the string ``gz``,
+	or force off by setting compress to False.
 
 	If the optional xmldoc argument is provided and not None, the
 	parsed XML tree will be appended to that document, otherwise a new
@@ -341,9 +358,12 @@ def load_fileobj(fileobj, gz = None, xmldoc = None, contenthandler = None):
 	ligo.lw.ligolw.FilteringLIGOLWContentHandler for examples of custom
 	content handlers used to load subsets of documents into memory.
 	"""
+	# FIXME: remove the following once we drop the ``gz`` keyword argument.
+	compress = _normalize_compress_kwarg(compress = compress, gz = gz)
+
 	if contenthandler is None:
 		raise ValueError("missing required keyword argument \"contenthandler\"")
-	if gz or gz is None:
+	if compress == 'gz' or compress is None:
 		fileobj = RewindableInputFile(fileobj)
 		magic = fileobj.read(2)
 		fileobj.seek(0, os.SEEK_SET)
@@ -411,14 +431,14 @@ def load_url(url, verbose = False, **kwargs):
 		return load_fileobj(fileobj, **kwargs)
 
 
-def write_fileobj(xmldoc, fileobj, gz = False, compresslevel = 3, **kwargs):
+def write_fileobj(xmldoc, fileobj, compress = None, gz = False, compresslevel = 3, **kwargs):
 	"""
 	Writes the LIGO Light Weight document tree rooted at xmldoc to the
 	given file object.  Internally, the .write() method of the xmldoc
 	object is invoked and any additional keyword arguments are passed
 	to that method.  The file object need not be seekable.  The file
 	object must be in binary mode.  The output data is gzip compressed
-	on the fly if gz is True, and in that case the compresslevel
+	on the fly if compress is ``gz``, and in that case the compresslevel
 	parameter sets the gzip compression level (the default is 3).
 
 	Example:
@@ -428,8 +448,11 @@ def write_fileobj(xmldoc, fileobj, gz = False, compresslevel = 3, **kwargs):
 	>>> xmldoc = load_filename("demo.xml", contenthandler = ligolw.LIGOLWContentHandler)
 	>>> write_fileobj(xmldoc, open("/dev/null","wb"))
 	"""
+	# FIXME: remove the following once we drop the ``gz`` keyword argument.
+	compress = _normalize_compress_kwarg(compress = compress, gz = gz)
+
 	with NoCloseFlushWrapper(fileobj) as fileobj:
-		if gz:
+		if compress == 'gz':
 			fileobj = gzip.GzipFile(mode = "wb", fileobj = fileobj, compresslevel = compresslevel)
 		with codecs.getwriter("utf_8")(fileobj) as fileobj:
 			xmldoc.write(fileobj, **kwargs)
@@ -465,13 +488,13 @@ class tildefile(object):
 		return False
 
 
-def write_filename(xmldoc, filename, verbose = False, gz = False, with_mv = True, trap_signals = SignalsTrap.default_signals, **kwargs):
+def write_filename(xmldoc, filename, verbose = False, compress = None, gz = False, with_mv = True, trap_signals = SignalsTrap.default_signals, **kwargs):
 	"""
 	Writes the LIGO Light Weight document tree rooted at xmldoc to the
 	file name filename.  If filename is None the file is written to
 	stdout, otherwise it is written to the named file.  Friendly
 	verbosity messages are printed while writing the file if verbose is
-	True.  The output data is gzip compressed on the fly if gz is True.
+	True.  The output data is gzip compressed on the fly if compress is ``gz``.
 	If with_mv is True and filename is not None the filename has a "~"
 	appended to it and the file is written to that name then moved to
 	the requested name once the write has completed successfully.
@@ -494,21 +517,24 @@ def write_filename(xmldoc, filename, verbose = False, gz = False, with_mv = True
 	Example:
 
 	>>> write_filename(xmldoc, "demo.xml")	# doctest: +SKIP
-	>>> write_filename(xmldoc, "demo.xml.gz", gz = True)	# doctest: +SKIP
+	>>> write_filename(xmldoc, "demo.xml.gz", compress = 'gz')	# doctest: +SKIP
 	"""
+	# FIXME: remove the following once we drop the ``gz`` keyword argument.
+	compress = _normalize_compress_kwarg(compress = compress, gz = gz)
+
 	if verbose:
 		sys.stderr.write("writing %s ...\n" % (("'%s'" % filename) if filename is not None else "stdout"))
 	with SignalsTrap(trap_signals):
 		if filename is None:
 			# In Python 3, sys.stdout has a .buffer attribute
 			# that is the underyling byte-oriented stream.
-			write_fileobj(xmldoc, sys.stdout.buffer if hasattr(sys.stdout, "buffer") else sys.stdout, gz = gz, **kwargs)
+			write_fileobj(xmldoc, sys.stdout.buffer if hasattr(sys.stdout, "buffer") else sys.stdout, compress = compress, **kwargs)
 		else:
-			if not gz and filename.endswith(".gz"):
+			if compress != 'gz' and filename.endswith(".gz"):
 				warnings.warn("filename '%s' ends in '.gz' but file is not being gzip-compressed" % filename, UserWarning)
 			binary_open = lambda filename: open(filename, "wb")
 			with (binary_open if not with_mv else tildefile)(filename) as fileobj:
-				write_fileobj(xmldoc, fileobj, gz = gz, **kwargs)
+				write_fileobj(xmldoc, fileobj, compress = compress, **kwargs)
 
 
 def write_url(xmldoc, url, **kwargs):
@@ -525,6 +551,6 @@ def write_url(xmldoc, url, **kwargs):
 	Example:
 
 	>>> write_url(xmldoc, "file:///data.xml")	# doctest: +SKIP
-	>>> write_url(xmldoc, "file:///data.xml.gz", gz = True)	# doctest: +SKIP
+	>>> write_url(xmldoc, "file:///data.xml.gz", compress = 'gz')	# doctest: +SKIP
 	"""
 	return write_filename(xmldoc, local_path_from_url(url), **kwargs)

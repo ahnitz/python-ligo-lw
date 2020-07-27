@@ -87,5 +87,5 @@ for filename in filenames or [None]:
 
 	ilwd.strip_ilwdchar(xmldoc)
 
-	ligolw_utils.write_filename(xmldoc, filename, gz = (filename or "stdout").endswith(".gz"), verbose = options.verbose)
+	ligolw_utils.write_filename(xmldoc, filename, compress = 'gz' if (filename or "stdout").endswith(".gz") else False, verbose = options.verbose)
 	xmldoc.unlink()

@@ -193,5 +193,5 @@ for n, filename in enumerate(filenames, 1):
 		RemoveColumns(doc, options.delete_column)
 	if options.delete_element:
 		RemoveElements(doc, options.delete_element)
-	ligolw_utils.write_filename(doc, filename, verbose = options.verbose, gz = (filename or "stdout").endswith(".gz"))
+	ligolw_utils.write_filename(doc, filename, verbose = options.verbose, compress = 'gz' if (filename or "stdout").endswith(".gz") else False)
 	doc.unlink()

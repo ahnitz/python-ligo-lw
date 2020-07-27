@@ -73,7 +73,7 @@ Example:
 ...
 >>> # write document.  must explicitly state whether or not the file is to be
 >>> # gzip compressed
->>> ligolw_utils.write_filename(xmldoc, filename, gz = filename.endswith(".gz"), verbose = True)
+>>> ligolw_utils.write_filename(xmldoc, filename, compress = 'gz' if filename.endswith(".gz") else False, verbose = True)
 """
 
 

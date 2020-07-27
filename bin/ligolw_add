@@ -135,7 +135,7 @@ ligolw_utils.write_filename(
 	xmldoc,
 	options.output,
 	verbose = options.verbose,
-	gz = (options.output or "stdout").endswith(".gz")
+	compress = 'gz' if (options.output or "stdout").endswith(".gz") else False
 )
 
 
