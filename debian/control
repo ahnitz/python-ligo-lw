@@ -5,6 +5,8 @@ Maintainer: Kipp Cannon <kipp.cannon@ligo.org>
 Build-Depends:
  debhelper (>= 9),
  dh-python,
+# for xmllint tool used by test suite
+ libxml2-utils,
  python-all,
  python-all-dev,
  python-ligo-common,

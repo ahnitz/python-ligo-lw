@@ -9,14 +9,15 @@ Source:		http://software.ligo.org/lscsoft/source/%{name}-%{version}.tar.gz
 Url:		https://git.ligo.org/kipp.cannon/python-ligo-lw
 Prefix:		%{_prefix}
 
+BuildRequires:	epel-rpm-macros
+BuildRequires:	python-devel
+BuildRequires:	python%{python3_pkgversion}-devel
 BuildRequires:	python-rpm-macros
 BuildRequires:	python-srpm-macros
 BuildRequires:	python2-rpm-macros
 BuildRequires:	python3-rpm-macros
-BuildRequires:	epel-rpm-macros
-
-BuildRequires:	python-devel
-BuildRequires:	python%{python3_pkgversion}-devel
+# for xmllint tool used by test suite
+BuildRequires:	libxml2
 
 %description
 The LIGO Light-Weight XML format is widely used within gravitational-wave
