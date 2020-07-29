@@ -10,8 +10,8 @@
 #io.StringIO = StringIO
 import doctest
 import sys
-from ligo.lw import utils
+from ligo.lw import utils as ligolw_utils
 
 if __name__ == '__main__':
-	failures = doctest.testmod(utils)[0]
+	failures = doctest.testmod(ligolw_utils)[0]
 	sys.exit(bool(failures))
