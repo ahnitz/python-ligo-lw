@@ -2,6 +2,12 @@
 
 BASE="ligolw_sqlite_test"
 
+xmlcanonicalize () {
+	for filename in "$@" ; do
+		xmllint --c14n "${filename}" >"${filename}"~ && mv -f "${filename}"~ "${filename}" || return;
+	done
+}
+
 #
 # can ligolw_sqlite detect a missing input file?
 #
@@ -28,6 +34,7 @@ echo "--------------------------------------------------------------------"
 rm -vf ${BASE}_ref.xml ${BASE}.sqlite ${BASE}_output.xml
 ligolw_add --verbose --output ${BASE}_ref.xml ${BASE}_input.xml.gz ${BASE}_input.xml.gz
 ligolw_sqlite --verbose --replace --database ${BASE}.sqlite --extract ${BASE}_output.xml file://${PWD}/${BASE}_input.xml.gz ${BASE}_input.xml.gz
+xmlcanonicalize ${BASE}_ref.xml ${BASE}_output.xml || exit
 cmp ${BASE}_ref.xml ${BASE}_output.xml || exit
 rm -vf ${BASE}.sqlite ${BASE}_output.xml
 echo
@@ -45,6 +52,7 @@ echo "ligolw_sqlite test 3:  merge .sqlite files and compare to ligolw_add"
 echo "--------------------------------------------------------------------"
 ligolw_sqlite --verbose --preserve-ids --replace --database ${BASE}_input.sqlite ${BASE}_input.xml.gz
 ligolw_sqlite --verbose --replace --database ${BASE}.sqlite --extract ${BASE}_output.xml file://${PWD}/${BASE}_input.sqlite ${BASE}_input.sqlite
+xmlcanonicalize ${BASE}_ref.xml ${BASE}_output.xml || exit
 cmp ${BASE}_ref.xml ${BASE}_output.xml || exit
 rm -vf ${BASE}_ref.xml ${BASE}_input.sqlite ${BASE}.sqlite ${BASE}_output.xml
 echo
