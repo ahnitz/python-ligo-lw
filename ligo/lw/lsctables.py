@@ -116,11 +116,11 @@ def New(cls, columns = None, **kwargs):
 	>>> tbl = New(ProcessTable, [u"process_id", u"start_time", u"end_time", u"comment"])
 	>>> tbl.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
 	<Table Name="process:table">
-		<Column Type="int_8s" Name="process_id"/>
-		<Column Type="int_4s" Name="start_time"/>
-		<Column Type="int_4s" Name="end_time"/>
-		<Column Type="lstring" Name="comment"/>
-		<Stream Delimiter="," Type="Local" Name="process:table">
+		<Column Name="process_id" Type="int_8s"/>
+		<Column Name="start_time" Type="int_4s"/>
+		<Column Name="end_time" Type="int_4s"/>
+		<Column Name="comment" Type="lstring"/>
+		<Stream Name="process:table" Delimiter="," Type="Local">
 		</Stream>
 	</Table>
 	"""

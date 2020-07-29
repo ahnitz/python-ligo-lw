@@ -360,39 +360,39 @@ class LigolwSegments(set):
 	<!DOCTYPE LIGO_LW SYSTEM "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt">
 	<LIGO_LW>
 		<Table Name="segment_definer:table">
-			<Column Type="int_8s" Name="process:process_id"/>
-			<Column Type="int_8s" Name="segment_def_id"/>
-			<Column Type="lstring" Name="ifos"/>
-			<Column Type="lstring" Name="name"/>
-			<Column Type="int_4s" Name="version"/>
-			<Column Type="lstring" Name="comment"/>
-			<Stream Delimiter="," Type="Local" Name="segment_definer:table">
+			<Column Name="process:process_id" Type="int_8s"/>
+			<Column Name="segment_def_id" Type="int_8s"/>
+			<Column Name="ifos" Type="lstring"/>
+			<Column Name="name" Type="lstring"/>
+			<Column Name="version" Type="int_4s"/>
+			<Column Name="comment" Type="lstring"/>
+			<Stream Name="segment_definer:table" Delimiter="," Type="Local">
 				0,0,"H1","test",,,
 				0,1,"L1","test",,,
 			</Stream>
 		</Table>
 		<Table Name="segment_summary:table">
-			<Column Type="int_8s" Name="process:process_id"/>
-			<Column Type="int_8s" Name="segment_sum_id"/>
-			<Column Type="int_4s" Name="start_time"/>
-			<Column Type="int_4s" Name="start_time_ns"/>
-			<Column Type="int_4s" Name="end_time"/>
-			<Column Type="int_4s" Name="end_time_ns"/>
-			<Column Type="int_8s" Name="segment_definer:segment_def_id"/>
-			<Column Type="lstring" Name="comment"/>
-			<Stream Delimiter="," Type="Local" Name="segment_summary:table">
+			<Column Name="process:process_id" Type="int_8s"/>
+			<Column Name="segment_sum_id" Type="int_8s"/>
+			<Column Name="start_time" Type="int_4s"/>
+			<Column Name="start_time_ns" Type="int_4s"/>
+			<Column Name="end_time" Type="int_4s"/>
+			<Column Name="end_time_ns" Type="int_4s"/>
+			<Column Name="segment_definer:segment_def_id" Type="int_8s"/>
+			<Column Name="comment" Type="lstring"/>
+			<Stream Name="segment_summary:table" Delimiter="," Type="Local">
 				0,0,4294967295,4294967295,2147483647,4294967295,1,,
 			</Stream>
 		</Table>
 		<Table Name="segment:table">
-			<Column Type="int_8s" Name="process:process_id"/>
-			<Column Type="int_8s" Name="segment_id"/>
-			<Column Type="int_4s" Name="start_time"/>
-			<Column Type="int_4s" Name="start_time_ns"/>
-			<Column Type="int_4s" Name="end_time"/>
-			<Column Type="int_4s" Name="end_time_ns"/>
-			<Column Type="int_8s" Name="segment_definer:segment_def_id"/>
-			<Stream Delimiter="," Type="Local" Name="segment:table">
+			<Column Name="process:process_id" Type="int_8s"/>
+			<Column Name="segment_id" Type="int_8s"/>
+			<Column Name="start_time" Type="int_4s"/>
+			<Column Name="start_time_ns" Type="int_4s"/>
+			<Column Name="end_time" Type="int_4s"/>
+			<Column Name="end_time_ns" Type="int_4s"/>
+			<Column Name="segment_definer:segment_def_id" Type="int_8s"/>
+			<Stream Name="segment:table" Delimiter="," Type="Local">
 				0,0,0,0,10,0,0,
 				0,1,5,0,15,0,1
 			</Stream>
@@ -400,7 +400,7 @@ class LigolwSegments(set):
 	</LIGO_LW>
 	>>> xmlsegments = LigolwSegments(xmldoc)
 	>>> xmlsegments.get_by_name("test")
-	{u'H1': [segment(LIGOTimeGPS(0, 0), LIGOTimeGPS(10, 0))], u'L1': [segment(LIGOTimeGPS(5, 0), LIGOTimeGPS(15, 0))]}
+	{'H1': [segment(LIGOTimeGPS(0, 0), LIGOTimeGPS(10, 0))], 'L1': [segment(LIGOTimeGPS(5, 0), LIGOTimeGPS(15, 0))]}
 	>>> xmlsegments.get_by_name("wrong name")
 	Traceback (most recent call last):
 		...

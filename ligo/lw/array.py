@@ -183,7 +183,7 @@ class Array(ligolw.Array):
 	<Array Type="int_8s" Name="test:array">
 		<Dim Name="dim1">3</Dim>
 		<Dim Name="dim0">5</Dim>
-		<Stream Delimiter=" " Type="Local">
+		<Stream Type="Local" Delimiter=" ">
 			0 1 2 3 4
 			0 1 2 3 4
 			0 1 2 3 4
@@ -194,7 +194,7 @@ class Array(ligolw.Array):
 	>>> elem.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
 	<Array Type="int_8s" Name="test:array">
 		<Dim Name="dim0">15</Dim>
-		<Stream Delimiter=" " Type="Local">
+		<Stream Type="Local" Delimiter=" ">
 			0 0 0 1 1 1 2 2 2 3 3 3 4 4 4
 		</Stream>
 	</Array>
@@ -207,7 +207,7 @@ class Array(ligolw.Array):
 		<Dim>2</Dim>
 		<Dim>3</Dim>
 		<Dim Name="dim0">4</Dim>
-		<Stream Delimiter=" " Type="Local">
+		<Stream Type="Local" Delimiter=" ">
 			0 1 2 3
 			0 1 2 3
 			0 1 2 3
@@ -317,7 +317,7 @@ class Array(ligolw.Array):
 		<Array Type="real_8" Name="test:array">
 			<Dim>3</Dim>
 			<Dim>4</Dim>
-			<Stream Delimiter=" " Type="Local">
+			<Stream Type="Local" Delimiter=" ">
 				0 3 6 9
 				1 4 7 10
 				2 5 8 11

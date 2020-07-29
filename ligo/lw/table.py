@@ -165,7 +165,7 @@ class Column(ligolw.Column):
 	array([ 8., 10., 12.])
 	>>> tbl.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
 	<Table Name="test">
-		<Column Type="real_8" Name="test:snr"/>
+		<Column Name="test:snr" Type="real_8"/>
 		<Stream Name="test">
 			8,
 			10,
@@ -181,7 +181,7 @@ class Column(ligolw.Column):
 	>>> col[2] = 9.
 	>>> tbl.write(sys.stdout)		# doctest: +NORMALIZE_WHITESPACE
 	<Table Name="test">
-		<Column Type="real_8" Name="test:snr"/>
+		<Column Name="test:snr" Type="real_8"/>
 		<Stream Name="test">
 			9,
 			9,
