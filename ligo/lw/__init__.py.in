@@ -86,12 +86,12 @@ __all__ = [
 	"__author__",
 	"__date__",
 	"__version__",
-	"ligolw",
-	"types",
-	"ilwd",
-	"table",
 	"array",
-	"param",
+	"ilwd",
+	"ligolw",
 	"lsctables",
+	"param",
+	"table",
+	"types",
 	"utils"
 ]
