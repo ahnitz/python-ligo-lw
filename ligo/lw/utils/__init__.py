@@ -138,7 +138,7 @@ class RewindableInputFile(object):
 		# getting more data
 		self.reuse = 0
 		# the internal buffer
-		self.buf = b' ' * buffer_size
+		self.buf = b" " * buffer_size
 		# flag indicating a .seek()-based EOF test is in progress
 		self.gzip_hack_pretend_to_be_at_eof = False
 		# avoid attribute look-ups
@@ -154,7 +154,7 @@ class RewindableInputFile(object):
 
 	def next(self):
 		if self.gzip_hack_pretend_to_be_at_eof:
-			return b''
+			return b""
 		if self.reuse:
 			buf = self.buf[-self.reuse:]
 			self.reuse = 0
@@ -166,7 +166,7 @@ class RewindableInputFile(object):
 
 	def read(self, size = None):
 		if self.gzip_hack_pretend_to_be_at_eof:
-			return b''
+			return b""
 		if self.reuse:
 			if self.reuse < 0:
 				buf = self._read(size - self.reuse)
@@ -347,7 +347,7 @@ def load_fileobj(fileobj, gz = None, xmldoc = None, contenthandler = None):
 		fileobj = RewindableInputFile(fileobj)
 		magic = fileobj.read(2)
 		fileobj.seek(0, os.SEEK_SET)
-		if gz or magic == b'\037\213':
+		if gz or magic == b"\037\213":
 			fileobj = gzip.GzipFile(mode = "rb", fileobj = fileobj)
 	if xmldoc is None:
 		xmldoc = ligolw.Document()
@@ -506,7 +506,7 @@ def write_filename(xmldoc, filename, verbose = False, gz = False, with_mv = True
 		else:
 			if not gz and filename.endswith(".gz"):
 				warnings.warn("filename '%s' ends in '.gz' but file is not being gzip-compressed" % filename, UserWarning)
-			binary_open = lambda filename: open(filename, 'wb')
+			binary_open = lambda filename: open(filename, "wb")
 			with (binary_open if not with_mv else tildefile)(filename) as fileobj:
 				write_fileobj(xmldoc, fileobj, gz = gz, **kwargs)
 
