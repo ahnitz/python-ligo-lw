@@ -502,12 +502,7 @@ def write_filename(xmldoc, filename, verbose = False, gz = False, with_mv = True
 		if filename is None:
 			# In Python 3, sys.stdout has a .buffer attribute
 			# that is the underyling byte-oriented stream.
-			fileobj = sys.stdout
-			try:
-				fileobj = fileobj.buffer
-			except AttributeError:
-				pass
-			write_fileobj(xmldoc, fileobj, gz = gz, **kwargs)
+			write_fileobj(xmldoc, sys.stdout.buffer if hasattr(sys.stdout, "buffer") else sys.stdout, gz = gz, **kwargs)
 		else:
 			if not gz and filename.endswith(".gz"):
 				warnings.warn("filename '%s' ends in '.gz' but file is not being gzip-compressed" % filename, UserWarning)
