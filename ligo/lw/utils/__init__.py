@@ -425,18 +425,7 @@ def write_fileobj(xmldoc, fileobj, gz = False, compresslevel = 3, **kwargs):
 	>>> import sys
 	>>> from ligo.lw import ligolw
 	>>> xmldoc = load_filename("demo.xml", contenthandler = ligolw.LIGOLWContentHandler)
-	>>> write_fileobj(xmldoc, sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
-	<?xml version='1.0' encoding='utf-8'?>
-	<!DOCTYPE LIGO_LW SYSTEM "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt">
-	<LIGO_LW>
-		<Table Name="demo:table">
-			<Column Type="lstring" Name="name"/>
-			<Column Type="real8" Name="value"/>
-			<Stream Delimiter="," Type="Local" Name="demo:table">
-	"mass",0.5,"velocity",34
-			</Stream>
-		</Table>
-	</LIGO_LW>
+	>>> write_fileobj(xmldoc, open("/dev/null","wb"))
 	"""
 	with NoCloseFlushWrapper(fileobj) as fileobj:
 		if gz:
