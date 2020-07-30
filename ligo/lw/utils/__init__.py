@@ -313,7 +313,8 @@ def load_fileobj(fileobj, gz = None, xmldoc = None, contenthandler = None):
 	"""
 	Parse the contents of the file object fileobj, and return the
 	contents as a LIGO Light Weight document tree.  The file object
-	does not need to be seekable.
+	does not need to be seekable.  The file object must be in binary
+	mode.
 
 	If the gz parameter is None (the default) then gzip compressed data
 	will be automatically detected and decompressed, otherwise
@@ -415,10 +416,10 @@ def write_fileobj(xmldoc, fileobj, gz = False, compresslevel = 3, **kwargs):
 	Writes the LIGO Light Weight document tree rooted at xmldoc to the
 	given file object.  Internally, the .write() method of the xmldoc
 	object is invoked and any additional keyword arguments are passed
-	to that method.  The file object need not be seekable.  The output
-	data is gzip compressed on the fly if gz is True, and in that case
-	the compresslevel parameter sets the gzip compression level (the
-	default is 3).
+	to that method.  The file object need not be seekable.  The file
+	object must be in binary mode.  The output data is gzip compressed
+	on the fly if gz is True, and in that case the compresslevel
+	parameter sets the gzip compression level (the default is 3).
 
 	Example:
 
