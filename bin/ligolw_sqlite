@@ -132,59 +132,51 @@ class ContentHandler(ligolw.LIGOLWContentHandler):
 if will_read_from_file and not will_write_to_file and not os.path.exists(options.database):
 	print("'%s': no such file" % options.database, file=sys.stderr)
 	sys.exit(1)
-target = dbtables.get_connection_filename(options.database, tmp_path = options.tmp_space if will_use_tmp_space else None, replace_file = will_replace_file, verbose = options.verbose)
-ContentHandler.connection = sqlite3.connect(str(target))
+
+with dbtables.workingcopy(options.database, tmp_path = options.tmp_space if will_use_tmp_space else None, replace_file = will_replace_file, verbose = options.verbose) as target:
+	ContentHandler.connection = sqlite3.connect(str(target))
 
 
-#
-# Insert files
-#
+	#
+	# Insert files
+	#
 
 
-if will_write_to_file:
-	for n, url in enumerate(urls, 1):
-		if options.verbose:
-			print("%d/%d:" % (n, len(urls)), end=' ', file=sys.stderr)
-		if url.endswith(".sqlite"):
-			source_filename = dbtables.get_connection_filename(local_path_from_url(url), tmp_path = options.tmp_space, verbose = options.verbose)
+	if will_write_to_file:
+		for n, url in enumerate(urls, 1):
 			if options.verbose:
-				print("reading '%s' ..." % source_filename, file=sys.stderr)
-			xmldoc = dbtables.get_xml(sqlite3.connect(str(source_filename)))
-			ligolw_sqlite.insert_from_xmldoc(ContentHandler.connection, xmldoc, preserve_ids = options.preserve_ids, verbose = options.verbose)
-			xmldoc.unlink()
-			dbtables.discard_connection_filename(local_path_from_url(url), source_filename, verbose = options.verbose)
+				print("%d/%d:" % (n, len(urls)), end=' ', file=sys.stderr)
+			if url.endswith(".sqlite"):
+				with dbtables.workingcopy(local_path_from_url(url), tmp_path = options.tmp_space, discard = True, verbose = options.verbose) as source_filename:
+					if options.verbose:
+						print("reading '%s' ..." % source_filename, file=sys.stderr)
+					xmldoc = dbtables.get_xml(sqlite3.connect(str(source_filename)))
+					ligolw_sqlite.insert_from_xmldoc(ContentHandler.connection, xmldoc, preserve_ids = options.preserve_ids, verbose = options.verbose)
+					xmldoc.unlink()
+			else:
+				ligolw_sqlite.insert_from_url(url, contenthandler = ContentHandler, preserve_ids = options.preserve_ids, verbose = options.verbose)
+		dbtables.build_indexes(ContentHandler.connection, options.verbose)
+
+
+	#
+	# Extract database contents
+	#
+
+
+	if options.extract is not None:
+		if options.extract == "-":
+			# stdout
+			ligolw_sqlite.extract(ContentHandler.connection, None, verbose = options.verbose)
 		else:
-			ligolw_sqlite.insert_from_url(url, contenthandler = ContentHandler, preserve_ids = options.preserve_ids, verbose = options.verbose)
-	dbtables.build_indexes(ContentHandler.connection, options.verbose)
+			ligolw_sqlite.extract(ContentHandler.connection, options.extract, verbose = options.verbose)
 
 
-#
-# Extract database contents
-#
+	#
+	# Close database
+	#
 
 
-if options.extract is not None:
-	if options.extract == "-":
-		# stdout
-		ligolw_sqlite.extract(ContentHandler.connection, None, verbose = options.verbose)
-	else:
-		ligolw_sqlite.extract(ContentHandler.connection, options.extract, verbose = options.verbose)
-
-
-#
-# Close database
-#
-
-
-ContentHandler.connection.close()
-
-
-#
-# Move database to final location
-#
-
-
-dbtables.put_connection_filename(options.database, target, verbose = options.verbose)
+	ContentHandler.connection.close()
 
 
 #
