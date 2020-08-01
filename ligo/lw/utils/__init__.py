@@ -365,7 +365,7 @@ def load_fileobj(fileobj, compress = None, gz = None, xmldoc = None, contenthand
 		fileobj = RewindableInputFile(fileobj)
 		magic = fileobj.read(2)
 		fileobj.seek(0, os.SEEK_SET)
-		if gz or magic == b"\037\213":
+		if compress == 'gz' or magic == b"\037\213":
 			fileobj = gzip.GzipFile(mode = "rb", fileobj = fileobj)
 	if xmldoc is None:
 		xmldoc = ligolw.Document()
