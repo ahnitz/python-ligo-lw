@@ -309,8 +309,9 @@ class SignalsTrap(object):
 		return False
 
 
-def _normalize_compress_kwarg(compress = None, gz = None):
-	if gz is not None:
+# FIXME: remove the following once we drop the ``gz`` keyword argument.
+def _normalize_compress_kwarg(compress = None, gz = False):
+	if gz:
 		warnings.warn(
 			'The gz keyword argument is deprecated. '
 			'Use the compress keyword argument instead.',
@@ -319,10 +320,7 @@ def _normalize_compress_kwarg(compress = None, gz = None):
 		if compress is not None:
 			raise ValueError(
 				'must not specify both compress and gz keyword arguments')
-		if gz:
-			compress = 'gz'
-		else:
-			compress = False
+		compress = 'gz'
 	return compress
 
 
