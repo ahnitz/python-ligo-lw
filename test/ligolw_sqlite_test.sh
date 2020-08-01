@@ -51,7 +51,7 @@ echo
 echo "ligolw_sqlite test 3:  merge .sqlite files and compare to ligolw_add"
 echo "--------------------------------------------------------------------"
 ligolw_sqlite --verbose --preserve-ids --replace --database ${BASE}_input.sqlite ${BASE}_input.xml.gz
-ligolw_sqlite --verbose --replace --database ${BASE}.sqlite --extract ${BASE}_output.xml file://${PWD}/${BASE}_input.sqlite ${BASE}_input.sqlite
+ligolw_sqlite --verbose --replace --tmp-space ${TMPDIR:-/tmp} --database ${BASE}.sqlite --extract ${BASE}_output.xml file://${PWD}/${BASE}_input.sqlite ${BASE}_input.sqlite
 xmlcanonicalize ${BASE}_ref.xml ${BASE}_output.xml || exit
 cmp ${BASE}_ref.xml ${BASE}_output.xml || exit
 rm -vf ${BASE}_ref.xml ${BASE}_input.sqlite ${BASE}.sqlite ${BASE}_output.xml
