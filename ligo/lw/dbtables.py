@@ -50,6 +50,7 @@ from . import ligolw
 from . import table
 from . import lsctables
 from . import types as ligolwtypes
+from . import utils as ligolw_utils
 
 
 #
@@ -78,144 +79,92 @@ def connection_db_type(connection):
 
 
 #
-# Module-level variable used to hold references to
-# tempfile.NamedTemporaryFiles objects to prevent them from being deleted
-# while in use.  NOT MEANT FOR USE BY CODE OUTSIDE OF THIS MODULE!
+# work with database file in scratch space
 #
 
 
-temporary_files = {}
-temporary_files_lock = threading.Lock()
-
-
-#
-# Module-level variable to hold the signal handlers that have been
-# overridden as part of the clean-up-scratch-files-on-signal feature.  NOT
-# MEANT FOR USE BY CODE OUTSIDE OF THIS MODULE!
-#
-
-
-origactions = {}
-
-
-def install_signal_trap(signums = (signal.SIGTERM, signal.SIGTSTP), retval = 1):
+class workingcopy(object):
 	"""
-	Installs a signal handler to erase temporary scratch files when a
-	signal is received.  This can be used to help ensure scratch files
-	are erased when jobs are evicted by Condor.  signums is a squence
-	of the signals to trap, the default value is a list of the signals
-	used by Condor to kill and/or evict jobs.
-
-	The logic is as follows.  If the current signal handler is
-	signal.SIG_IGN, i.e. the signal is being ignored, then the signal
-	handler is not modified since the reception of that signal would
-	not normally cause a scratch file to be leaked.  Otherwise a signal
-	handler is installed that erases the scratch files.  If the
-	original signal handler was a Python callable, then after the
-	scratch files are erased the original signal handler will be
-	invoked.  If program control returns from that handler, i.e.  that
-	handler does not cause the interpreter to exit, then sys.exit() is
-	invoked and retval is returned to the shell as the exit code.
-
-	Note:  by invoking sys.exit(), the signal handler causes the Python
-	interpreter to do a normal shutdown.  That means it invokes
-	atexit() handlers, and does other garbage collection tasks that it
-	normally would not do when killed by a signal.
-
-	Note:  this function will not replace a signal handler more than
-	once, that is if it has already been used to set a handler
-	on a signal then it will be a no-op when called again for that
-	signal until uninstall_signal_trap() is used to remove the handler
-	from that signal.
-
-	Note:  this function is called by get_connection_filename()
-	whenever it creates a scratch file.
+	Manage a working copy of an sqlite database file.  This is used
+	when a large enough number of manipulations are being performed on
+	a database file that the total network I/O would be higher than
+	that of copying the entire file to a local disk, doing the
+	manipulations locally, then copying the file back.  It is also
+	useful in unburdening a file server when large numbers of read-only
+	operations are being performed on the same file by many different
+	machines.
 	"""
-	# NOTE:  this must be called with the temporary_files_lock held.
-	# ignore signums we've already replaced
-	signums = set(signums) - set(origactions)
 
-	def temporary_file_cleanup_on_signal(signum, frame):
-		with temporary_files_lock:
-			temporary_files.clear()
-		if callable(origactions[signum]):
-			# original action is callable, chain to it
-			origactions[signum](signum, frame)
-		# original action was not callable or the callable
-		# returned.  invoke sys.exit() with retval as exit code
-		sys.exit(retval)
+	def __init__(self, filename, tmp_path = None, replace_file = False, discard = False, verbose = False):
+		"""
+		filename:  the name of the sqlite database file.
 
-	for signum in signums:
-		origactions[signum] = signal.getsignal(signum)
-		if origactions[signum] != signal.SIG_IGN:
-			# signal is not being ignored, so install our
-			# handler
-			signal.signal(signum, temporary_file_cleanup_on_signal)
+		tmp_path:  the directory to use for the working copy.  If
+		None (the default), the system's default location for
+		temporary files is used.  If set to the special value
+		"_CONDOR_SCRATCH_DIR" then the value of the environment
+		variable of that name will be used (to use a directory
+		literally named _CONDOR_SCRATCH_DIR set tmp_path to
+		"./_CONDOR_SCRATCH_DIR").
+
+		replace_file:  if True, filename is truncated in place
+		before manipulation;  if False (the default), the file is
+		not modified before use.  This is used when the original
+		file is being over-written with the working copy, and it is
+		necessary to ensure that a malfunction or crash (which
+		might prevent the working copy from over writing the
+		original) does not leave behind the unmodified original,
+		which could subsequently be mistaken for valid output.
+
+		discard:  if True the working copy is simply deleted
+		instead of being copied back to the original location;  if
+		False (the default) the working copy overwrites the
+		original.  This is used to improve read-only operations,
+		when it is not necessary to pay the I/O cost of moving an
+		unmodified file a second time.  The .discard attribute can
+		be set at any time while the context manager is in use,
+		before the .__exit__() method is invoked.
+
+		verbose:  print messages to stderr.
+
+		NOTES:
+
+		- When replace_file mode is enabled, any failures that
+		  prevent the original file from being trucated are
+		  ignored.  The inability to truncate the file is
+		  considered non-fatal.
+
+		- If the operation to copy the file to the working path
+		  fails then a working copy is not used, the original file
+		  is used in place.  If the failure that prevents copying
+		  the file to the working path is potentially transient,
+		  for example "permission denied" or "no space on device",
+		  the code sleeps for a brief period of time and then tries
+		  again.  Only after the potentially transient failure
+		  persists for several attempts is the working copy
+		  abandoned and the original copy used instead.
+
+		- When the working copy is moved back to the original
+		  location, if a file with the same name but ending in
+		  -journal is present in the working directory then it is
+		  deleted.
+
+		- The name of the working copy can be obtained by
+		  converting the workingcopy object to a string.
+		"""
+		self.filename = filename
+		self.tmp_path = tmp_path if tmp_path != "_CONDOR_SCRATCH_DIR" else os.getenv("_CONDOR_SCRATCH_DIR")
+		self.replace_file = replace_file
+		self.discard = discard
+		self.verbose = verbose
 
 
-def uninstall_signal_trap(signums = None):
-	"""
-	Undo the effects of install_signal_trap().  Restores the original
-	signal handlers.  If signums is a sequence of signal numbers only
-	the signal handlers for those signals will be restored (KeyError
-	will be raised if one of them is not one that install_signal_trap()
-	installed a handler for, in which case some undefined number of
-	handlers will have been restored).  If signums is None (the
-	default) then all signals that have been modified by previous calls
-	to install_signal_trap() are restored.
-
-	Note:  this function is called by put_connection_filename() and
-	discard_connection_filename() whenever they remove a scratch file
-	and there are then no more scrach files in use.
-	"""
-	# NOTE:  this must be called with the temporary_files_lock held.
-	if signums is None:
-		signums = list(origactions.keys())
-	for signum in signums:
-		signal.signal(signum, origactions.pop(signum))
-
-
-#
-# Functions to work with database files in scratch space
-#
-
-
-def get_connection_filename(filename, tmp_path = None, replace_file = False, verbose = False):
-	"""
-	Utility code for moving database files to a (presumably local)
-	working location for improved performance and reduced fileserver
-	load.
-	"""
-	def mktmp(path, suffix = ".sqlite", verbose = False):
-		with temporary_files_lock:
-			# make sure the clean-up signal traps are installed
-			install_signal_trap()
-			# create the remporary file and replace it's
-			# unlink() function
-			temporary_file = tempfile.NamedTemporaryFile(suffix = suffix, dir = path if path != "_CONDOR_SCRATCH_DIR" else os.getenv("_CONDOR_SCRATCH_DIR"))
-			def new_unlink(self, orig_unlink = temporary_file.unlink):
-				# also remove a -journal partner, ignore all errors
-				try:
-					orig_unlink("%s-journal" % self)
-				except:
-					pass
-				orig_unlink(self)
-			temporary_file.unlink = new_unlink
-			filename = temporary_file.name
-			# hang onto reference to prevent its removal
-			temporary_files[filename] = temporary_file
-		if verbose:
-			sys.stderr.write("using '%s' as workspace\n" % filename)
-		# mkstemp() ignores umask, creates all files accessible
-		# only by owner;  we should respect umask.  note that
-		# os.umask() sets it, too, so we have to set it back after
-		# we know what it is
-		umsk = os.umask(0o777)
-		os.umask(umsk)
-		os.chmod(filename, 0o666 & ~umsk)
-		return filename
-
+	@staticmethod
 	def truncate(filename, verbose = False):
+		"""
+		Truncate a file to 0 size, ignoring all errors.  This is
+		used internally to implement the "replace_file" feature.
+		"""
 		if verbose:
 			sys.stderr.write("'%s' exists, truncating ... " % filename)
 		try:
@@ -228,10 +177,43 @@ def get_connection_filename(filename, tmp_path = None, replace_file = False, ver
 		if verbose:
 			sys.stderr.write("done.\n")
 
-	def cpy(srcname, dstname, verbose = False):
+
+	@staticmethod
+	def cpy(srcname, dstname, attempts = 5, verbose = False):
+		"""
+		Copy a file to a destination preserving permission if
+		possible.  If the operation fails for a non-fatal reason
+		then several attempts are made with a pause between each.
+		The return value is dstname if the operation was successful
+		or srcname if a non-fatal failure caused the operation to
+		terminate.  Fatal failures raise an exeption.
+		"""
 		if verbose:
 			sys.stderr.write("copying '%s' to '%s' ... " % (srcname, dstname))
-		shutil.copy2(srcname, dstname)
+		for i in itertools.count(1):
+			try:
+				shutil.copy2(srcname, dstname)
+				# if we get here it worked
+				break
+			except IOError as e:
+				# anything other than out-of-space is a
+				# real error
+				import errno
+				import time
+				if e.errno not in (errno.EPERM, errno.ENOSPC):
+					raise
+				if verbose:
+					sys.stderr.write("warning: attempt %d: %s: \r" % (i, errno.errorcode[e.errno]))
+				# if we've run out of attempts, fall back
+				# to the original file
+				if i > 4:
+					if verbose:
+						sys.stderr.write("working with original file '%s'\n" % srcname)
+					return srcname
+				# otherwise sleep and try again
+				if verbose:
+					sys.stderr.write("sleeping and trying again ...\n")
+				time.sleep(10)
 		if verbose:
 			sys.stderr.write("done.\n")
 		try:
@@ -243,66 +225,160 @@ def get_connection_filename(filename, tmp_path = None, replace_file = False, ver
 			shutil.copystat(srcname, dstname)
 		except Exception as e:
 			if verbose:
-				sys.stderr.write("warning: ignoring failure to copy permission bits from '%s' to '%s': %s\n" % (filename, target, str(e)))
+				sys.stderr.write("warning: ignoring failure to copy permission bits from '%s' to '%s': %s\n" % (srcname, dstname, str(e)))
+		return dstname
 
-	database_exists = os.access(filename, os.F_OK)
 
-	if tmp_path is not None:
-		# for suffix, can't use splitext() because it only keeps
-		# the last bit, e.g. won't give ".xml.gz" but just ".gz"
-		target = mktmp(tmp_path, suffix = ".".join(os.path.split(filename)[-1].split(".")[1:]), verbose = verbose)
-		if database_exists:
-			if replace_file:
-				# truncate database so that if this job
+	def __enter__(self):
+		database_exists = os.access(self.filename, os.F_OK)
+
+		if self.tmp_path is not None:
+			# create the remporary file and retain a reference
+			# to prevent its removal.  for suffix, can't use
+			# splitext() because it only keeps the last bit,
+			# e.g. won't give ".xml.gz" but just ".gz"
+
+			self.temporary_file = tempfile.NamedTemporaryFile(suffix = ".".join(os.path.split(self.filename)[-1].split(".")[1:]), dir = self.tmp_path)
+			self.target = self.temporary_file.name
+			if self.verbose:
+				sys.stderr.write("using '%s' as workspace\n" % self.target)
+
+			# mkstemp() ignores umask, creates all files accessible
+			# only by owner;  we should respect umask.  note that
+			# os.umask() sets it, too, so we have to set it back after
+			# we know what it is
+
+			umsk = os.umask(0o777)
+			os.umask(umsk)
+			os.chmod(self.target, 0o666 & ~umsk)
+
+			if database_exists:
+				# if the file is being replaced then
+				# truncate the database so that if this job
 				# fails the user won't think the database
-				# file is valid
-				truncate(filename, verbose = verbose)
-			else:
-				# need to copy existing database to work
-				# space for modifications
-				i = 1
-				while True:
+				# file is valid, otherwise copy the
+				# existing database to the work space for
+				# modification
+				if self.replace_file:
+					self.truncate(self.filename, verbose = self.verbose)
+				elif self.cpy(self.filename, self.target, verbose = self.verbose) == self.filename:
+					# non-fatal errors have caused us
+					# to fall-back to the file in its
+					# original location
+					self.target = self.filename
+					del self.temporary_file
+		else:
+			self.target = self.filename
+			if database_exists and self.replace_file:
+				self.truncate(self.target, verbose = self.verbose)
+
+		return self
+
+
+	def __str__(self):
+		return self.target
+
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		"""
+		Restore the working copy to its original location if the
+		two are different.
+
+		During the move operation, this function traps the signals
+		used by Condor to evict jobs.  This reduces the risk of
+		corrupting a document by the job terminating part-way
+		through the restoration of the file to its original
+		location.  When the move operation is concluded, the
+		original signal handlers are restored and if any signals
+		were trapped they are resent to the current process in
+		order.  Typically this will result in the signal handlers
+		installed by the install_signal_trap() function being
+		invoked, meaning any other scratch files that might be in
+		use get deleted and the current process is terminated.
+		"""
+		# when removed, must also delete a -journal partner, ignore
+		# all errors
+
+		try:
+			orig_unlink("%s-journal" % self)
+		except:
+			pass
+
+		# restore the file to its original location
+
+		if self.target != self.filename:
+			with ligolw_utils.SignalsTrap():
+				if not self.discard:
+					# move back to original location
+
+					if self.verbose:
+						sys.stderr.write("moving '%s' to '%s' ... " % (self.target, self.filename))
+					shutil.move(self.target, self.filename)
+					if self.verbose:
+						sys.stderr.write("done.\n")
+
+					# next we will trigger the
+					# temporary file removal.  because
+					# we've just deleted that file,
+					# this will produce an annoying but
+					# harmless message about an ignored
+					# OSError.  so silence the warning
+					# we create a dummy file for the
+					# TemporaryFile to delete.  ignore
+					# any errors that occur when trying
+					# to make the dummy file.  FIXME:
+					# this is stupid, find a better way
+					# to shut TemporaryFile up
+
 					try:
-						cpy(filename, target, verbose = verbose)
-					except IOError as e:
-						import errno
-						import time
-						if e.errno not in (errno.EPERM, errno.ENOSPC):
-							# anything other
-							# than out-of-space
-							# is a real error
-							raise
-						if i < 5:
-							if verbose:
-								sys.stderr.write("warning: attempt %d: %s, sleeping and trying again ...\n" % (i, errno.errorcode[e.errno]))
-							time.sleep(10)
-							i += 1
-							continue
-						if verbose:
-							sys.stderr.write("warning: attempt %d: %s: working with original file '%s'\n" % (i, errno.errorcode[e.errno], filename))
-						with temporary_files_lock:
-							del temporary_files[target]
-						target = filename
-					break
-	else:
-		with temporary_files_lock:
-			if filename in temporary_files:
-				raise ValueError("file '%s' appears to be in use already as a temporary database file and is to be deleted" % filename)
-		target = filename
-		if database_exists and replace_file:
-			truncate(target, verbose = verbose)
+						open(self.target, "w").close()
+					except:
+						pass
 
-	del mktmp
-	del truncate
-	del cpy
+				# remove reference to
+				# tempfile.TemporaryFile object.  this
+				# triggers the removal of the file.
 
-	return target
+				del self.temporary_file
 
+		# if an exception terminated the code block, re-raise the
+		# exception
+
+		return False
+
+
+	def set_temp_store_directory(self, connection, verbose = False):
+		"""
+		Sets the temp_store_directory parameter in sqlite.
+		"""
+		if verbose:
+			sys.stderr.write("setting the temp_store_directory to %s ... " % self.tmp_path)
+		cursor = connection.cursor()
+		cursor.execute("PRAGMA temp_store_directory = '%s'" % self.tmp_path)
+		cursor.close()
+		if verbose:
+			sys.stderr.write("done\n")
+
+
+#
+# backwards compatibility for old code.  FIXME:  delete in next release
+#
+
+
+def get_connection_filename(*args, **kwargs):
+	return workingcopy(*args, **kwargs).__enter__()
+
+
+def put_connection_filename(ignored, target, verbose = False):
+	target.verbose = verbose
+	target.__exit__(None, None, None)
+
+def discard_connection_filename(ignored, target, verbose = False):
+	target.discard = True
+	target.verbose = verbose
+	target.__exit__(None, None, None)
 
 def set_temp_store_directory(connection, temp_store_directory, verbose = False):
-	"""
-	Sets the temp_store_directory parameter in sqlite.
-	"""
 	if temp_store_directory == "_CONDOR_SCRATCH_DIR":
 		temp_store_directory = os.getenv("_CONDOR_SCRATCH_DIR")
 	if verbose:
@@ -312,98 +388,6 @@ def set_temp_store_directory(connection, temp_store_directory, verbose = False):
 	cursor.close()
 	if verbose:
 		sys.stderr.write("done\n")
-
-
-def put_connection_filename(filename, working_filename, verbose = False):
-	"""
-	This function reverses the effect of a previous call to
-	get_connection_filename(), restoring the working copy to its
-	original location if the two are different.  This function should
-	always be called after calling get_connection_filename() when the
-	file is no longer in use.
-
-	During the move operation, this function traps the signals used by
-	Condor to evict jobs.  This reduces the risk of corrupting a
-	document by the job terminating part-way through the restoration of
-	the file to its original location.  When the move operation is
-	concluded, the original signal handlers are restored and if any
-	signals were trapped they are resent to the current process in
-	order.  Typically this will result in the signal handlers installed
-	by the install_signal_trap() function being invoked, meaning any
-	other scratch files that might be in use get deleted and the
-	current process is terminated.
-	"""
-	if working_filename != filename:
-		# initialize SIGTERM and SIGTSTP trap
-		deferred_signals = []
-		def newsigterm(signum, frame):
-			deferred_signals.append(signum)
-		oldhandlers = {}
-		for sig in (signal.SIGTERM, signal.SIGTSTP):
-			oldhandlers[sig] = signal.getsignal(sig)
-			signal.signal(sig, newsigterm)
-
-		# replace document
-		if verbose:
-			sys.stderr.write("moving '%s' to '%s' ... " % (working_filename, filename))
-		shutil.move(working_filename, filename)
-		if verbose:
-			sys.stderr.write("done.\n")
-
-		# remove reference to tempfile.TemporaryFile object.
-		# because we've just deleted the file above, this would
-		# produce an annoying but harmless message about an ignored
-		# OSError, so we create a dummy file for the TemporaryFile
-		# to delete.  ignore any errors that occur when trying to
-		# make the dummy file.  FIXME: this is stupid, find a
-		# better way to shut TemporaryFile up
-		try:
-			open(working_filename, "w").close()
-		except:
-			pass
-		with temporary_files_lock:
-			del temporary_files[working_filename]
-
-		# restore original handlers, and send ourselves any trapped signals
-		# in order
-		for sig, oldhandler in oldhandlers.items():
-			signal.signal(sig, oldhandler)
-		while deferred_signals:
-			os.kill(os.getpid(), deferred_signals.pop(0))
-
-		# if there are no more temporary files in place, remove the
-		# temporary-file signal traps
-		with temporary_files_lock:
-			if not temporary_files:
-				uninstall_signal_trap()
-
-
-def discard_connection_filename(filename, working_filename, verbose = False):
-	"""
-	Like put_connection_filename(), but the working copy is simply
-	deleted instead of being copied back to its original location.
-	This is a useful performance boost if it is known that no
-	modifications were made to the file, for example if queries were
-	performed but no updates.
-
-	Note that the file is not deleted if the working copy and original
-	file are the same, so it is always safe to call this function after
-	a call to get_connection_filename() even if a separate working copy
-	is not created.
-	"""
-	if working_filename == filename:
-		return
-	with temporary_files_lock:
-		if verbose:
-			sys.stderr.write("removing '%s' ... " % working_filename)
-		# remove reference to tempfile.TemporaryFile object
-		del temporary_files[working_filename]
-		if verbose:
-			sys.stderr.write("done.")
-		# if there are no more temporary files in place, remove the
-		# temporary-file signal traps
-		if not temporary_files:
-			uninstall_signal_trap()
 
 
 #
