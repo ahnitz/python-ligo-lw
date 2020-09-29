@@ -63,9 +63,7 @@ class LigolwSegmentList(object):
 	"active" list defines the intervals when the segment list is on.
 	It is not an error for the active list to be on during times when
 	the segment lists state is unknown, this code does not impose any
-	policy in that regard, but it should be expected that consumers of
-	the segment list will treat all times when the segment list's state
-	is unknown the same way.
+	policy in that regard.
 
 	Example:
 
