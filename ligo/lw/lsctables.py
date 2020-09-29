@@ -782,6 +782,26 @@ class SearchSummary(table.Table.RowType):
 	in_segment = segmentproperty("in_start", "in_end")
 	out_segment = segmentproperty("out_start", "out_end")
 
+	@classmethod
+	def initialized(cls, process, shared_object = "standalone", lalwrapper_cvs_tag = "", lal_cvs_tag = "", comment = None, ifos = None, inseg = None, outseg = None, nevents = 0, nnodes = 1):
+		"""
+		Create and return a sensibly initialized row for the
+		search_summary table.  process is an initialized row for
+		the process table.
+		"""
+		return cls(
+			process_id = process.process_id,
+			shared_object = shared_object,
+			lalwrapper_cvs_tag = lalwrapper_cvs_tag,
+			lal_cvs_tag = lal_cvs_tag,
+			comment = comment or process.comment,
+			instruments = ifos if ifos is not None else process.instruments,
+			in_segment = inseg,
+			out_segment = outseg,
+			nevents = nevents,
+			nnodes = nnodes
+		)
+
 
 SearchSummaryTable.RowType = SearchSummary
 

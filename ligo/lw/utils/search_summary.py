@@ -43,28 +43,19 @@ from .. import lsctables
 #
 
 
-def append_search_summary(xmldoc, process, shared_object = "standalone", lalwrapper_cvs_tag = "", lal_cvs_tag = "", comment = None, ifos = None, inseg = None, outseg = None, nevents = 0, nnodes = 1):
+def append_search_summary(xmldoc, process, **kwargs):
 	"""
 	Append search summary information associated with the given process
 	to the search summary table in xmldoc.  Returns the newly-created
-	search_summary table row.
+	search_summary table row.  Any keyword arguments are passed to the
+	.initialized() method of the SearchSummary row type.
 	"""
 	try:
 		tbl = lsctables.SearchSummaryTable.get_table(xmldoc)
 	except ValueError:
 		tbl = xmldoc.childNodes[0].appendChild(lsctables.New(lsctables.SearchSummaryTable))
-	tbl.append(tbl.RowType(
-		process_id = process.process_id,
-		shared_object = shared_object,
-		lalwrapper_cvs_tag = lalwrapper_cvs_tag,
-		lal_cvs_tag = lal_cvs_tag,
-		comment = comment or process.comment,
-		instruments = ifos if ifos is not None else process.instruments,
-		in_segment = inseg,
-		out_segment = outseg,
-		nevents = nevents,
-		nnodes = nnodes
-	))
+	row = tbl.RowType.initialized(process, **kwargs)
+	tbl.append(row)
 	return row
 
 
