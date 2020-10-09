@@ -131,12 +131,7 @@ xmldoc = ligolw_add.ligolw_add(
 #
 
 
-ligolw_utils.write_filename(
-	xmldoc,
-	options.output,
-	verbose = options.verbose,
-	compress = 'gz' if (options.output or "stdout").endswith(".gz") else False
-)
+ligolw_utils.write_filename(xmldoc, options.output, verbose = options.verbose)
 
 
 #

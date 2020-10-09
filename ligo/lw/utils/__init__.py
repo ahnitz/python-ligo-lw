@@ -331,10 +331,11 @@ def load_fileobj(fileobj, compress = None, gz = None, xmldoc = None, contenthand
 	does not need to be seekable.  The file object must be in binary
 	mode.
 
-	If the compress parameter is None (the default) then gzip compressed data
-	will be automatically detected and decompressed, otherwise
-	decompression can be forced on by setting compress to the string ``gz``,
-	or force off by setting compress to False.
+	The compress parameter selects the decompression algorithm to use.
+	Valid values are:  "auto" to automatically deduce the decompression
+	scheme from the file format, "gz" to force gzip decompression,
+	False to disable decompression, or None to select the default
+	behaviour (currently equivalent to "auto").
 
 	If the optional xmldoc argument is provided and not None, the
 	parsed XML tree will be appended to that document, otherwise a new
@@ -349,26 +350,55 @@ def load_fileobj(fileobj, compress = None, gz = None, xmldoc = None, contenthand
 	>>> xmldoc = load_fileobj(f, contenthandler = ligolw.LIGOLWContentHandler)
 
 	The contenthandler argument specifies the SAX content handler to
-	use when parsing the document.  The contenthandler is a required
-	argument.  See the ligo.lw package documentation for typical
-	parsing scenario involving a custom content handler.  See
-	ligo.lw.ligolw.PartialLIGOLWContentHandler and
+	use when parsing the document.  contenthandler is a required
+	argument.  See the ligo.lw package documentation for an explanation
+	of a typical document parsing scenario and the content handler it
+	uses.  See ligo.lw.ligolw.PartialLIGOLWContentHandler and
 	ligo.lw.ligolw.FilteringLIGOLWContentHandler for examples of custom
 	content handlers used to load subsets of documents into memory.
 	"""
+	if contenthandler is None:
+		raise ValueError("missing required keyword argument \"contenthandler\"")
+
 	# FIXME: remove the following once we drop the ``gz`` keyword argument.
 	compress = _normalize_compress_kwarg(compress = compress, gz = gz)
 
-	if contenthandler is None:
-		raise ValueError("missing required keyword argument \"contenthandler\"")
-	if compress == 'gz' or compress is None:
+	if compress is None:
+		# select default behaviour
+		compress = "auto"
+
+	if compress == "auto":
+		# set keyword argument automatically from file format
 		fileobj = RewindableInputFile(fileobj)
 		magic = fileobj.read(2)
 		fileobj.seek(0, os.SEEK_SET)
-		if compress == 'gz' or magic == b"\037\213":
-			fileobj = gzip.GzipFile(mode = "rb", fileobj = fileobj)
+		if magic == b"\037\213":
+			compress = "gz"
+		else:
+			# format not recognized, assume not compressed
+			compress = False
+
+	#
+	# select stream decoder
+	#
+
+	if compress == False:
+		# pass-through
+		pass
+	elif compress == "gz":
+		# gzip decompression
+		fileobj = gzip.GzipFile(mode = "rb", fileobj = fileobj if type(fileobj) == RewindableInputFile else RewindableInputFile(fileobj))
+	else:
+		# oops
+		raise ValueError("unrecognized compress \"%s\"" % compress)
+
+	#
+	# parse stream into XML tree and return it
+	#
+
 	if xmldoc is None:
 		xmldoc = ligolw.Document()
+
 	ligolw.make_parser(contenthandler(xmldoc)).parse(fileobj)
 	return xmldoc
 
@@ -435,8 +465,12 @@ def write_fileobj(xmldoc, fileobj, compress = None, gz = False, compresslevel = 
 	given file object.  Internally, the .write() method of the xmldoc
 	object is invoked and any additional keyword arguments are passed
 	to that method.  The file object need not be seekable.  The file
-	object must be in binary mode.  The output data is gzip compressed
-	on the fly if compress is ``gz``, and in that case the compresslevel
+	object must be in binary mode.
+
+	The compress parameter selects the file compression format to use.
+	Valid values are:  False to disable compression, "gz" to select
+	gzip compression, None to select the default behaviour (disable
+	compression)..  When gzip compression is slected, the compresslevel
 	parameter sets the gzip compression level (the default is 3).
 
 	Example:
@@ -449,9 +483,28 @@ def write_fileobj(xmldoc, fileobj, compress = None, gz = False, compresslevel = 
 	# FIXME: remove the following once we drop the ``gz`` keyword argument.
 	compress = _normalize_compress_kwarg(compress = compress, gz = gz)
 
+	if compress is None:
+		# select default behaviour
+		compress = False
+
 	with NoCloseFlushWrapper(fileobj) as fileobj:
-		if compress == 'gz':
+		#
+		# select stream encoder
+		#
+
+		if compress == False:
+			# no compression
+			pass
+		elif compress == "gz":
 			fileobj = gzip.GzipFile(mode = "wb", fileobj = fileobj, compresslevel = compresslevel)
+		else:
+			# oops
+			raise ValueError("unrecognized compress \"%s\"" % compress)
+
+		#
+		# write file
+		#
+
 		with codecs.getwriter("utf_8")(fileobj) as fileobj:
 			xmldoc.write(fileobj, **kwargs)
 
@@ -492,7 +545,16 @@ def write_filename(xmldoc, filename, verbose = False, compress = None, gz = Fals
 	file name filename.  If filename is None the file is written to
 	stdout, otherwise it is written to the named file.  Friendly
 	verbosity messages are printed while writing the file if verbose is
-	True.  The output data is gzip compressed on the fly if compress is ``gz``.
+	True.
+
+	The compress keyword argument selects the compression format to
+	use.  Recognized values are:  "auto" to automatically select the
+	format based on filename, "gz" to force gzip compression, False to
+	disable compression, None to select the default behaviour (which is
+	currently "auto").  When "auto" is the mode selected, if the
+	filename does not match a recognized pattern or filename is None
+	(writing to stdout) then compression is disabled.
+
 	If with_mv is True and filename is not None the filename has a "~"
 	appended to it and the file is written to that name then moved to
 	the requested name once the write has completed successfully.
@@ -520,6 +582,25 @@ def write_filename(xmldoc, filename, verbose = False, compress = None, gz = Fals
 	# FIXME: remove the following once we drop the ``gz`` keyword argument.
 	compress = _normalize_compress_kwarg(compress = compress, gz = gz)
 
+	#
+	# select format
+	#
+
+	if compress is None:
+		# select default behaviour
+		compress = "auto"
+	if compress == "auto":
+		if filename is None:
+			# writing to stdout:  no filename = cannot deduce
+			# compression format = turn compression off
+			compress = False
+		elif filename.endswith(".gz"):
+			compress = "gz"
+		else:
+			# filename scheme not recognized, disable
+			# compression
+			compress = False
+
 	if verbose:
 		sys.stderr.write("writing %s ...\n" % (("'%s'" % filename) if filename is not None else "stdout"))
 	with SignalsTrap(trap_signals):
@@ -528,8 +609,6 @@ def write_filename(xmldoc, filename, verbose = False, compress = None, gz = Fals
 			# that is the underyling byte-oriented stream.
 			write_fileobj(xmldoc, sys.stdout.buffer if hasattr(sys.stdout, "buffer") else sys.stdout, compress = compress, **kwargs)
 		else:
-			if compress != 'gz' and filename.endswith(".gz"):
-				warnings.warn("filename '%s' ends in '.gz' but file is not being gzip-compressed" % filename, UserWarning)
 			binary_open = lambda filename: open(filename, "wb")
 			with (binary_open if not with_mv else tildefile)(filename) as fileobj:
 				write_fileobj(xmldoc, fileobj, compress = compress, **kwargs)

@@ -218,8 +218,8 @@ for url in urls:
 
 
 	if not options.output:
-		ligolw_utils.write_url(xmldoc, url, verbose = options.verbose, compress = 'gz' if (url or "stdout").endswith(".gz") else False)
+		ligolw_utils.write_url(xmldoc, url, verbose = options.verbose)
 	elif options.output == "-":
 		ligolw_utils.write_filename(xmldoc, None, verbose = options.verbose)
 	else:
-		ligolw_utils.write_filename(xmldoc, options.output, verbose = options.verbose, compress = 'gz' if options.output.endswith(".gz") else False)
+		ligolw_utils.write_filename(xmldoc, options.output, verbose = options.verbose)
