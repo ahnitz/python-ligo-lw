@@ -1,4 +1,4 @@
-from setuptools import setup, Extension
+from distutils.core import setup, Extension
 
 
 __version__ = "1.7.0"
