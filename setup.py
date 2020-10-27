@@ -2,7 +2,7 @@ from distutils.core import setup, Extension
 
 
 __version__ = "1.7.0"
-__date__ = "2020-02-27"
+__date__ = "2020-10-27"
 
 
 def macroreplace(filenames, substs):
