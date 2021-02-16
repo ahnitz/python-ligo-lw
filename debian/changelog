@@ -1,3 +1,9 @@
+python-ligo-lw (1.7.1-1) unstable; urgency=medium
+
+  * fix use of file() in ligolw_segments
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
+
 python-ligo-lw (1.7.0-1) unstable; urgency=medium
 
   * replace gz= keyword with compress= and expand auto format detection features

@@ -165,7 +165,7 @@ for url in urls:
 		if options.verbose:
 			print >>sys.stderr, "reading \"%s\" for instrument \"%s\" (name %s) ..." % (filename, instrument, repr(options.name))
 
-		segments_tables.insert_from_segwizard(file(filename), set([instrument]), options.name, version = options.segments_version, comment = options.comment)
+		segments_tables.insert_from_segwizard(open(filename), set([instrument]), options.name, version = options.segments_version, comment = options.comment)
 
 
 	#
@@ -178,7 +178,7 @@ for url in urls:
 		for filename in options.insert_from_lal_cache:
 			if options.verbose:
 				print >>sys.stderr, "reading \"%s\" ..." % filename
-			for cacheentry in [CacheEntry(line, coltype = lsctables.LIGOTimeGPS) for line in file(filename)]:
+			for cacheentry in [CacheEntry(line, coltype = lsctables.LIGOTimeGPS) for line in open(filename)]:
 				if cacheentry.description not in seglistdicts:
 					seglistdicts[cacheentry.description] = segments.segmentlistdict()
 				seglistdicts[cacheentry.description] |= cacheentry.segmentlistdict
