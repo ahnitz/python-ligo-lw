@@ -347,16 +347,20 @@ class workingcopy(object):
 		return False
 
 
-	def set_temp_store_directory(self, connection, verbose = False):
+	def set_temp_store_directory(self, connection):
 		"""
 		Sets the temp_store_directory parameter in sqlite.
 		"""
-		if verbose:
-			sys.stderr.write("setting the temp_store_directory to %s ... " % self.tmp_path)
+		if self.tmp_path is None:
+			if self.verbose:
+				sys.stderr.write("sqlite temp_store_directory not changed")
+			return
+		if self.verbose:
+			sys.stderr.write("setting the sqlite temp_store_directory to %s ... " % self.tmp_path)
 		cursor = connection.cursor()
 		cursor.execute("PRAGMA temp_store_directory = '%s'" % self.tmp_path)
 		cursor.close()
-		if verbose:
+		if self.verbose:
 			sys.stderr.write("done\n")
 
 
