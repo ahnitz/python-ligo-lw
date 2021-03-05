@@ -32,7 +32,6 @@ Library of utility code for LIGO Light Weight XML applications.
 import codecs
 import contextlib
 import gzip
-import warnings
 import os
 from six.moves import urllib
 import signal
@@ -309,22 +308,7 @@ class SignalsTrap(object):
 		return False
 
 
-# FIXME: remove the following once we drop the ``gz`` keyword argument.
-def _normalize_compress_kwarg(compress = None, gz = False):
-	if gz:
-		warnings.warn(
-			'The gz keyword argument is deprecated. '
-			'Use the compress keyword argument instead.',
-			DeprecationWarning,
-			stacklevel=3)
-		if compress is not None:
-			raise ValueError(
-				'must not specify both compress and gz keyword arguments')
-		compress = 'gz'
-	return compress
-
-
-def load_fileobj(fileobj, compress = None, gz = None, xmldoc = None, contenthandler = None):
+def load_fileobj(fileobj, compress = None, xmldoc = None, contenthandler = None):
 	"""
 	Parse the contents of the file object fileobj, and return the
 	contents as a LIGO Light Weight document tree.  The file object
@@ -359,9 +343,6 @@ def load_fileobj(fileobj, compress = None, gz = None, xmldoc = None, contenthand
 	"""
 	if contenthandler is None:
 		raise ValueError("missing required keyword argument \"contenthandler\"")
-
-	# FIXME: remove the following once we drop the ``gz`` keyword argument.
-	compress = _normalize_compress_kwarg(compress = compress, gz = gz)
 
 	if compress is None:
 		# select default behaviour
@@ -459,7 +440,7 @@ def load_url(url, verbose = False, **kwargs):
 		return load_fileobj(fileobj, **kwargs)
 
 
-def write_fileobj(xmldoc, fileobj, compress = None, gz = False, compresslevel = 3, **kwargs):
+def write_fileobj(xmldoc, fileobj, compress = None, compresslevel = 3, **kwargs):
 	"""
 	Writes the LIGO Light Weight document tree rooted at xmldoc to the
 	given file object.  Internally, the .write() method of the xmldoc
@@ -470,7 +451,7 @@ def write_fileobj(xmldoc, fileobj, compress = None, gz = False, compresslevel = 
 	The compress parameter selects the file compression format to use.
 	Valid values are:  False to disable compression, "gz" to select
 	gzip compression, None to select the default behaviour (disable
-	compression)..  When gzip compression is slected, the compresslevel
+	compression).  When gzip compression is slected, the compresslevel
 	parameter sets the gzip compression level (the default is 3).
 
 	Example:
@@ -480,9 +461,6 @@ def write_fileobj(xmldoc, fileobj, compress = None, gz = False, compresslevel = 
 	>>> xmldoc = load_filename("demo.xml", contenthandler = ligolw.LIGOLWContentHandler)
 	>>> write_fileobj(xmldoc, open("/dev/null","wb"))
 	"""
-	# FIXME: remove the following once we drop the ``gz`` keyword argument.
-	compress = _normalize_compress_kwarg(compress = compress, gz = gz)
-
 	if compress is None:
 		# select default behaviour
 		compress = False
@@ -539,7 +517,7 @@ class tildefile(object):
 		return False
 
 
-def write_filename(xmldoc, filename, verbose = False, compress = None, gz = False, with_mv = True, trap_signals = SignalsTrap.default_signals, **kwargs):
+def write_filename(xmldoc, filename, verbose = False, compress = None, with_mv = True, trap_signals = SignalsTrap.default_signals, **kwargs):
 	"""
 	Writes the LIGO Light Weight document tree rooted at xmldoc to the
 	file name filename.  If filename is None the file is written to
@@ -579,9 +557,6 @@ def write_filename(xmldoc, filename, verbose = False, compress = None, gz = Fals
 	>>> write_filename(xmldoc, "demo.xml")	# doctest: +SKIP
 	>>> write_filename(xmldoc, "demo.xml.gz", compress = 'gz')	# doctest: +SKIP
 	"""
-	# FIXME: remove the following once we drop the ``gz`` keyword argument.
-	compress = _normalize_compress_kwarg(compress = compress, gz = gz)
-
 	#
 	# select format
 	#
