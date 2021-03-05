@@ -365,36 +365,6 @@ class workingcopy(object):
 
 
 #
-# backwards compatibility for old code.  FIXME:  delete in next release
-#
-
-
-def get_connection_filename(*args, **kwargs):
-	return workingcopy(*args, **kwargs).__enter__()
-
-
-def put_connection_filename(ignored, target, verbose = False):
-	target.verbose = verbose
-	target.__exit__(None, None, None)
-
-def discard_connection_filename(ignored, target, verbose = False):
-	target.discard = True
-	target.verbose = verbose
-	target.__exit__(None, None, None)
-
-def set_temp_store_directory(connection, temp_store_directory, verbose = False):
-	if temp_store_directory == "_CONDOR_SCRATCH_DIR":
-		temp_store_directory = os.getenv("_CONDOR_SCRATCH_DIR")
-	if verbose:
-		sys.stderr.write("setting the temp_store_directory to %s ... " % temp_store_directory)
-	cursor = connection.cursor()
-	cursor.execute("PRAGMA temp_store_directory = '%s'" % temp_store_directory)
-	cursor.close()
-	if verbose:
-		sys.stderr.write("done\n")
-
-
-#
 # =============================================================================
 #
 #                                  ID Mapping
