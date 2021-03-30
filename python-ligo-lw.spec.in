@@ -59,7 +59,6 @@ Requires:	python%{python3_pkgversion}-dateutil
 #Requires:	python%{python3_pkgversion}-glue
 #Requires:	python%{python3_pkgversion}-lal
 #Requires:	python%{python3_pkgversion}-lalburst
-Requires:	python%{python3_pkgversion}-ligo-common
 Requires:	python%{python3_pkgversion}-ligo-segments
 Requires:	python%{python3_pkgversion}-six
 Requires:	python%{python3_pkgversion}-tqdm
