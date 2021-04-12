@@ -29,7 +29,7 @@ Depends:
  python-dateutil,
  python-ligo-common,
  python-ligo-segments,
- python-numpy,
+ python-numpy (>= 1.6),
  python-six,
  python-tqdm,
  python-yaml
@@ -77,7 +77,7 @@ Depends:
  ${python3:Depends},
  python3-dateutil,
  python3-ligo-segments,
- python3-numpy,
+ python3-numpy (>= 1.6),
  python3-six,
  python3-tqdm,
  python3-yaml
