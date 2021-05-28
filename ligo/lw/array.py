@@ -109,26 +109,25 @@ class ArrayStream(ligolw.Stream):
 		# has been set.
 		self._tokenizer.set_types([ligolwtypes.ToPyType[parentNode.Type]])
 		parentNode.array = numpy.zeros(parentNode.shape, ligolwtypes.ToNumPyType[parentNode.Type])
-		self._array_view = parentNode.array.T.flat
-		self._index = 0
+		self._array_view = numpy.nditer(parentNode.array, order = "F", op_flags = ("writeonly",))
 		return self
 
 	def appendData(self, content):
 		# tokenize buffer, and assign to array
-		tokens = tuple(self._tokenizer.append(content))
-		next_index = self._index + len(tokens)
-		self._array_view[self._index : next_index] = tokens
-		self._index = next_index
+		it = self._array_view
+		nxt = it.iternext
+		for token in self._tokenizer.append(content):
+			it[0] = token
+			nxt()
 
 	def endElement(self):
 		# stream tokenizer uses delimiter to identify end of each
 		# token, so add a final delimiter to induce the last token
 		# to get parsed.
 		self.appendData(self.Delimiter)
-		if self._index != len(self._array_view):
-			raise ValueError("length of Stream (%d elements) does not match array size (%d elements)" % (self._index, len(self._array_view)))
+		if not self._array_view.finished:
+			raise ValueError("length of Stream does not match array size")
 		del self._array_view
-		del self._index
 
 	def write(self, fileobj = sys.stdout, indent = u""):
 		# avoid symbol and attribute look-ups in inner loop
