@@ -492,6 +492,21 @@ class LIGO_LW(EmptyElement):
 	Name = attributeproxy(u"Name")
 	Type = attributeproxy(u"Type")
 
+	@classmethod
+	def get_ligo_lw(cls, xmldoc, name = None):
+		"""
+		Scan xmldoc for a LIGO_LW element with .Name name.  Raises
+		ValueError if not exactly 1 such element is found.  If name
+		is None (default), then all LIGO_LW elements are considered
+		to match (it is still an error if there is not exactly 1).
+		"""
+		elems = xmldoc.getElementsByTagName(cls.tagName)
+		if name is not None:
+			elems = [elem for elem in elems if elem.hasAttribute(u"Name") and elem.Name == name]
+		if len(elems) != 1:
+			raise ValueError("document must contain exactly one %s element%s" % (cls.tagName, (" named %s" % name if name is not None else "")))
+		return elems[0]
+
 
 class Comment(Element):
 	"""
