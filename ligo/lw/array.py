@@ -136,26 +136,25 @@ class ArrayStream(ligolw.Stream):
 		w(self.start_tag(indent))
 
 		array = self.parentNode.array
-		if array is not None:
+		if array is not None and array.size:
 			# avoid symbol and attribute look-ups in inner
 			# loop.  we use self.parentNode.shape to retrieve
 			# the array's shape, rather than just asking the
 			# array, to induce a sanity check that the Dim
 			# elements are correct for the array
 			linelen = self.parentNode.shape[0]
-			lines = array.size // linelen if array.size else 0
+			lines = array.size // linelen
 			tokens = iter(map(ligolwtypes.FormatFunc[self.parentNode.Type], array.T.flat))
 			islice = itertools.islice
 			join = self.Delimiter.join
 
-			if lines:
-				newline = u"\n" + indent + ligolw.Indent
+			newline = u"\n" + indent + ligolw.Indent
+			w(newline)
+			w(xmlescape(join(islice(tokens, linelen))))
+			newline = self.Delimiter + newline
+			for i in range(lines - 1):
 				w(newline)
 				w(xmlescape(join(islice(tokens, linelen))))
-				newline = self.Delimiter + newline
-				for i in range(lines - 1):
-					w(newline)
-					w(xmlescape(join(islice(tokens, linelen))))
 		w(u"\n" + self.end_tag(indent) + u"\n")
 
 
