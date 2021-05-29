@@ -77,4 +77,5 @@ ligo_lw_test_01 test_array test_ilwd test_ligolw test_lsctables test_param test_
 	@echo "<=== end $@ ==="
 
 clean :
+	rm -f big_array.xml.gz
 	rm -f ligo_lw_test_01*png
