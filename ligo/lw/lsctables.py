@@ -72,6 +72,7 @@ Example:
 """
 
 
+import cmath
 import functools
 import itertools
 import math
@@ -1417,13 +1418,15 @@ class SimInspiral(table.Table.RowType):
 	>>> x.distance = 100e6
 	>>> x.ra_dec = 0., 0.
 	>>> x.inclination = 0.
+	>>> x.coa_phase = 0.
 	>>> x.polarization = 0.
 	>>> x.snr_geometry_factors(("H1",))
-	{'H1': 0.6773046071543202}
+	{'H1': (0.490467233277456-0.4671010853697789j)}
+	>>> # NOTE:  complex, abs() is traditional value
 	>>> x.effective_distances(("H1",))
-	{'H1': 147644056.9630077}
+	{'H1': (106915812.12292896+101822279.85362741j)}
 	>>> x.expected_snrs({"H1": 150e6})
-	{'H1': 8.127655285851842}
+	{'H1': (5.885606799329472-5.605213024437346j)}
 	"""
 	__slots__ = tuple(map(table.Column.ColumnName, SimInspiralTable.validcolumns))
 
@@ -1499,9 +1502,11 @@ class SimInspiral(table.Table.RowType):
 	def snr_geometry_factors(self, instruments):
 		"""
 		Compute and return a dictionary of the ratios of the
-		source's physical distance to its effective distances for
-		each of the given instruments.  The expected SNR in a
-		detector is
+		source's physical distance to its effective distance for
+		each of the given instruments.  NOTE that the quantity
+		returned is complex, where the magnitude of the value is
+		that ratio and the phase is such that the expected complex
+		SNR in a detector is given by
 
 		rho_{0} = 8 * (D_horizon / D) * snr_geometry_factor,
 
@@ -1510,14 +1515,19 @@ class SimInspiral(table.Table.RowType):
 		density), and D is the source's physical distance.  The
 		geometry factor (what this method computes) depends on the
 		direction to the source with respect to the antenna beam,
-		the inclination of the source's orbital plane, and the wave
-		frame's polarization.  The combination (D / geometry
-		factor) is called the effective distance.  See Equation
-		(4.3) of arXiv:0705.1514.
+		the inclination of the source's orbital plane, the wave
+		frame's polarization, and the phase of the waveform at the
+		time of coalescence.  The combination
+
+		D / geometry factor
+
+		is called the effective distance.  See Equation (4.3) of
+		arXiv:0705.1514.
 
 		See also .effective_distances(), .expected_snrs().
 		"""
-		cos2i = math.cos(self.inclination)**2.
+		cosi = math.cos(self.inclination)
+		cos2i = cosi**2.
 		# don't rely on self.gmst to be set properly
 		gmst = lal.GreenwichMeanSiderealTime(self.time_geocent)
 		snr_geometry_factors = {}
@@ -1528,21 +1538,35 @@ class SimInspiral(table.Table.RowType):
 				self.polarization,
 				gmst
 			)
-			snr_geometry_factors[instrument] = math.sqrt(fp**2. * (1. + cos2i)**2. / 4. + fc**2. * cos2i)
+			snr_geometry_factors[instrument] = complex(
+				-fc * cosi, fp * (1. + cos2i) / 2.
+			) * cmath.exp(-2.j * self.coa_phase)
 		return snr_geometry_factors
 
 	def effective_distances(self, instruments):
 		"""
 		Compute and return a dictionary of the effective distances
-		for this injection for the given instruments.  The expected
-		SNR in a detector is
+		for this injection for the given instruments.  The
+		effective distance is the distance at which an optimally
+		oriented and positioned source would be seen with the same
+		SNR as that with which this source will be seen in the
+		given instrument.  Effective distance is related to the
+		physical distance, D, by the geometry factor
+
+		D_effective = D / (geometry factor).
+
+		NOTE that in this implementation the quantity returned is
+		complex such that the expected complex SNR in a detector is
 
 		rho_{0} = 8 * D_horizon / D_effective
 
-		where D_effective, the effective distance, is related to
-		the physical distance, D, by geometry factors
-
-		D_effective = D / (geometry factors).
+		Traditionally the effective distance is a scalar and does
+		not convey information about the phase of the
+		signal-to-noise ratio.  That quantity is the absolute value
+		of the quantity computed by this method.  The extension to
+		complex values is done here to facilitate the use of this
+		code in applications where the expected complex SNR is
+		required.
 
 		See also .snr_geometry_factors(), .expected_snrs().
 		"""
@@ -1550,11 +1574,11 @@ class SimInspiral(table.Table.RowType):
 
 	def expected_snrs(self, horizon_distances):
 		"""
-		Compute and return a dictionary of the expected SNRs for
-		this injection in the given instruments.  horizon_distances
-		is a dictionary giving the horizon distance for each of the
-		detectors for which an expected SNR is to be computed.  The
-		expected SNR in a detector is
+		Compute and return a dictionary of the expected complex
+		SNRs for this injection in the given instruments.
+		horizon_distances is a dictionary giving the horizon
+		distance for each of the detectors for which an expected
+		SNR is to be computed.  The expected SNR in a detector is
 
 		rho_{0} = 8 * D_horizon / D_effective.
 
