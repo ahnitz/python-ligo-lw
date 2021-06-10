@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
 
-#import io
-#import codecs
-#class StringIO(io.StringIO):
-#	# give io.StringIO an buffer attribute that mimics a binary file
-#	@property
-#	def buffer(self):
-#		return self.detach()
-#io.StringIO = StringIO
 import doctest
 import sys
 from ligo.lw import utils as ligolw_utils
