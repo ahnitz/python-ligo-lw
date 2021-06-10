@@ -70,7 +70,6 @@ import base64
 
 
 from . import __author__, __date__, __version__
-from . import ilwd
 import six
 
 
@@ -88,9 +87,6 @@ except NameError:  # python >= 3
 # =============================================================================
 #
 
-
-IDTypes = set([u"ilwd:char", u"ilwd:char_u"])
-"""LIGO Light-Weight XML type strings for ID-like data."""
 
 BlobTypes = set([u"blob", u"ilwd:char_u"])
 """LIGO Light-Weight XML type strings for binary blob-like data."""
@@ -195,7 +191,7 @@ ligo.lw XML writing codes.
 ToPyType = {
 	u"char_s": six.text_type,
 	u"char_v": six.text_type,
-	u"ilwd:char": ilwd.ilwdchar,
+	u"ilwd:char": six.text_type,
 	u"ilwd:char_u": lambda s: memoryview(base64.b64decode(s)),
 	u"blob": lambda s: memoryview(base64.b64decode(s)),
 	u"lstring": six.text_type,
@@ -233,7 +229,6 @@ class FromPyTypeCls(dict):
 
 
 FromPyType = FromPyTypeCls({
-	ilwd._ilwd.ilwdchar: u"ilwd:char",
 	memoryview: u"blob",
 	str: u"lstring",
 	six.text_type: u"lstring",

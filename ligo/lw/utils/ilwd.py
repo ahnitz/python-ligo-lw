@@ -77,7 +77,7 @@ def strip_ilwdchar(xmldoc):
 			for attr in idattrs:
 				new_value = getattr(row, attr)
 				if new_value is not None:
-					setattr(row, attr, int(new_value))
+					setattr(row, attr, int(new_value.split(":")[-1]))
 
 		# update the column types
 		for attr in idattrs:

@@ -51,13 +51,6 @@ setup(
 	],
 	ext_modules = [
 		Extension(
-			"ligo.lw._ilwd",
-			[
-				"ligo/lw/ilwd.c",
-			],
-			include_dirs = ["ligo/lw"]
-		),
-		Extension(
 			"ligo.lw.tokenizer",
 			[
 				"ligo/lw/tokenizer.c",
