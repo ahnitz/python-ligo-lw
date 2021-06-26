@@ -43,15 +43,6 @@ from .. import lsctables
 #
 
 
-def set_process_end_time(process):
-	"""
-	Deprecated.  Use .set_end_time_now() method of the Process object.
-	"""
-	# FIXME:  delete when nothing needs this.
-	process.set_end_time_now()
-	return process
-
-
 def get_process_params(xmldoc, program, param, require_unique_program = True):
 	"""
 	Return a list of the values stored in the process_params table for
