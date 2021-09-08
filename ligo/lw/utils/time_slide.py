@@ -46,7 +46,7 @@ def get_time_slide_id(xmldoc, time_slide, create_new = None, superset_ok = False
 	Example:
 
 	>>> get_time_slide_id(xmldoc, {"H1": 0, "L1": 0})
-	'time_slide:time_slide_id:10'
+	10
 
 	This function is a wrapper around the .get_time_slide_id() method
 	of the ligo.lw.lsctables.TimeSlideTable class.  See the
@@ -58,7 +58,7 @@ def get_time_slide_id(xmldoc, time_slide, create_new = None, superset_ok = False
 	time_slide table then ValueError is raised, unless the optional
 	create_new argument is not None.  In that case a new table is
 	created.  This effect of the create_new argument is in addition to
-	the affects described by the TimeSlideTable class.
+	the effects described by the TimeSlideTable class.
 	"""
 	try:
 		tisitable = lsctables.TimeSlideTable.get_table(xmldoc)
@@ -96,17 +96,15 @@ def time_slides_vacuum(time_slides, verbose = False):
 
 	Example:
 
-	>>> slides = {"time_slide_id:0": {"H1": 0, "H2": 0},
-	"time_slide_id:1": {"H1": 10, "H2": 10}, "time_slide_id:2": {"H1":
-	0, "H2": 10}}
+	>>> slides = {0: {"H1": 0, "H2": 0}, 1: {"H1": 10, "H2": 10}, 2: {"H1": 0, "H2": 10}}
 	>>> time_slides_vacuum(slides)
-	{'time_slide_id:1': 'time_slide_id:0'}
+	{1: 0}
 
-	indicating that time_slide_id:1 describes a time slide that is
-	equivalent to time_slide_id:0.  The calling code could use this
-	information to delete time_slide_id:1 from the time_slide table,
+	indicating that time slide ID 1 describes a time slide that is
+	equivalent to time slide ID 0.  The calling code could use this
+	information to delete time slide ID 1 from the time_slide table,
 	and replace references to that ID in other tables with references
-	to time_slide_id:0.
+	to time slide ID 0.
 	"""
 	# convert offsets to deltas
 	time_slides = dict((time_slide_id, offsetvect.deltas) for time_slide_id, offsetvect in time_slides.items())
