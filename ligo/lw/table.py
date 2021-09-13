@@ -67,16 +67,6 @@ from . import types as ligolwtypes
 #
 
 
-def get_table(xmldoc, name):
-	"""
-	Scan xmldoc for a Table element named name.  Raises ValueError if
-	not exactly 1 such table is found.
-
-	See also the .get_table() class method of the Table class.
-	"""
-	return Table.get_table(xmldoc, name)
-
-
 class next_id(int):
 	"""
 	Type for .next_id attributes of tables with int_8s ID columns.
@@ -597,9 +587,6 @@ class Table(ligolw.Table, list):
 		.tableName attribute, but sub-classes, for example those in
 		lsctables.py, do provide a value for that attribute.
 
-		The module-level get_table() function is a wrapper of this
-		class method.
-
 		Example:
 
 		>>> from ligo.lw import ligolw
@@ -607,8 +594,6 @@ class Table(ligolw.Table, list):
 		>>> xmldoc = ligolw.Document()
 		>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
 		[]
-		>>> # find table with module function
-		>>> sngl_inspiral_table = get_table(xmldoc, lsctables.SnglInspiralTable.tableName)
 		>>> # find table with .get_table() class method (preferred)
 		>>> sngl_inspiral_table = lsctables.SnglInspiralTable.get_table(xmldoc)
 
@@ -618,7 +603,7 @@ class Table(ligolw.Table, list):
 			name = cls.tableName
 		tables = cls.getTablesByName(xmldoc, name)
 		if len(tables) != 1:
-			raise ValueError("document must contain exactly one %s table" % Table.TableName(name))
+			raise ValueError("document must contain exactly one %s table" % cls.TableName(name))
 		return tables[0]
 
 	def copy(self):
