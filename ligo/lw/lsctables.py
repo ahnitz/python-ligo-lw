@@ -94,6 +94,29 @@ from . import table
 from . import types as ligolwtypes
 
 
+
+# NOTE:  some table definitions below make the comment that they are using
+# indexes where a primary key constraint would be more appropirate.  in
+# those cases, the ID column in question refers to IDs in other tables
+# (typically the process table) and they cannot be declared to be primary
+# keys, even if they would be unique, because sqlite does not allow primary
+# key values to be modified.  the values might need to be changed after the
+# table to which they refer is populated and its rows have had their IDs
+# reassigned to avoid conflicts with pre-existing data in the database.
+# that problem can potentially be fixed by populating tables in the correct
+# order, but because calling code can declare its own custom tables it's
+# not clear that such a solution would be robust or even guaranteed to
+# always be possible.  another solution might be to re-assign all IDs in
+# all tables in RAM before inserting any rows into the database, but that
+# creates a scaling limitation wherein each document individually must be
+# small enough to be held in in memory in its entirety, which is not
+# currently a limitation the code has.  I think, in practice, documents
+# that are too large to hold in memory are also too large to work with
+# conveniently so it's unlikely there are any existing use cases where
+# imposing that limit would be a problem.  in the meantime, we use indexes
+# in these cases instead of primary keys.
+
+
 #
 # =============================================================================
 #
@@ -607,9 +630,7 @@ class ProcessParamsTable(table.Table):
 		"type": "lstring",
 		"value": "lstring"
 	}
-	# FIXME: these constraints break ID remapping in the DB backend.
-	# an index is used instead.  switch back to the constraints when I
-	# can figure out how not to break remapping.
+	# NOTE:  must use index instead of primary key
 	#constraints = "PRIMARY KEY (process_id, param)"
 	how_to_index = {
 		"pp_pip_index": ("process_id", "param"),
@@ -1180,10 +1201,7 @@ class CoincInspiralTable(table.Table):
 		"false_alarm_rate": "real_8",
 		"combined_far": "real_8"
 	}
-	# FIXME:  like some other tables here, this table should have the
-	# constraint that the coinc_event_id column is a primary key.  this
-	# breaks ID reassignment in ligolw_sqlite, so until that is fixed
-	# the constraint is being replaced with an index.
+	# NOTE:  must use index instead of primary key
 	#constraints = "PRIMARY KEY (coinc_event_id)"
 	how_to_index = {
 		"ci_cei_index": ("coinc_event_id",)
@@ -1299,6 +1317,7 @@ class CoincRingdownTable(table.Table):
 		"false_alarm_rate": "real_8",
 		"combined_far": "real_8"
 	}
+	# NOTE:  must use index instead of primary key
 	# constraints = "PRIMARY KEY (coinc_event_id)"
 	how_to_index = {
 		"cr_cei_index": ("coinc_event_id",)
