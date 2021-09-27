@@ -38,7 +38,6 @@ level operations provided by the ligolw_sqlite program.
 """
 
 
-import sqlite3
 import sys
 
 
@@ -62,30 +61,6 @@ from .. import utils as ligolw_utils
 #
 
 
-def update_ids(connection, xmldoc, verbose = False):
-	"""
-	For internal use only.
-	"""
-	# NOTE:  it's critical that the xmldoc object be retrieved *before*
-	# the rows whose IDs need to be updated are inserted.  The xml
-	# retrieval resets the "last max row ID" values inside the table
-	# objects, so if retrieval of the xmldoc is deferred until after
-	# the rows are inserted, nothing will get updated.  therefore, the
-	# connection and xmldoc need to be passed separately to this
-	# function, even though it seems this function could reconstruct
-	# the xmldoc itself from the connection.
-	table_elems = xmldoc.getElementsByTagName(ligolw.Table.tagName)
-	for i, tbl in enumerate(table_elems):
-		if verbose:
-			sys.stderr.write("updating IDs: %d%%\r" % (100.0 * i / len(table_elems)))
-		tbl.applyKeyMapping()
-	if verbose:
-		sys.stderr.write("updating IDs: 100%\n")
-
-	# reset ID mapping for next document
-	dbtables.idmap_reset(connection)
-
-
 def insert_from_url(url, preserve_ids = False, verbose = False, contenthandler = None):
 	"""
 	Parse and insert the LIGO Light Weight document at the URL into the
@@ -107,12 +82,7 @@ def insert_from_url(url, preserve_ids = False, verbose = False, contenthandler =
 	orig_DBTable_append = dbtables.DBTable.append
 
 	if not preserve_ids:
-		try:
-			dbtables.idmap_create(contenthandler.connection)
-		except sqlite3.OperationalError:
-			# assume table already exists
-			pass
-		dbtables.idmap_sync(contenthandler.connection)
+		idmapper = dbtables.idmapper(contenthandler.connection)
 		dbtables.DBTable.append = dbtables.DBTable._remapping_append
 	else:
 		dbtables.DBTable.append = dbtables.DBTable._append
@@ -140,7 +110,7 @@ def insert_from_url(url, preserve_ids = False, verbose = False, contenthandler =
 		#
 
 		if not preserve_ids:
-			update_ids(contenthandler.connection, xmldoc, verbose = verbose)
+			idmapper.update_ids(xmldoc, verbose = verbose)
 
 	finally:
 		dbtables.DBTable.append = orig_DBTable_append
@@ -173,12 +143,7 @@ def insert_from_xmldoc(connection, source_xmldoc, preserve_ids = False, verbose 
 	orig_DBTable_append = dbtables.DBTable.append
 
 	if not preserve_ids:
-		try:
-			dbtables.idmap_create(connection)
-		except sqlite3.OperationalError:
-			# assume table already exists
-			pass
-		dbtables.idmap_sync(connection)
+		idmapper = dbtables.idmapper(connection)
 		dbtables.DBTable.append = dbtables.DBTable._remapping_append
 	else:
 		dbtables.DBTable.append = dbtables.DBTable._append
@@ -235,7 +200,7 @@ def insert_from_xmldoc(connection, source_xmldoc, preserve_ids = False, verbose 
 		#
 
 		if not preserve_ids:
-			update_ids(connection, xmldoc, verbose = verbose)
+			idmapper.update_ids(xmldoc, verbose = verbose)
 
 	finally:
 		dbtables.DBTable.append = orig_DBTable_append

@@ -38,6 +38,7 @@ import os
 import re
 import shutil
 import signal
+import sqlite3
 import sys
 import tempfile
 import threading
@@ -373,66 +374,88 @@ class workingcopy(object):
 #
 
 
-def idmap_create(connection):
+class idmapper(object):
 	"""
-	Create the _idmap_ table.  This table has columns "table_name",
-	"old", and "new" mapping old IDs to new IDs for each table.  The
-	(table_name, old) column pair is a primary key (is indexed and must
-	contain unique entries).  The table is created as a temporary
-	table, so it will be automatically dropped when the database
-	connection is closed.
+	Create and manage the _idmap_ table in an sqlite database.  This
+	table has columns "table_name", "old", and "new" mapping old IDs to
+	new IDs for each table.  The (table_name, old) column pair is a
+	primary key (is indexed and must contain unique entries).  The
+	table is created as a temporary table, so it will be automatically
+	dropped when the database connection is closed.
 
-	This function is for internal use, it forms part of the code used
-	to re-map row IDs when merging multiple documents.
+	This class is for internal use, it forms part of the code used to
+	re-map row IDs when merging multiple documents.
 	"""
-	connection.cursor().execute("CREATE TEMPORARY TABLE _idmap_ (table_name TEXT NOT NULL, old INTEGER NOT NULL, new INTEGER NOT NULL, PRIMARY KEY (table_name, old))")
+	def __init__(self, connection):
+		self.connection = connection
+		self.cursor = self.connection.cursor()
+		try:
+			self.cursor.execute("CREATE TEMPORARY TABLE _idmap_ (table_name TEXT NOT NULL, old INTEGER NOT NULL, new INTEGER NOT NULL, PRIMARY KEY (table_name, old))")
+		except sqlite3.OperationalError:
+			# assume table already exists
+			pass
+		self.sync()
 
+	def reset(self):
+		"""
+		Erase the contents of the _idmap_ table, but leave the
+		table in place.
+		"""
+		self.cursor.execute("DELETE FROM _idmap_")
 
-def idmap_reset(connection):
-	"""
-	Erase the contents of the _idmap_ table, but leave the table in
-	place.
+	def sync(self):
+		"""
+		Iterate over the tables in the database, ensure that there
+		exists a custom DBTable class for each, and synchronize
+		that table's ID generator to the ID values in the database.
+		"""
+		xmldoc = get_xml(self.connection)
+		for tbl in xmldoc.getElementsByTagName(DBTable.tagName):
+			tbl.sync_next_id()
+		xmldoc.unlink()
 
-	This function is for internal use, it forms part of the code used
-	to re-map row IDs when merging multiple documents.
-	"""
-	connection.cursor().execute("DELETE FROM _idmap_")
+	@staticmethod
+	def get_new(cursor, table_name, old, tbl):
+		"""
+		From the old ID, obtain a replacement ID by either grabbing
+		it from the _idmap_ table if one has already been assigned
+		to the old ID, or by using the current value of the Table
+		instance's next_id class attribute.  In the latter case,
+		the new ID is recorded in the _idmap_ table, and the class
+		attribute incremented by 1.
+		"""
+		cursor.execute("SELECT new FROM _idmap_ WHERE table_name == ? AND old == ?", (table_name, old))
+		new = cursor.fetchone()
+		if new is not None:
+			# a new ID has already been created for this old ID
+			return new[0]
+		# this ID was not found in _idmap_ table, assign a new ID and
+		# record it
+		new = tbl.get_next_id()
+		cursor.execute("INSERT INTO _idmap_ VALUES (?, ?, ?)", (table_name, old, new))
+		return new
 
-
-def idmap_sync(connection):
-	"""
-	Iterate over the tables in the database, ensure that there exists a
-	custom DBTable class for each, and synchronize that table's ID
-	generator to the ID values in the database.
-	"""
-	xmldoc = get_xml(connection)
-	for tbl in xmldoc.getElementsByTagName(DBTable.tagName):
-		tbl.sync_next_id()
-	xmldoc.unlink()
-
-
-def idmap_get_new(cursor, table_name, old, tbl):
-	"""
-	From the old ID string, obtain a replacement ID string by either
-	grabbing it from the _idmap_ table if one has already been assigned
-	to the old ID, or by using the current value of the Table
-	instance's next_id class attribute.  In the latter case, the new ID
-	is recorded in the _idmap_ table, and the class attribute
-	incremented by 1.
-
-	This function is for internal use, it forms part of the code used
-	to re-map row IDs when merging multiple documents.
-	"""
-	cursor.execute("SELECT new FROM _idmap_ WHERE table_name == ? AND old == ?", (table_name, old))
-	new = cursor.fetchone()
-	if new is not None:
-		# a new ID has already been created for this old ID
-		return new[0]
-	# this ID was not found in _idmap_ table, assign a new ID and
-	# record it
-	new = tbl.get_next_id()
-	cursor.execute("INSERT INTO _idmap_ VALUES (?, ?, ?)", (table_name, old, new))
-	return new
+	def update_ids(self, xmldoc, verbose = False):
+		# NOTE:  it's critical that the xmldoc object be retrieved
+		# *before* the rows whose IDs need to be updated are
+		# inserted (which, of course, is done before before this
+		# method is called).  the xml retrieval resets the "last
+		# max row ID" values inside the table objects, so if
+		# retrieval of the xmldoc is deferred until after the rows
+		# are inserted, nothing will get updated.  therefore, the
+		# xmldoc needs to be retrieved ahead of time and passed
+		# separately to this method, even though it seems this
+		# method could reconstruct the xmldoc itself from the
+		# connection.
+		table_elems = xmldoc.getElementsByTagName(ligolw.Table.tagName)
+		for i, tbl in enumerate(table_elems):
+			if verbose:
+				sys.stderr.write("updating IDs: %d%%\r" % (100.0 * i / len(table_elems)))
+			tbl.applyKeyMapping()
+		if verbose:
+			sys.stderr.write("updating IDs: 100%\n")
+		# reset for next document
+		self.reset()
 
 
 #
@@ -735,7 +758,7 @@ class DBTable(table.Table):
 		if self.next_id is not None:
 			# assign (and record) a new ID before inserting the
 			# row to avoid collisions with existing rows
-			setattr(row, self.next_id.column_name, idmap_get_new(self.cursor, self.Name, getattr(row, self.next_id.column_name), self))
+			setattr(row, self.next_id.column_name, idmapper.get_new(self.cursor, self.Name, getattr(row, self.next_id.column_name), self))
 		self._append(row)
 		if self.remap_first_rowid is None:
 			self.remap_first_rowid = self.maxrowid()
