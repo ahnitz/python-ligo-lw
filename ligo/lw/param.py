@@ -147,6 +147,23 @@ class Param(ligolw.Param):
 				fileobj.write(xmlescape(ligolwtypes.FormatFunc[self.Type](self.pcdata).strip(u"\"") or u" "))
 		fileobj.write(self.end_tag(u"") + u"\n")
 
+	@property
+	def value(self):
+		"""
+		Synonym of .pcdata.  Makes calling code easier to
+		understand.  In the parent class .pcdata is text only.
+		Here it has been translated into a native Python type, but
+		it's not obvious in calling code that that is what has
+		happened so it can be unclear when reading calling codes if
+		one should be expecting a string or a native value.  Using
+		this synonym can clarify the meaning.
+		"""
+		return self.pcdata
+
+	@value.setter
+	def value(self, value):
+		self.pcdata = value
+
 	@classmethod
 	def build(cls, name, Type, value, start = None, scale = None, unit = None, dataunit = None, comment = None):
 		"""
