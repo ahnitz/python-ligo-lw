@@ -51,23 +51,16 @@ from . import types as ligolwtypes
 
 def get_param(xmldoc, name):
 	"""
-	Scan xmldoc for a param named name.  Raises ValueError if not
-	exactly 1 such param is found.
+	Deprecated.  Use Param.get_param(xmldoc, name)
 	"""
-	params = Param.getParamsByName(xmldoc, name)
-	if len(params) != 1:
-		raise ValueError("document must contain exactly one %s param" % Param.ParamName(name))
-	return params[0]
+	return Param.get_param(xmldoc, name)
 
 
 def get_pyvalue(xml, name):
 	"""
-	Convenience wrapper for get_param() that recovers an instance of a
-	Python builtin type from a Param element.
+	Deprecated.  Use Param.get_param(xml, name).value
 	"""
-	# Note:  the Param is automatically parsed into the correct Python
-	# type, so this function is mostly a no-op.
-	return get_param(xml, name).pcdata
+	return Param.get_param(xml, name).value
 
 
 #
@@ -225,9 +218,29 @@ class Param(ligolw.Param):
 	def getParamsByName(cls, elem, name):
 		"""
 		Return a list of params with name name under elem.
+
+		See also .get_param().
 		"""
 		name = cls.ParamName(name)
 		return elem.getElements(lambda e: (e.tagName == cls.tagName) and (e.Name == name))
+
+	@classmethod
+	def get_param(cls, xmldoc, name = None):
+		"""
+		Scan xmldoc for a param named name.  Raises ValueError if
+		not exactly 1 such param is found.  If name is None
+		(default), then the .paramName attribute of this class is
+		used.  The Param class does not provide a .paramName
+		attribute, but sub-classes may choose to.
+
+		See also .getParamsByName().
+		"""
+		if name is None:
+			name = cls.paramName
+		elems = Param.getParamsByName(xmldoc, name)
+		if len(elems) != 1:
+			raise ValueError("document must contain exactly one %s param" % cls.ParamName(name))
+		return elems[0]
 
 
 #
