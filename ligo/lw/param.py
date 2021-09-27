@@ -181,14 +181,24 @@ class Param(ligolw.Param):
 		Examples:
 
 		>>> import sys
-		>>> Param.from_pyvalue(u"float", 3.0).write(sys.stdout)
-		<Param Name="float:param" Type="real_8">3</Param>
-		>>> Param.from_pyvalue(u"string", u"test").write(sys.stdout)
-		<Param Name="string:param" Type="lstring">test</Param>
-		>>> Param.from_pyvalue(u"shortstring", u"").write(sys.stdout)
-		<Param Name="shortstring:param" Type="lstring"> </Param>
-		>>> Param.from_pyvalue(u"none", None).write(sys.stdout)
-		<Param Name="none:param" Type="None"></Param>
+		>>> # float
+		>>> Param.from_pyvalue(u"example", 3.0).write(sys.stdout)
+		<Param Name="example:param" Type="real_8">3</Param>
+		>>> # string
+		>>> Param.from_pyvalue(u"example", u"test").write(sys.stdout)
+		<Param Name="example:param" Type="lstring">test</Param>
+		>>> # short string (non-empty data = not NULL)
+		>>> Param.from_pyvalue(u"example", u"").write(sys.stdout)
+		<Param Name="example:param" Type="lstring"> </Param>
+		>>> # None (empty data = NULL)
+		>>> Param.from_pyvalue(u"example", None).write(sys.stdout)
+		<Param Name="example:param" Type="None"></Param>
+
+		Note that any type of Param may be NULL-valued.  These
+		examples demonstrate the use of the automatic encoding
+		helper function, which translates None into a None-typed
+		Param because it doesn't know what else it might be, but,
+		for example, a float-typed Param may also be set to None.
 		"""
 		if value is not None:
 			return cls.build(name, ligolwtypes.FromPyType[type(value)], value, **kwargs)
