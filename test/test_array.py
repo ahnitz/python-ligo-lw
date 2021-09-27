@@ -26,7 +26,7 @@ def test_io_iteration_order():
 	print("writing took %g s" % (end_write - start_write))
 
 	start_read = time.perf_counter()
-	recov = ligolw_array.get_array(ligolw_utils.load_filename("big_array.xml.gz", contenthandler = LIGOXMLContentHandler), "test").array
+	recov = ligolw_array.Array.get_array(ligolw_utils.load_filename("big_array.xml.gz", contenthandler = LIGOXMLContentHandler), "test").array
 	end_read = time.perf_counter()
 	print("reading took %g s" % (end_read - start_read))
 

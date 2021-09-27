@@ -66,13 +66,9 @@ from . import types as ligolwtypes
 
 def get_array(xmldoc, name):
 	"""
-	Scan xmldoc for an array named name.  Raises ValueError if not
-	exactly 1 such array is found.
+	Deprecated.  use Array.get_array(xmldoc, name).
 	"""
-	arrays = Array.getArraysByName(xmldoc, name)
-	if len(arrays) != 1:
-		raise ValueError("document must contain exactly one %s array" % Array.ArrayName(name))
-	return arrays[0]
+	return Array.get_array(xmldoc, name)
 
 
 #
@@ -342,9 +338,29 @@ class Array(ligolw.Array):
 	def getArraysByName(cls, elem, name):
 		"""
 		Return a list of arrays with name name under elem.
+
+		See also .get_array().
 		"""
 		name = cls.ArrayName(name)
 		return elem.getElements(lambda e: (e.tagName == cls.tagName) and (e.Name == name))
+
+	@classmethod
+	def get_array(cls, xmldoc, name = None):
+		"""
+		Scan xmldoc for an array named name.  Raises ValueError if
+		not exactly 1 such array is found.  If name is None
+		(default), then the .arrayName attribute of this class is
+		used.  The Array class does not provide a .arrayName
+		attribute, but sub-classes could choose to do so.
+
+		See also .getArraysByName().
+		"""
+		if name is None:
+			name = cls.arrayName
+		elems = cls.getArraysByName(xmldoc, name)
+		if len(elems) != 1:
+			raise ValueError("document must contain exactly one %s array" % cls.ArrayName(name))
+		return elems[0]
 
 	#
 	# Element methods
