@@ -58,17 +58,6 @@ from .. import utils as ligolw_utils
 
 
 #
-# Open database
-#
-
-
-def setup(target, check_same_thread = True):
-	connection = sqlite3.connect(target, check_same_thread = check_same_thread)
-	dbtables.idmap_sync(connection)
-	return connection
-
-
-#
 # How to insert
 #
 
