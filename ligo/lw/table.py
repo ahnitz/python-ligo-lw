@@ -601,10 +601,10 @@ class Table(ligolw.Table, list):
 		"""
 		if name is None:
 			name = cls.tableName
-		tables = cls.getTablesByName(xmldoc, name)
-		if len(tables) != 1:
+		elems = cls.getTablesByName(xmldoc, name)
+		if len(elems) != 1:
 			raise ValueError("document must contain exactly one %s table" % cls.TableName(name))
-		return tables[0]
+		return elems[0]
 
 	def copy(self):
 		"""
