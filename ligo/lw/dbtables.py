@@ -490,18 +490,6 @@ def get_table_names(connection):
 	return [name for (name,) in cursor]
 
 
-def get_column_info(connection, table_name):
-	"""
-	Return an in order list of (name, type) tuples describing the
-	columns in the given table.
-	"""
-	cursor = connection.cursor()
-	cursor.execute("SELECT sql FROM sqlite_master WHERE type == 'table' AND name == ?", (table_name,))
-	statement, = cursor.fetchone()
-	coldefs = re.match(_sql_create_table_pattern, statement).groupdict()["coldefs"]
-	return [(coldef.groupdict()["name"], coldef.groupdict()["type"]) for coldef in re.finditer(_sql_coldef_pattern, coldefs) if coldef.groupdict()["name"].upper() not in ("PRIMARY", "UNIQUE", "CHECK")]
-
-
 def get_xml(connection, table_names = None):
 	"""
 	Construct an XML document tree wrapping around the contents of the
@@ -527,7 +515,7 @@ def get_xml(connection, table_names = None):
 		if table_elem.validcolumns is not None:
 			for name in table_elem.validcolumns:
 				destrip[table.Column.ColumnName(name)] = name
-		for column_name, column_type in get_column_info(connection, table_elem.Name):
+		for column_name, column_type in table_elem.get_column_info():
 			if table_elem.validcolumns is not None:
 				try:
 					column_name = destrip[column_name]
@@ -699,6 +687,16 @@ class DBTable(table.Table):
 		}[connection_db_type(self.connection)]
 		self.append_statement = "INSERT INTO %s (%s) VALUES (%s)" % (self.Name, ",".join(self.dbcolumnnames), params)
 		self.append_attrgetter = operator.attrgetter(*self.dbcolumnnames)
+
+	def get_column_info(self):
+		"""
+		Return an in order list of (name, type) tuples describing
+		the columns in this table.
+		"""
+		self.cursor.execute("SELECT sql FROM sqlite_master WHERE type == 'table' AND name == ?", (self.Name,))
+		statement, = self.cursor.fetchone()
+		coldefs = re.match(_sql_create_table_pattern, statement).groupdict()["coldefs"]
+		return [(coldef.groupdict()["name"], coldef.groupdict()["type"]) for coldef in re.finditer(_sql_coldef_pattern, coldefs) if coldef.groupdict()["name"].upper() not in ("PRIMARY", "UNIQUE", "CHECK")]
 
 	def sync_next_id(self):
 		if self.next_id is not None:
