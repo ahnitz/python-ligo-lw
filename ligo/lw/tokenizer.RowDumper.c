@@ -30,6 +30,8 @@
 #include <structmember.h>
 #include <stdlib.h>
 #include <tokenizer.h>
+#include <wchar.h>
+#include <wctype.h>
 
 
 /*
@@ -91,7 +93,7 @@ static void __del__(PyObject *self)
 static int __init__(PyObject *self, PyObject *args, PyObject *kwds)
 {
 	ligolw_RowDumper *rowdumper = (ligolw_RowDumper *) self;
-	Py_UNICODE default_delimiter = ',';
+	wchar_t default_delimiter = L',';
 
 	rowdumper->delimiter = NULL;
 	if(!PyArg_ParseTuple(args, "OO|U", &rowdumper->attributes, &rowdumper->formats, &rowdumper->delimiter))
@@ -100,7 +102,7 @@ static int __init__(PyObject *self, PyObject *args, PyObject *kwds)
 	if(rowdumper->delimiter)
 		Py_INCREF(rowdumper->delimiter);
 	else
-		rowdumper->delimiter = PyUnicode_FromUnicode(&default_delimiter, 1);
+		rowdumper->delimiter = PyUnicode_FromWideChar(&default_delimiter, 1);
 	rowdumper->attributes = llwtokenizer_build_attributes(rowdumper->attributes);
 	rowdumper->formats = llwtokenizer_build_formats(rowdumper->formats);
 	if(!rowdumper->delimiter || !rowdumper->attributes || !rowdumper->formats)
@@ -220,7 +222,7 @@ static PyObject *next(PyObject *self)
 		}
 
 		if(val == Py_None)
-			token = PyUnicode_FromUnicode(NULL, 0); /* u"" */
+			token = PyUnicode_FromWideChar(NULL, 0); /* u"" */
 		else
 			token = PyObject_CallFunctionObjArgs(PyTuple_GET_ITEM(rowdumper->formats, i), val, NULL);
 		Py_DECREF(val);

@@ -35,6 +35,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <tokenizer.h>
+#include <wchar.h>
+#include <wctype.h>
 
 
 /*
@@ -52,7 +54,7 @@
  */
 
 
-static const Py_UNICODE default_quote_characters[] = {'\'', '\"', '\0'};
+static const wchar_t default_quote_characters[] = {L'\'', L'\"', 0};
 
 
 /*
@@ -69,19 +71,19 @@ typedef struct {
 	/* the type to which the next parsed token will be converted */
 	PyObject **type;
 	/* delimiter character to be used in parsing */
-	Py_UNICODE delimiter;
+	wchar_t delimiter;
 	/* the character(s) to interpret as a quote character */
-	const Py_UNICODE *quote_characters;
+	const wchar_t *quote_characters;
 	/* the character to interpret as the escape character */
-	Py_UNICODE escape_character;
+	wchar_t escape_character;
 	/* size of internal buffer, minus null terminator */
 	Py_ssize_t allocation;
 	/* internal buffer */
-	Py_UNICODE *data;
+	wchar_t *data;
 	/* end of internal buffer's contents (null terminator) */
-	Py_UNICODE *length;
+	wchar_t *length;
 	/* current offset in buffer */
-	Py_UNICODE *pos;
+	wchar_t *pos;
 } ligolw_Tokenizer;
 
 
@@ -93,7 +95,12 @@ typedef struct {
 
 static int add_to_data(ligolw_Tokenizer *tokenizer, PyObject *unicode)
 {
+	/* FIXME:  remove GET_SIZE vers. when we require python >= 3.12 */
+#ifndef PyUnicode_GET_LENGTH
 	Py_ssize_t n = PyUnicode_GET_SIZE(unicode);
+#else
+	Py_ssize_t n = PyUnicode_GET_LENGTH(unicode);
+#endif
 
 	if(n) {
 		if(tokenizer->length - tokenizer->data + n > tokenizer->allocation) {
@@ -109,7 +116,7 @@ static int add_to_data(ligolw_Tokenizer *tokenizer, PyObject *unicode)
 			 * the null terminator
 			 */
 
-			Py_UNICODE *old_data = tokenizer->data;
+			wchar_t *old_data = tokenizer->data;
 
 			tokenizer->data = realloc(tokenizer->data, (tokenizer->allocation + n + 1) * sizeof(*tokenizer->data));
 			if(!tokenizer->data) {
@@ -135,7 +142,7 @@ static int add_to_data(ligolw_Tokenizer *tokenizer, PyObject *unicode)
 		 * terminator
 		 */
 
-		memcpy(tokenizer->length, PyUnicode_AsUnicode(unicode), n * sizeof(*tokenizer->length));
+		PyUnicode_AsWideChar(unicode, tokenizer->length, n);
 		tokenizer->length += n;
 		*tokenizer->length = 0;
 	}
@@ -187,7 +194,7 @@ static void unref_types(ligolw_Tokenizer *tokenizer)
  */
 
 
-static void parse_error(PyObject *exception, const Py_UNICODE *buffer, const ptrdiff_t buffer_length, const Py_UNICODE *pos, const char *msg)
+static void parse_error(PyObject *exception, const wchar_t *buffer, const ptrdiff_t buffer_length, const wchar_t *pos, const char *msg)
 {
 	PyObject *buffer_str;
 	PyObject *pos_str;
@@ -197,15 +204,15 @@ static void parse_error(PyObject *exception, const Py_UNICODE *buffer, const ptr
 	buffer_str = PyUnicode_Encode(buffer, buffer_length, NULL, NULL);
 	pos_str = PyUnicode_Encode(pos, 1, NULL, NULL);
 #else
-	buffer_str = PyUnicode_FromUnicode(buffer, buffer_length);
-	pos_str = PyUnicode_FromUnicode(pos, 1);
+	buffer_str = PyUnicode_FromWideChar(buffer, buffer_length);
+	pos_str = PyUnicode_FromWideChar(pos, 1);
 #endif
 
 	if(buffer_str && pos_str)
 #if PY_MAJOR_VERSION < 3
 		PyErr_Format(exception, "parse error in '%s' near '%s' at position %td: %s", PyString_AS_STRING(buffer_str), PyString_AS_STRING(pos_str), pos - buffer + 1, msg);
 #else
-		PyErr_Format(exception, "parse error in '%U' near '%U' at position %td: %s", buffer_str, pos_str, pos - buffer + 1, msg);
+		PyErr_Format(exception, "parse error in '%U' near '%U' at position %zd: %s", buffer_str, pos_str, (Py_ssize_t) (pos - buffer + 1), msg);
 #endif
 	else
 		PyErr_Format(exception, "parse error (details not available): %s", msg);
@@ -216,27 +223,13 @@ static void parse_error(PyObject *exception, const Py_UNICODE *buffer, const ptr
 
 
 /*
- * Py_UNICODE equivalent of strchr()
- */
-
-
-static const Py_UNICODE *pyunicode_strchr(const Py_UNICODE *s, Py_UNICODE c)
-{
-	for(; *s; s++)
-		if(*s == c)
-			return s;
-	return NULL;
-}
-
-
-/*
  * Unescape a string.
  */
 
 
-static int unescape(Py_UNICODE *s, Py_UNICODE **end, const Py_UNICODE *escapable_characters, Py_UNICODE escape_character)
+static int unescape(wchar_t *s, wchar_t **end, const wchar_t *escapable_characters, wchar_t escape_character)
 {
-	Py_UNICODE *start = s;
+	wchar_t *start = s;
 	int escaped = 0;
 
 	while(*s) {
@@ -254,7 +247,7 @@ static int unescape(Py_UNICODE *s, Py_UNICODE **end, const Py_UNICODE *escapable
 		 * Check for an unrecognized escape sequence.
 		 */
 
-		if(!pyunicode_strchr(escapable_characters, *s)) {
+		if(!wcschr(escapable_characters, *s)) {
 			parse_error(PyExc_ValueError, start, *end - start - 1, s - 1, "unrecognized escape sequence");
 			return -1;
 		}
@@ -307,12 +300,12 @@ static int unescape(Py_UNICODE *s, Py_UNICODE **end, const Py_UNICODE *escapable
  */
 
 
-static PyObject *next_token(ligolw_Tokenizer *tokenizer, Py_UNICODE **start, Py_UNICODE **end)
+static PyObject *next_token(ligolw_Tokenizer *tokenizer, wchar_t **start, wchar_t **end)
 {
-	Py_UNICODE *pos = tokenizer->pos;
-	Py_UNICODE *bailout = tokenizer->length;
+	wchar_t *pos = tokenizer->pos;
+	wchar_t *bailout = tokenizer->length;
 	PyObject *type = *tokenizer->type;
-	Py_UNICODE quote_character;
+	wchar_t quote_character;
 
 	/*
 	 * The following code matches the pattern:
@@ -340,10 +333,10 @@ static PyObject *next_token(ligolw_Tokenizer *tokenizer, Py_UNICODE **start, Py_
 
 	if(pos >= bailout)
 		goto stop_iteration;
-	while(Py_UNICODE_ISSPACE(*pos))
+	while(iswspace(*pos))
 		if(++pos >= bailout)
 			goto stop_iteration;
-	if(pyunicode_strchr(tokenizer->quote_characters, *pos)) {
+	if(wcschr(tokenizer->quote_characters, *pos)) {
 		/*
 		 * Found a quoted token.
 		 */
@@ -371,7 +364,7 @@ static PyObject *next_token(ligolw_Tokenizer *tokenizer, Py_UNICODE **start, Py_
 		quote_character = 0;
 
 		*start = pos;
-		while(!Py_UNICODE_ISSPACE(*pos) && (*pos != tokenizer->delimiter))
+		while(!iswspace(*pos) && (*pos != tokenizer->delimiter))
 			if(++pos >= bailout)
 				goto stop_iteration;
 		*end = pos;
@@ -385,7 +378,7 @@ static PyObject *next_token(ligolw_Tokenizer *tokenizer, Py_UNICODE **start, Py_
 			*start = *end = NULL;
 	}
 	while(*pos != tokenizer->delimiter) {
-		if(!Py_UNICODE_ISSPACE(*pos)) {
+		if(!iswspace(*pos)) {
 			parse_error(PyExc_ValueError, *start, tokenizer->length - *start - 1, pos, "expected whitespace or delimiter");
 			return NULL;
 		}
@@ -419,7 +412,7 @@ static PyObject *next_token(ligolw_Tokenizer *tokenizer, Py_UNICODE **start, Py_
 		**end = 0;
 	if(quote_character) {
 		/* FIXME:  remove the delimiter */
-		Py_UNICODE escapable_characters[] = {quote_character, tokenizer->escape_character, tokenizer->delimiter, '\0'};
+		wchar_t escapable_characters[] = {quote_character, tokenizer->escape_character, tokenizer->delimiter, 0};
 		if(unescape(*start, end, escapable_characters, tokenizer->escape_character))
 			return NULL;
 	}
@@ -456,6 +449,10 @@ static PyObject *append(PyObject *self, PyObject *data)
 	int fail;
 
 	if(PyUnicode_Check(data)) {
+		/* FIXME:  remove when we require Python >= 3.12 */
+#ifdef PyUnicode_READY
+		PyUnicode_READY(data);
+#endif
 		fail = add_to_data((ligolw_Tokenizer *) self, data);
 	/* FIXME:  remove when we require >= 3 */
 #if PY_MAJOR_VERSION < 3
@@ -511,12 +508,25 @@ static int __init__(PyObject *self, PyObject *args, PyObject *kwds)
 	if(!PyArg_ParseTuple(args, "U", &arg))
 		return -1;
 
+	/* FIXME:  remove when we require Python >= 3.12 */
+#ifdef PyUnicode_READY
+	PyUnicode_READY(arg);
+#endif
+
+	/* FIXME:  remove _GET_SIZE vers. when we require Python >= 3.3 */
+#ifndef PyUnicode_GET_LENGTH
 	if(PyUnicode_GET_SIZE(arg) != 1) {
 		PyErr_SetString(PyExc_ValueError, "len(delimiter) != 1");
 		return -1;
 	}
+#else
+	if(PyUnicode_GET_LENGTH(arg) != 1) {
+		PyErr_SetString(PyExc_ValueError, "len(delimiter) != 1");
+		return -1;
+	}
+#endif
 
-	tokenizer->delimiter = *PyUnicode_AS_UNICODE(arg);
+	PyUnicode_AsWideChar(arg, &tokenizer->delimiter, 1);
 	tokenizer->quote_characters = default_quote_characters;
 	tokenizer->escape_character = '\\';
 	tokenizer->types = malloc(1 * sizeof(*tokenizer->types));
@@ -555,7 +565,7 @@ static PyObject *next(PyObject *self)
 	ligolw_Tokenizer *tokenizer = (ligolw_Tokenizer *) self;
 	PyObject *type;
 	PyObject *token;
-	Py_UNICODE *start, *end;
+	wchar_t *start, *end;
 
 	/*
 	 * Identify the start and end of the next token.
@@ -579,23 +589,25 @@ static PyObject *next(PyObject *self)
 		Py_INCREF(Py_None);
 		token = Py_None;
 	} else if(type == (PyObject *) &PyFloat_Type) {
-		char ascii_buffer[end - start + 1];
-		char *ascii_end;
-		if(PyUnicode_EncodeDecimal(start, end - start, ascii_buffer, NULL))
-			return NULL;
-		token = PyFloat_FromDouble(strtod(ascii_buffer, &ascii_end));
-		if(ascii_end == ascii_buffer || *ascii_end != 0) {
+		wchar_t buffer[end - start + 1];
+		wchar_t *buffer_end;
+		memcpy(buffer, start, (void *) end - (void *) start);
+		buffer[end - start] = 0;
+		token = PyFloat_FromDouble(wcstod(buffer, &buffer_end));
+		if(buffer_end == buffer || *buffer_end != 0) {
 			/*
-			 * strtod() couldn't convert the token, emulate
+			 * wcstod() couldn't convert the token, emulate
 			 * float()'s error message
 			 */
 
 			Py_XDECREF(token);
-			PyErr_Format(PyExc_ValueError, "invalid literal for float(): '%s'", ascii_buffer);
+			token = PyUnicode_FromWideChar(buffer, -1);
+			PyErr_Format(PyExc_ValueError, "invalid literal for float(): '%U'", token);
+			Py_DECREF(token);
 			token = NULL;
 		}
 	} else if(type == (PyObject *) &PyUnicode_Type) {
-		token = PyUnicode_FromUnicode(start, end - start);
+		token = PyUnicode_FromWideChar(start, end - start);
 	/* FIXME:  remove when we require >= 3 */
 #if PY_MAJOR_VERSION < 3
 	} else if(type == (PyObject *) &PyString_Type) {
@@ -604,7 +616,29 @@ static PyObject *next(PyObject *self)
 		token = PyInt_FromUnicode(start, end - start, 0);
 #endif
 	} else if(type == (PyObject *) &PyLong_Type) {
-		token = PyLong_FromUnicode(start, end - start, 0);
+		wchar_t buffer[end - start + 1];
+		wchar_t *buffer_end;
+		memcpy(buffer, start, (void *) end - (void *) start);
+		buffer[end - start] = 0;
+		/* FIXME:  although Python supports arbitrary precision
+		 * integers, this can only handle numbers that fit into a C
+		 * long long.  in practice, since we invariably
+		 * interoperate with C codes, that should be sufficient,
+		 * but it's a limitation of the library and should probably
+		 * be fixed */
+		token = PyLong_FromLongLong(wcstoll(buffer, &buffer_end, 0));
+		if(buffer_end == buffer || *buffer_end != 0) {
+			/*
+			 * wcstoll() couldn't convert the token, emulate
+			 * long()'s error message
+			 */
+
+			Py_XDECREF(token);
+			token = PyUnicode_FromWideChar(buffer, -1);
+			PyErr_Format(PyExc_ValueError, "invalid literal for long(): '%U'", token);
+			Py_DECREF(token);
+			token = NULL;
+		}
 	} else {
 		token = PyObject_CallFunction(type, "u#", start, end - start);
 	}
@@ -682,7 +716,7 @@ static PyObject *attribute_get_data(PyObject *obj, void *data)
 {
 	ligolw_Tokenizer *tokenizer = (ligolw_Tokenizer *) obj;
 
-	return PyUnicode_FromUnicode(tokenizer->pos, tokenizer->length - tokenizer->pos);
+	return PyUnicode_FromWideChar(tokenizer->pos, tokenizer->length - tokenizer->pos);
 }
 
 
