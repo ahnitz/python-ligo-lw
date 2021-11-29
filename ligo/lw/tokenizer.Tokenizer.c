@@ -411,8 +411,7 @@ static PyObject *next_token(ligolw_Tokenizer *tokenizer, wchar_t **start, wchar_
 	if(*end)
 		**end = 0;
 	if(quote_character) {
-		/* FIXME:  remove the delimiter */
-		wchar_t escapable_characters[] = {quote_character, tokenizer->escape_character, tokenizer->delimiter, 0};
+		wchar_t escapable_characters[] = {quote_character, tokenizer->escape_character, 0};
 		if(unescape(*start, end, escapable_characters, tokenizer->escape_character))
 			return NULL;
 	}
