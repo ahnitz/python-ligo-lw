@@ -416,8 +416,11 @@ def load_url(url, verbose = False, **kwargs):
 	as a LIGO Light Weight document tree.  Any source from which
 	Python's urllib library can read data is acceptable.  stdin is
 	parsed if url is None.  Helpful verbosity messages are printed to
-	stderr if verbose is True.  All other keyword arguments are passed
-	to load_fileobj(), see that function for more information.  In
+	stderr if verbose is True.  When url is not a local file,
+	urllib.request.urlopen() is used to access it, and if the keyword
+	arguments timeout and/or context is set then those arguments are
+	passed to urlopen().  All other keyword arguments are passed to
+	load_fileobj(), see that function for more information.  In
 	particular note that a content handler must be specified.
 
 	Example:
@@ -428,6 +431,7 @@ def load_url(url, verbose = False, **kwargs):
 	"""
 	if verbose:
 		sys.stderr.write("reading %s ...\n" % (("'%s'" % url) if url is not None else "stdin"))
+	urlopen_kwargs = dict((kwarg, kwargs.pop(kwarg)) for kwarg in ("context", "timeout") if kwarg in kwargs)
 	if url is None:
 		# In Python 3, ``sys.stdin`` has an attribute called
 		# ``buffer`` that is the underyling byte-oriented stream.
@@ -436,7 +440,7 @@ def load_url(url, verbose = False, **kwargs):
 	if scheme.lower() in ("", "file") and host.lower() in ("", "localhost"):
 		with open(path, "rb") as fileobj:
 			return load_fileobj(fileobj, **kwargs)
-	with contextlib.closing(urllib.request.urlopen(url)) as fileobj:
+	with contextlib.closing(urllib.request.urlopen(url, **urlopen_kwargs)) as fileobj:
 		return load_fileobj(fileobj, **kwargs)
 
 
