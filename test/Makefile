@@ -38,6 +38,8 @@ ligolw_test03a :
 	# test reading compressed and non-compressed files from stdin
 	{ cat inspiral_event_id_test_in1.xml.gz | ligolw_print >/dev/null ; } && $(printpassfail)
 	{ cat inspiral_event_id_test_in2.xml | ligolw_print >/dev/null ; } && $(printpassfail)
+	{ cat inspiral_event_id_test_in2.xml | bzip2 | ligolw_print >/dev/null ; } && $(printpassfail)
+	{ cat inspiral_event_id_test_in2.xml | xz | ligolw_print >/dev/null ; } && $(printpassfail)
 	@echo "<=== end $@ ==="
 
 ligolw_test03b :
@@ -63,6 +65,8 @@ ligolw_test05 :
 	@echo "=== start $@ ===>"
 	# make sure XML writing code compresses files
 	FILENAME=$(shell mktemp --suffix .xml.gz) && { ligolw_add --output $${FILENAME} ligolw_sqlite_test_input.xml.gz && gunzip --test $${FILENAME} && $(printpassfail) ; } ; rm -f $${FILENAME}
+	FILENAME=$(shell mktemp --suffix .xml.bz2) && { ligolw_add --output $${FILENAME} ligolw_sqlite_test_input.xml.gz && bzip2 --test $${FILENAME} && $(printpassfail) ; } ; rm -f $${FILENAME}
+	FILENAME=$(shell mktemp --suffix .xml.xz) && { ligolw_add --output $${FILENAME} ligolw_sqlite_test_input.xml.gz && xz --test $${FILENAME} && $(printpassfail) ; } ; rm -f $${FILENAME}
 	@echo "<=== end $@ ==="
 
 ligolw_print_test ligolw_sqlite_test :

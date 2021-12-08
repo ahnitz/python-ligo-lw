@@ -29,9 +29,11 @@ Library of utility code for LIGO Light Weight XML applications.
 """
 
 
+import bz2
 import codecs
 import contextlib
 import gzip
+import lzma
 import os
 from six.moves import urllib
 import signal
@@ -317,9 +319,10 @@ def load_fileobj(fileobj, compress = None, xmldoc = None, contenthandler = None)
 
 	The compress parameter selects the decompression algorithm to use.
 	Valid values are:  "auto" to automatically deduce the decompression
-	scheme from the file format, "gz" to force gzip decompression,
-	False to disable decompression, or None to select the default
-	behaviour (currently equivalent to "auto").
+	scheme from the file format;  one of "bz2", "gz", or "xz" to force
+	bzip2, gzip, or lzma/xz decompression, respectively;  False to
+	disable decompression;  or None to select the default behaviour
+	(which is "auto").
 
 	If the optional xmldoc argument is provided and not None, the
 	parsed XML tree will be appended to that document, otherwise a new
@@ -351,10 +354,20 @@ def load_fileobj(fileobj, compress = None, xmldoc = None, contenthandler = None)
 	if compress == "auto":
 		# set keyword argument automatically from file format
 		fileobj = RewindableInputFile(fileobj)
-		magic = fileobj.read(2)
+		magic = fileobj.read(6)
 		fileobj.seek(0, os.SEEK_SET)
-		if magic == b"\037\213":
+		if magic[:3] == b"\x42\x5A\x68":
+			compress = "bz2"
+		elif magic[:2] == b"\x1F\x8B":
 			compress = "gz"
+		elif magic[:6] == b"\xFD\x37\x7A\x58\x5A\x00":
+			compress = "xz"
+		elif magic[:4] == b"\x28\xB5\x2F\xFD":
+			# NOTE:  only foramt detection is provided.  this
+			# compression format is not supported.  will
+			# trigger the unrecognized keyword arg exception
+			# below
+			compress = "zst"
 		else:
 			# format not recognized, assume not compressed
 			compress = False
@@ -366,9 +379,15 @@ def load_fileobj(fileobj, compress = None, xmldoc = None, contenthandler = None)
 	if compress == False:
 		# pass-through
 		pass
+	elif compress == "bz2":
+		# bzip2 decompression
+		fileobj = bz2.BZ2File(fileobj, mode = "rb")
 	elif compress == "gz":
 		# gzip decompression
 		fileobj = gzip.GzipFile(mode = "rb", fileobj = fileobj if type(fileobj) == RewindableInputFile else RewindableInputFile(fileobj))
+	elif compress == "xz":
+		# xz/lzma decompression
+		fileobj = lzma.LZMAFile(fileobj, mode = "rb")
 	else:
 		# oops
 		raise ValueError("unrecognized compress \"%s\"" % compress)
@@ -453,10 +472,12 @@ def write_fileobj(xmldoc, fileobj, compress = None, compresslevel = 3, **kwargs)
 	object must be in binary mode.
 
 	The compress parameter selects the file compression format to use.
-	Valid values are:  False to disable compression, "gz" to select
-	gzip compression, None to select the default behaviour (disable
-	compression).  When gzip compression is slected, the compresslevel
-	parameter sets the gzip compression level (the default is 3).
+	Valid values are:  False to disable compression;  one of "bz2",
+	"gz", or "xz" to select bzip2, gzip, or lzma compression,
+	respectively;  or None to select the default behaviour (which is to
+	disable compression).  When bzip2 or gzip compression is slected,
+	the compresslevel parameter sets the compression level (the default
+	is 3).
 
 	Example:
 
@@ -477,8 +498,12 @@ def write_fileobj(xmldoc, fileobj, compress = None, compresslevel = 3, **kwargs)
 		if compress == False:
 			# no compression
 			pass
+		elif compress == "bz2":
+			fileobj = bz2.BZ2File(fileobj, mode = "wb", compresslevel = compresslevel)
 		elif compress == "gz":
 			fileobj = gzip.GzipFile(mode = "wb", fileobj = fileobj, compresslevel = compresslevel)
+		elif compress == "xz":
+			fileobj = lzma.LZMAFile(fileobj, mode = "wb", format = lzma.FORMAT_XZ)
 		else:
 			# oops
 			raise ValueError("unrecognized compress \"%s\"" % compress)
@@ -531,10 +556,12 @@ def write_filename(xmldoc, filename, verbose = False, compress = None, with_mv =
 
 	The compress keyword argument selects the compression format to
 	use.  Recognized values are:  "auto" to automatically select the
-	format based on filename, "gz" to force gzip compression, False to
-	disable compression, None to select the default behaviour (which is
-	currently "auto").  When "auto" is the mode selected, if the
-	filename does not match a recognized pattern or filename is None
+	format based on filename;  None to select the default behaviour
+	(which is "auto");  or any of the compression format values
+	recognized by write_fileobj().  When "auto" is the mode selected,
+	then if the filename ends in ".bz2", ".gz", or ".xz" then the
+	corresponding compression format is selected, othewrise if the
+	filename does not match a recognized pattern or if filename is None
 	(writing to stdout) then compression is disabled.
 
 	If with_mv is True and filename is not None the filename has a "~"
@@ -558,8 +585,12 @@ def write_filename(xmldoc, filename, verbose = False, compress = None, with_mv =
 
 	Example:
 
+	>>> # write file
 	>>> write_filename(xmldoc, "demo.xml")	# doctest: +SKIP
-	>>> write_filename(xmldoc, "demo.xml.gz", compress = 'gz')	# doctest: +SKIP
+	>>> # write gzip-compressed file (auto-select format)
+	>>> write_filename(xmldoc, "demo.xml.gz")	# doctest: +SKIP
+	>>> # force compression off
+	>>> write_filename(xmldoc, "demo.xml.gz", compress = False)	# doctest: +SKIP
 	"""
 	#
 	# select format
@@ -573,8 +604,17 @@ def write_filename(xmldoc, filename, verbose = False, compress = None, with_mv =
 			# writing to stdout:  no filename = cannot deduce
 			# compression format = turn compression off
 			compress = False
+		elif filename.endswith(".bz2"):
+			compress = "bz2"
 		elif filename.endswith(".gz"):
 			compress = "gz"
+		elif filename.endswith(".xz"):
+			compress = "xz"
+		elif filename.endswith(".zst"):
+			# NOTE:  this format is not supported.  this will
+			# trigger the unrecognized keyword arg exception in
+			# write_fileobj()
+			compress = "zst"
 		else:
 			# filename scheme not recognized, disable
 			# compression
