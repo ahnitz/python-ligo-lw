@@ -1,3 +1,30 @@
+python-ligo-lw (1.8.0-1) unstable; urgency=medium
+
+  * adjust dbtables.workingcopy error path behaviour
+  * remove dbtables.workingcopy compatibility code
+  * remove gz= compatibility keyword argument from I/O functions
+  * remove ligo-common from python3 requirements
+  * update dependencies in .spec file for RPM systems
+  * ligo.LIGO_LW add .get_ligo_lw() class method
+  * expand test suite coverage
+  * lsctables.SimInspiral generalize SNR related methods to complex values
+  * switch test suite to python3 (python2 no longer covered by test suite)
+  * remove ilwd support code, use native strings for this type
+  * process.py remove set_process_end_time() function
+  * table.py remove get_table() function
+  * param.Param introduce .value
+  * param.Param introduce .get_param() class method
+  * array.Array introduce .get_array() class method
+  * ligolw_sqlite remove unused setup() function
+  * dbtables collect ID remapping code into a class
+  * tokenizer drop use in Py_UNICODE in favour of wchar_t
+  * tokenizer no longer allow quoted delimiters to be escaped
+  * load_url() expose context and timeout keyword arguments
+  * add ligolw_run_sqlite (migrated from lalapps)
+  * add support for .bz2 and .xz compression formats
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
+
 python-ligo-lw (1.7.1-1) unstable; urgency=medium
 
   * fix use of file() in ligolw_segments

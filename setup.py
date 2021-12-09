@@ -1,8 +1,8 @@
 from distutils.core import setup, Extension
 
 
-__version__ = "1.7.1"
-__date__ = "2021-02-16"
+__version__ = "1.8.0"
+__date__ = "2021-12-09"
 
 
 def macroreplace(filenames, substs):
