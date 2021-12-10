@@ -25,7 +25,7 @@ several programs to perform common, basic, manipulations of files in this format
 
 %package -n python%{python3_pkgversion}-%{shortname}
 Summary:	LIGO Light-Weight XML I/O Library (python%{python3_version})
-Requires:	python%{python3_pkgversion}
+Requires:	python%{python3_pkgversion} >= 3.3
 Requires:	python%{python3_pkgversion}-dateutil
 # temporarily commented out to break cyclic dependency.  The following are
 # optional dependencies, but the rpm version at CIT is too old for that

@@ -95,12 +95,7 @@ typedef struct {
 
 static int add_to_data(ligolw_Tokenizer *tokenizer, PyObject *unicode)
 {
-	/* FIXME:  remove GET_SIZE vers. when we require python >= 3.12 */
-#ifndef PyUnicode_GET_LENGTH
-	Py_ssize_t n = PyUnicode_GET_SIZE(unicode);
-#else
 	Py_ssize_t n = PyUnicode_GET_LENGTH(unicode);
-#endif
 
 	if(n) {
 		if(tokenizer->length - tokenizer->data + n > tokenizer->allocation) {
@@ -494,18 +489,10 @@ static int __init__(PyObject *self, PyObject *args, PyObject *kwds)
 	PyUnicode_READY(arg);
 #endif
 
-	/* FIXME:  remove _GET_SIZE vers. when we require Python >= 3.3 */
-#ifndef PyUnicode_GET_LENGTH
-	if(PyUnicode_GET_SIZE(arg) != 1) {
-		PyErr_SetString(PyExc_ValueError, "len(delimiter) != 1");
-		return -1;
-	}
-#else
 	if(PyUnicode_GET_LENGTH(arg) != 1) {
 		PyErr_SetString(PyExc_ValueError, "len(delimiter) != 1");
 		return -1;
 	}
-#endif
 
 	PyUnicode_AsWideChar(arg, &tokenizer->delimiter, 1);
 	tokenizer->quote_characters = default_quote_characters;

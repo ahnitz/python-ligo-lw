@@ -2,6 +2,7 @@ python-ligo-lw (2.0.0-1) unstable; urgency=medium
 
   * improve ligolw_add garbage collection
   * drop support for python < 3
+  * drop support for python < 3.3
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
 
