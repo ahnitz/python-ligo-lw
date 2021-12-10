@@ -68,7 +68,7 @@ def strip_ilwdchar(xmldoc):
 					logging.info("renamed %s column %s to %s" % (table.Name, before, column.getAttribute("Name")))
 
 		# convert ilwd:char IDs to integers
-		idattrs = tuple(table.columnnames[i] for i, coltype in enumerate(table.columntypes) if coltype == u"ilwd:char")
+		idattrs = tuple(table.columnnames[i] for i, coltype in enumerate(table.columntypes) if coltype == "ilwd:char")
 		if not idattrs:
 			logging.info("no ID columns to convert")
 			continue
@@ -81,6 +81,6 @@ def strip_ilwdchar(xmldoc):
 
 		# update the column types
 		for attr in idattrs:
-			table.getColumnByName(attr).Type = u"int_8s"
+			table.getColumnByName(attr).Type = "int_8s"
 
 	return xmldoc

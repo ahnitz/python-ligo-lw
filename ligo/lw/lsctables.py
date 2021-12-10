@@ -137,7 +137,7 @@ def New(cls, columns = None, **kwargs):
 	Example:
 
 	>>> import sys
-	>>> tbl = New(ProcessTable, [u"process_id", u"start_time", u"end_time", u"comment"])
+	>>> tbl = New(ProcessTable, ["process_id", "start_time", "end_time", "comment"])
 	>>> tbl.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
 	<Table Name="process:table">
 		<Column Name="process_id" Type="int_8s"/>
@@ -148,11 +148,11 @@ def New(cls, columns = None, **kwargs):
 		</Stream>
 	</Table>
 	"""
-	new = cls(sax.xmlreader.AttributesImpl({u"Name": cls.TableName.enc(cls.tableName)}), **kwargs)
+	new = cls(sax.xmlreader.AttributesImpl({"Name": cls.TableName.enc(cls.tableName)}), **kwargs)
 	for name in columns if columns is not None else sorted(new.validcolumns):
 		new.appendColumn(name)
 	new._end_of_columns()
-	new.appendChild(table.TableStream(sax.xmlreader.AttributesImpl({u"Name": new.getAttribute(u"Name"), u"Delimiter": table.TableStream.Delimiter.default, u"Type": table.TableStream.Type.default})))
+	new.appendChild(table.TableStream(sax.xmlreader.AttributesImpl({"Name": new.getAttribute("Name"), "Delimiter": table.TableStream.Delimiter.default, "Type": table.TableStream.Type.default})))
 	return new
 
 
@@ -216,24 +216,24 @@ class instrumentsproperty(object):
 
 		>>> print(instrumentsproperty.get(None))
 		None
-		>>> assert instrumentsproperty.get(u"") == set([])
-		>>> assert instrumentsproperty.get(u"  ,  ,,") == set([])
-		>>> assert instrumentsproperty.get(u"H1") == set([u'H1'])
-		>>> assert instrumentsproperty.get(u"SWIFT") == set([u'SWIFT'])
-		>>> assert instrumentsproperty.get(u"H1L1") == set([u'H1', u'L1'])
-		>>> assert instrumentsproperty.get(u"H1L1,") == set([u'H1L1'])
-		>>> assert instrumentsproperty.get(u"H1,L1") == set([u'H1', u'L1'])
-		>>> assert instrumentsproperty.get(u"H1+L1") == set([u'H1', u'L1'])
+		>>> assert instrumentsproperty.get("") == set([])
+		>>> assert instrumentsproperty.get("  ,  ,,") == set([])
+		>>> assert instrumentsproperty.get("H1") == set(['H1'])
+		>>> assert instrumentsproperty.get("SWIFT") == set(['SWIFT'])
+		>>> assert instrumentsproperty.get("H1L1") == set(['H1', 'L1'])
+		>>> assert instrumentsproperty.get("H1L1,") == set(['H1L1'])
+		>>> assert instrumentsproperty.get("H1,L1") == set(['H1', 'L1'])
+		>>> assert instrumentsproperty.get("H1+L1") == set(['H1', 'L1'])
 		"""
 		if ifos is None:
 			return None
-		if u"," in ifos:
-			result = set(ifo.strip() for ifo in ifos.split(u","))
-			result.discard(u"")
+		if "," in ifos:
+			result = set(ifo.strip() for ifo in ifos.split(","))
+			result.discard("")
 			return result
-		if u"+" in ifos:
-			result = set(ifo.strip() for ifo in ifos.split(u"+"))
-			result.discard(u"")
+		if "+" in ifos:
+			result = set(ifo.strip() for ifo in ifos.split("+"))
+			result.discard("")
 			return result
 		ifos = ifos.strip()
 		if len(ifos) > 2 and not len(ifos) % 2:
@@ -278,12 +278,12 @@ class instrumentsproperty(object):
 
 		>>> print(instrumentsproperty.set(None))
 		None
-		>>> assert instrumentsproperty.set(()) == u''
-		>>> assert instrumentsproperty.set((u"H1",)) == u'H1'
-		>>> assert instrumentsproperty.set((u"H1",u"H1",u"H1")) == u'H1'
-		>>> assert instrumentsproperty.set((u"H1",u"L1")) == u'H1,L1'
-		>>> assert instrumentsproperty.set((u"SWIFT",)) == u'SWIFT'
-		>>> assert instrumentsproperty.set((u"H1L1",)) == u'H1L1,'
+		>>> assert instrumentsproperty.set(()) == ''
+		>>> assert instrumentsproperty.set(("H1",)) == 'H1'
+		>>> assert instrumentsproperty.set(("H1","H1","H1")) == 'H1'
+		>>> assert instrumentsproperty.set(("H1","L1")) == 'H1,L1'
+		>>> assert instrumentsproperty.set(("SWIFT",)) == 'SWIFT'
+		>>> assert instrumentsproperty.set(("H1L1",)) == 'H1L1,'
 		"""
 		if instruments is None:
 			return None
@@ -291,13 +291,13 @@ class instrumentsproperty(object):
 		# safety check:  refuse to accept blank names, or names
 		# with commas or pluses in them as they cannot survive the
 		# encode/decode process
-		if not all(_instruments) or any(u"," in instrument or u"+" in instrument for instrument in _instruments):
+		if not all(_instruments) or any("," in instrument or "+" in instrument for instrument in _instruments):
 			raise ValueError(instruments)
 		if len(_instruments) == 1 and len(_instruments[0]) > 2 and not len(_instruments[0]) % 2:
 			# special case disambiguation.  FIXME:  remove when
 			# everything uses the comma-delimited encoding
-			return u"%s," % _instruments[0]
-		return u",".join(_instruments)
+			return "%s," % _instruments[0]
+		return ",".join(_instruments)
 
 	def __get__(self, obj, cls = None):
 		return self.get(getattr(obj, self.name))
@@ -455,7 +455,7 @@ class segmentproperty(object):
 #
 
 
-ProcessID = table.next_id.type(u"process_id")
+ProcessID = table.next_id.type("process_id")
 
 
 class ProcessTable(table.Table):
@@ -517,9 +517,9 @@ class Process(table.Table.RowType):
 	Example:
 
 	>>> x = Process()
-	>>> x.instruments = (u"H1", u"L1")
-	>>> assert x.ifos == u'H1,L1'
-	>>> assert x.instruments == set([u'H1', u'L1'])
+	>>> x.instruments = ("H1", "L1")
+	>>> assert x.ifos == 'H1,L1'
+	>>> assert x.instruments == set(['H1', 'L1'])
 	>>> # truncates to integers
 	>>> x.start = 10.5
 	>>> x.start
@@ -647,7 +647,7 @@ class ProcessParams(table.Table.RowType):
 	Example:
 
 	>>> x = ProcessParams()
-	>>> x.pyvalue = u"test"
+	>>> x.pyvalue = "test"
 	>>> print(x.type)
 	lstring
 	>>> print(x.value)
@@ -657,7 +657,7 @@ class ProcessParams(table.Table.RowType):
 	>>> x.pyvalue = 6.
 	>>> print(x.type)
 	real_8
-	>>> assert x.value == u'6'
+	>>> assert x.value == '6'
 	>>> print(x.pyvalue)
 	6.0
 	>>> x.pyvalue = None
@@ -670,7 +670,7 @@ class ProcessParams(table.Table.RowType):
 	>>> x.pyvalue = True
 	>>> print(x.type)
 	int_4s
-	>>> assert x.value == u'1'
+	>>> assert x.value == '1'
 	>>> x.pyvalue
 	1
 	"""
@@ -776,10 +776,10 @@ class SearchSummary(table.Table.RowType):
 	Example:
 
 	>>> x = SearchSummary()
-	>>> x.instruments = (u"H1", u"L1")
+	>>> x.instruments = ("H1", "L1")
 	>>> print(x.ifos)
 	H1,L1
-	>>> assert x.instruments == set([u'H1', u'L1'])
+	>>> assert x.instruments == set(['H1', 'L1'])
 	>>> x.in_start = x.out_start = LIGOTimeGPS(0)
 	>>> x.in_end = x.out_end = LIGOTimeGPS(10)
 	>>> x.in_segment
@@ -837,7 +837,7 @@ SearchSummaryTable.RowType = SearchSummary
 #
 
 
-SearchSummVarsID = table.next_id.type(u"search_summvar_id")
+SearchSummVarsID = table.next_id.type("search_summvar_id")
 
 
 class SearchSummVarsTable(table.Table):
@@ -869,7 +869,7 @@ SearchSummVarsTable.RowType = SearchSummVars
 #
 
 
-SnglBurstID = table.next_id.type(u"event_id")
+SnglBurstID = table.next_id.type("event_id")
 
 
 class SnglBurstTable(table.Table):
@@ -1039,7 +1039,7 @@ SnglBurstTable.RowType = SnglBurst
 #
 
 
-SnglInspiralID = table.next_id.type(u"event_id")
+SnglInspiralID = table.next_id.type("event_id")
 
 
 class SnglInspiralTable(table.Table):
@@ -1213,10 +1213,10 @@ class CoincInspiral(table.Table.RowType):
 	Example:
 
 	>>> x = CoincInspiral()
-	>>> x.instruments = (u"H1", u"L1")
+	>>> x.instruments = ("H1", "L1")
 	>>> print(x.ifos)
 	H1,L1
-	>>> assert x.instruments == set([u'H1', u'L1'])
+	>>> assert x.instruments == set(['H1', 'L1'])
 	>>> x.end = LIGOTimeGPS(10)
 	>>> x.end
 	LIGOTimeGPS(10, 0)
@@ -1243,7 +1243,7 @@ CoincInspiralTable.RowType = CoincInspiral
 #
 
 
-SnglRingdownID = table.next_id.type(u"event_id")
+SnglRingdownID = table.next_id.type("event_id")
 
 
 class SnglRingdownTable(table.Table):
@@ -1344,7 +1344,7 @@ CoincRingdownTable.RowType = CoincRingdown
 #
 
 
-SimInspiralID = table.next_id.type(u"simulation_id")
+SimInspiralID = table.next_id.type("simulation_id")
 
 
 class SimInspiralTable(table.Table):
@@ -1618,7 +1618,7 @@ SimInspiralTable.RowType = SimInspiral
 #
 
 
-SimBurstID = table.next_id.type(u"simulation_id")
+SimBurstID = table.next_id.type("simulation_id")
 
 
 class SimBurstTable(table.Table):
@@ -1728,7 +1728,7 @@ SimBurstTable.RowType = SimBurst
 #
 
 
-SimRingdownID = table.next_id.type(u"simulation_id")
+SimRingdownID = table.next_id.type("simulation_id")
 
 
 class SimRingdownTable(table.Table):
@@ -1831,7 +1831,7 @@ SimRingdownTable.RowType = SimRingdown
 #
 
 
-SummValueID = table.next_id.type(u"summ_value_id")
+SummValueID = table.next_id.type("summ_value_id")
 
 
 class SummValueTable(table.Table):
@@ -1862,10 +1862,10 @@ class SummValue(table.Table.RowType):
 	Example:
 
 	>>> x = SummValue()
-	>>> x.instruments = (u"H1", u"L1")
+	>>> x.instruments = ("H1", "L1")
 	>>> print(x.ifo)
 	H1,L1
-	>>> assert x.instruments == set([u'H1', u'L1'])
+	>>> assert x.instruments == set(['H1', 'L1'])
 	>>> x.start = LIGOTimeGPS(0)
 	>>> x.end = LIGOTimeGPS(10)
 	>>> x.segment
@@ -1895,7 +1895,7 @@ SummValueTable.RowType = SummValue
 #
 
 
-SegmentID = table.next_id.type(u"segment_id")
+SegmentID = table.next_id.type("segment_id")
 
 
 class SegmentTable(table.Table):
@@ -2036,7 +2036,7 @@ SegmentTable.RowType = Segment
 #
 
 
-SegmentDefID = table.next_id.type(u"segment_def_id")
+SegmentDefID = table.next_id.type("segment_def_id")
 
 
 class SegmentDefTable(table.Table):
@@ -2060,10 +2060,10 @@ class SegmentDef(table.Table.RowType):
 	Example:
 
 	>>> x = SegmentDef()
-	>>> x.instruments = (u"H1", u"L1")
+	>>> x.instruments = ("H1", "L1")
 	>>> print(x.ifos)
 	H1,L1
-	>>> assert x.instruments == set([u'H1', u'L1'])
+	>>> assert x.instruments == set(['H1', 'L1'])
 	"""
 	__slots__ = tuple(map(table.Column.ColumnName, SegmentDefTable.validcolumns))
 
@@ -2082,7 +2082,7 @@ SegmentDefTable.RowType = SegmentDef
 #
 
 
-SegmentSumID = table.next_id.type(u"segment_sum_id")
+SegmentSumID = table.next_id.type("segment_sum_id")
 
 
 class SegmentSumTable(table.Table):
@@ -2136,7 +2136,7 @@ SegmentSumTable.RowType = SegmentSum
 #
 
 
-TimeSlideID = table.next_id.type(u"time_slide_id")
+TimeSlideID = table.next_id.type("time_slide_id")
 
 
 class TimeSlideTable(table.Table):
@@ -2261,7 +2261,7 @@ TimeSlideTable.RowType = TimeSlide
 #
 
 
-CoincDefID = table.next_id.type(u"coinc_def_id")
+CoincDefID = table.next_id.type("coinc_def_id")
 
 
 class CoincDefTable(table.Table):
@@ -2328,7 +2328,7 @@ CoincDefTable.RowType = CoincDef
 #
 
 
-CoincID = table.next_id.type(u"coinc_event_id")
+CoincID = table.next_id.type("coinc_event_id")
 
 
 class CoincTable(table.Table):
@@ -2411,8 +2411,8 @@ CoincMapTable.RowType = CoincMap
 #
 
 
-DQSpecListID = table.next_id.type(u"dq_list_id")
-DQSpecListRowID = table.next_id.type(u"dq_list_row_id")
+DQSpecListID = table.next_id.type("dq_list_id")
+DQSpecListRowID = table.next_id.type("dq_list_row_id")
 
 
 class DQSpecListTable(table.Table):
@@ -2637,7 +2637,7 @@ def use_in(ContentHandler):
 	ContentHandler = table.use_in(ContentHandler)
 
 	def startTable(self, parent, attrs, __orig_startTable = ContentHandler.startTable):
-		name = table.Table.TableName(attrs[u"Name"])
+		name = table.Table.TableName(attrs["Name"])
 		if name in TableByName:
 			return TableByName[name](attrs)
 		return __orig_startTable(self, parent, attrs)

@@ -88,7 +88,7 @@ class ArrayStream(ligolw.Stream):
 	back into a character stream.
 	"""
 
-	Delimiter = ligolw.attributeproxy(u"Delimiter", default = u" ")
+	Delimiter = ligolw.attributeproxy("Delimiter", default = " ")
 
 	def __init__(self, *args):
 		super(ArrayStream, self).__init__(*args)
@@ -126,7 +126,7 @@ class ArrayStream(ligolw.Stream):
 		del self._array_view
 		del self._index
 
-	def write(self, fileobj = sys.stdout, indent = u""):
+	def write(self, fileobj = sys.stdout, indent = ""):
 		# avoid symbol and attribute look-ups in inner loop
 		w = fileobj.write
 		w(self.start_tag(indent))
@@ -144,14 +144,14 @@ class ArrayStream(ligolw.Stream):
 			islice = itertools.islice
 			join = self.Delimiter.join
 
-			newline = u"\n" + indent + ligolw.Indent
+			newline = "\n" + indent + ligolw.Indent
 			w(newline)
 			w(xmlescape(join(islice(tokens, linelen))))
 			newline = self.Delimiter + newline
 			for i in range(lines - 1):
 				w(newline)
 				w(xmlescape(join(islice(tokens, linelen))))
-		w(u"\n" + self.end_tag(indent) + u"\n")
+		w("\n" + self.end_tag(indent) + "\n")
 
 
 class Array(ligolw.Array):
@@ -214,9 +214,9 @@ class Array(ligolw.Array):
 	"""
 	class ArrayName(ligolw.LLWNameAttr):
 		dec_pattern = re.compile(r"(?P<Name>[a-zA-Z0-9_:]+):array\Z")
-		enc_pattern = u"%s:array"
+		enc_pattern = "%s:array"
 
-	Name = ligolw.attributeproxy(u"Name", enc = ArrayName.enc, dec = ArrayName)
+	Name = ligolw.attributeproxy("Name", enc = ArrayName.enc, dec = ArrayName)
 
 	def __init__(self, *args):
 		"""
@@ -308,7 +308,7 @@ class Array(ligolw.Array):
 		>>> import numpy, sys
 		>>> a = numpy.arange(12, dtype = "double")
 		>>> a.shape = (4, 3)
-		>>> Array.build(u"test", a).write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
+		>>> Array.build("test", a).write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
 		<Array Type="real_8" Name="test:array">
 			<Dim>3</Dim>
 			<Dim>4</Dim>
@@ -322,7 +322,7 @@ class Array(ligolw.Array):
 		# Type must be set for .__init__();  easier to set Name
 		# afterwards to take advantage of encoding handled by
 		# attribute proxy
-		self = cls(Attributes({u"Type": ligolwtypes.FromNumPyType[str(array.dtype)]}))
+		self = cls(Attributes({"Type": ligolwtypes.FromNumPyType[str(array.dtype)]}))
 		self.Name = name
 		self.shape = array.shape
 		if dim_names is not None:
@@ -330,7 +330,7 @@ class Array(ligolw.Array):
 				raise ValueError("dim_names must be same length as number of dimensions")
 			for child, name in zip(self.getElementsByTagName(ligolw.Dim.tagName), reversed(dim_names)):
 				child.Name = name
-		self.appendChild(ArrayStream(Attributes({u"Type": ArrayStream.Type.default, u"Delimiter": ArrayStream.Delimiter.default})))
+		self.appendChild(ArrayStream(Attributes({"Type": ArrayStream.Type.default, "Delimiter": ArrayStream.Delimiter.default})))
 		self.array = array
 		return self
 

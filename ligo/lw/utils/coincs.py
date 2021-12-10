@@ -42,7 +42,7 @@ from .. import lsctables
 #
 
 
-def get_coinc_def_id(xmldoc, search, search_coinc_type, create_new = True, description = u""):
+def get_coinc_def_id(xmldoc, search, search_coinc_type, create_new = True, description = ""):
 	"""
 	Wrapper for the get_coinc_def_id() method of the CoincDefiner table
 	class in ligo.lw.lsctables.  This wrapper will optionally create a

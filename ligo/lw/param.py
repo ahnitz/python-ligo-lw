@@ -96,28 +96,28 @@ class Param(ligolw.Param):
 	"""
 	class ParamName(ligolw.LLWNameAttr):
 		dec_pattern = re.compile(r"(?P<Name>[a-z0-9_:]+):param\Z")
-		enc_pattern = u"%s:param"
+		enc_pattern = "%s:param"
 
-	Name = ligolw.attributeproxy(u"Name", enc = ParamName.enc, dec = ParamName)
-	Scale = ligolw.attributeproxy(u"Scale", enc = ligolwtypes.FormatFunc[u"real_8"], dec = ligolwtypes.ToPyType[u"real_8"])
-	Type = ligolw.attributeproxy(u"Type", default = u"lstring")
+	Name = ligolw.attributeproxy("Name", enc = ParamName.enc, dec = ParamName)
+	Scale = ligolw.attributeproxy("Scale", enc = ligolwtypes.FormatFunc["real_8"], dec = ligolwtypes.ToPyType["real_8"])
+	Type = ligolw.attributeproxy("Type", default = "lstring")
 
 	def endElement(self):
 		if self.pcdata is not None:
 			# convert pcdata from string to native Python type
-			if self.Type == u"yaml":
+			if self.Type == "yaml":
 				self.pcdata = yaml.load(self.pcdata)
 			else:
 				self.pcdata = ligolwtypes.ToPyType[self.Type](self.pcdata.strip())
 
-	def write(self, fileobj = sys.stdout, indent = u""):
+	def write(self, fileobj = sys.stdout, indent = ""):
 		fileobj.write(self.start_tag(indent))
 		for c in self.childNodes:
 			if c.tagName not in self.validchildren:
 				raise ligolw.ElementError("invalid child %s for %s" % (c.tagName, self.tagName))
 			c.write(fileobj, indent + ligolw.Indent)
 		if self.pcdata is not None:
-			if self.Type == u"yaml":
+			if self.Type == "yaml":
 				fileobj.write(xmlescape(yaml.dump(self.pcdata).strip()))
 			else:
 				# we have to strip quote characters from
@@ -137,8 +137,8 @@ class Param(ligolw.Param):
 				# None on parsing, so this mechanism is how
 				# None is encoded (a zero-length Param is
 				# None)
-				fileobj.write(xmlescape(ligolwtypes.FormatFunc[self.Type](self.pcdata).strip(u"\"") or u" "))
-		fileobj.write(self.end_tag(u"") + u"\n")
+				fileobj.write(xmlescape(ligolwtypes.FormatFunc[self.Type](self.pcdata).strip("\"") or " "))
+		fileobj.write(self.end_tag("") + "\n")
 
 	@property
 	def value(self):
@@ -192,16 +192,16 @@ class Param(ligolw.Param):
 
 		>>> import sys
 		>>> # float
-		>>> Param.from_pyvalue(u"example", 3.0).write(sys.stdout)
+		>>> Param.from_pyvalue("example", 3.0).write(sys.stdout)
 		<Param Name="example:param" Type="real_8">3</Param>
 		>>> # string
-		>>> Param.from_pyvalue(u"example", u"test").write(sys.stdout)
+		>>> Param.from_pyvalue("example", "test").write(sys.stdout)
 		<Param Name="example:param" Type="lstring">test</Param>
 		>>> # short string (non-empty data = not NULL)
-		>>> Param.from_pyvalue(u"example", u"").write(sys.stdout)
+		>>> Param.from_pyvalue("example", "").write(sys.stdout)
 		<Param Name="example:param" Type="lstring"> </Param>
 		>>> # None (empty data = NULL)
-		>>> Param.from_pyvalue(u"example", None).write(sys.stdout)
+		>>> Param.from_pyvalue("example", None).write(sys.stdout)
 		<Param Name="example:param" Type="None"></Param>
 
 		Note that any type of Param may be NULL-valued.  These

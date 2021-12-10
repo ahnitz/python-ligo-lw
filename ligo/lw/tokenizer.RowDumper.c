@@ -222,7 +222,7 @@ static PyObject *next(PyObject *self)
 		}
 
 		if(val == Py_None)
-			token = PyUnicode_FromWideChar(NULL, 0); /* u"" */
+			token = PyUnicode_FromWideChar(NULL, 0); /* "" */
 		else
 			token = PyObject_CallFunctionObjArgs(PyTuple_GET_ITEM(rowdumper->formats, i), val, NULL);
 		Py_DECREF(val);

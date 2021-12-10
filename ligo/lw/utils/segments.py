@@ -170,9 +170,9 @@ class LigolwSegmentList(object):
 	# tables need to have
 	#
 
-	segment_def_columns = (u"process:process_id", u"segment_def_id", u"ifos", u"name", u"version", u"comment")
-	segment_sum_columns = (u"process:process_id", u"segment_sum_id", u"start_time", u"start_time_ns", u"end_time", u"end_time_ns", u"segment_definer:segment_def_id", u"comment")
-	segment_columns = (u"process:process_id", u"segment_id", u"start_time", u"start_time_ns", u"end_time", u"end_time_ns", u"segment_definer:segment_def_id")
+	segment_def_columns = ("process:process_id", "segment_def_id", "ifos", "name", "version", "comment")
+	segment_sum_columns = ("process:process_id", "segment_sum_id", "start_time", "start_time_ns", "end_time", "end_time_ns", "segment_definer:segment_def_id", "comment")
+	segment_columns = ("process:process_id", "segment_id", "start_time", "start_time_ns", "end_time", "end_time_ns", "segment_definer:segment_def_id")
 
 	def __init__(self, active = (), valid = (), instruments = (), name = None, version = None, comment = None):
 		"""

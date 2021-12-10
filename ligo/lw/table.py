@@ -133,9 +133,9 @@ class Column(ligolw.Column):
 
 	>>> from xml.sax.xmlreader import AttributesImpl
 	>>> import sys
-	>>> tbl = Table(AttributesImpl({u"Name": u"test"}))
-	>>> col = tbl.appendChild(Column(AttributesImpl({u"Name": u"test:snr", u"Type": u"real_8"})))
-	>>> tbl.appendChild(TableStream(AttributesImpl({u"Name": u"test"})))	# doctest: +ELLIPSIS
+	>>> tbl = Table(AttributesImpl({"Name": "test"}))
+	>>> col = tbl.appendChild(Column(AttributesImpl({"Name": "test:snr", "Type": "real_8"})))
+	>>> tbl.appendChild(TableStream(AttributesImpl({"Name": "test"})))	# doctest: +ELLIPSIS
 	<ligo.lw.table.TableStream object at ...>
 	>>> print(col.Name)
 	snr
@@ -227,7 +227,7 @@ class Column(ligolw.Column):
 	# chosen.
 	class ColumnName(ligolw.LLWNameAttr):
 		dec_pattern = re.compile(r"(?:\A\w+:|\A)(?P<FullName>(?:(?P<Table>\w+):|\A)(?P<Name>\w+))\Z")
-		enc_pattern = u"%s"
+		enc_pattern = "%s"
 
 		@classmethod
 		def table_name(cls, name):
@@ -246,7 +246,7 @@ class Column(ligolw.Column):
 				raise ValueError("table name not found in '%s'" % name)
 			return table_name
 
-	Name = ligolw.attributeproxy(u"Name", enc = ColumnName.enc, dec = ColumnName)
+	Name = ligolw.attributeproxy("Name", enc = ColumnName.enc, dec = ColumnName)
 
 	@property
 	def table_name(self):
@@ -407,7 +407,7 @@ class TableStream(ligolw.Stream):
 		del self._tokenizer
 		del self._rowbuilder
 
-	def write(self, fileobj = sys.stdout, indent = u""):
+	def write(self, fileobj = sys.stdout, indent = ""):
 		# retrieve the .write() method of the file object to avoid
 		# doing the attribute lookup in loops
 		w = fileobj.write
@@ -424,7 +424,7 @@ class TableStream(ligolw.Stream):
 			pass
 		else:
 			# write first row
-			newline = u"\n" + indent + ligolw.Indent
+			newline = "\n" + indent + ligolw.Indent
 			w(newline)
 			# the xmlescape() call replaces things like "<"
 			# with "&lt;" so that the string will not confuse
@@ -438,12 +438,12 @@ class TableStream(ligolw.Stream):
 			for line in rowdumper:
 				w(newline)
 				w(xmlescape(line))
-			if rowdumper.tokens and rowdumper.tokens[-1] == u"":
+			if rowdumper.tokens and rowdumper.tokens[-1] == "":
 				# the last token of the last row was null:
 				# add a final delimiter to indicate that a
 				# token is present
 				w(rowdumper.delimiter)
-		w(u"\n" + self.end_tag(indent) + u"\n")
+		w("\n" + self.end_tag(indent) + "\n")
 
 
 #
@@ -483,9 +483,9 @@ class Table(ligolw.Table, list):
 	"""
 	class TableName(ligolw.LLWNameAttr):
 		dec_pattern = re.compile(r"(?:\A[a-z0-9_]+:|\A)(?P<Name>[a-z0-9_]+):table\Z")
-		enc_pattern = u"%s:table"
+		enc_pattern = "%s:table"
 
-	Name = ligolw.attributeproxy(u"Name", enc = TableName.enc, dec = TableName)
+	Name = ligolw.attributeproxy("Name", enc = TableName.enc, dec = TableName)
 
 	validcolumns = None
 	loadcolumns = None
@@ -544,7 +544,7 @@ class Table(ligolw.Table, list):
 		attributes of the Column elements in this table, in order.
 		These are the Name attributes as they appear in the XML.
 		"""
-		return [child.getAttribute(u"Name") for child in self.getElementsByTagName(ligolw.Column.tagName)]
+		return [child.getAttribute("Name") for child in self.getElementsByTagName(ligolw.Column.tagName)]
 
 	@property
 	def columntypes(self):
@@ -651,10 +651,10 @@ class Table(ligolw.Table, list):
 		Example:
 
 		>>> from ligo.lw import lsctables
-		>>> lsctables.ProcessTable.CheckProperties(u"Table", {u"Name": u"process:table"})
+		>>> lsctables.ProcessTable.CheckProperties("Table", {"Name": "process:table"})
 		True
 		"""
-		return tagname == cls.tagName and cls.TableName(attrs[u"Name"]) == cls.tableName
+		return tagname == cls.tagName and cls.TableName(attrs["Name"]) == cls.tableName
 
 
 	#
@@ -699,7 +699,7 @@ class Table(ligolw.Table, list):
 		param
 		>>> print(col.Name)
 		param
-		>>> col = tbl.appendColumn(u"process:process_id")
+		>>> col = tbl.appendColumn("process:process_id")
 		>>> print(col.getAttribute("Name"))
 		process:process_id
 		>>> print(col.Name)
@@ -717,7 +717,7 @@ class Table(ligolw.Table, list):
 			coltype = self.validcolumns[Column.ColumnName(name)]
 		else:
 			raise ligolw.ElementError("invalid Column '%s' for Table '%s'" % (name, self.Name))
-		column = Column(AttributesImpl({u"Name": u"%s" % name, u"Type": coltype}))
+		column = Column(AttributesImpl({"Name": "%s" % name, "Type": coltype}))
 		streams = self.getElementsByTagName(ligolw.Stream.tagName)
 		if streams:
 			self.insertBefore(column, streams[0])

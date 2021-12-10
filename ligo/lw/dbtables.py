@@ -510,7 +510,7 @@ def get_xml(connection, table_names = None):
 			cls = TableByName[table_name]
 		except KeyError:
 			cls = DBTable
-		table_elem = cls(AttributesImpl({u"Name": u"%s:table" % table_name}), connection = connection)
+		table_elem = cls(AttributesImpl({"Name": "%s:table" % table_name}), connection = connection)
 		destrip = {}
 		if table_elem.validcolumns is not None:
 			for name in table_elem.validcolumns:
@@ -526,9 +526,9 @@ def get_xml(connection, table_names = None):
 			else:
 				# guess the column type
 				column_type = ligolwtypes.FromSQLiteType[column_type]
-			table_elem.appendChild(table.Column(AttributesImpl({u"Name": column_name, u"Type": column_type})))
+			table_elem.appendChild(table.Column(AttributesImpl({"Name": column_name, "Type": column_type})))
 		table_elem._end_of_columns()
-		table_elem.appendChild(table.TableStream(AttributesImpl({u"Name": u"%s:table" % table_name, u"Delimiter": table.TableStream.Delimiter.default, u"Type": table.TableStream.Type.default})))
+		table_elem.appendChild(table.TableStream(AttributesImpl({"Name": "%s:table" % table_name, "Delimiter": table.TableStream.Delimiter.default, "Type": table.TableStream.Type.default})))
 		ligo_lw.appendChild(table_elem)
 	return ligo_lw
 
@@ -585,7 +585,7 @@ class DBTable(table.Table):
 
 	>>> import sqlite3
 	>>> connection = sqlite3.connection()
-	>>> tbl = dbtables.DBTable(AttributesImpl({u"Name": u"process:table"}), connection = connection)
+	>>> tbl = dbtables.DBTable(AttributesImpl({"Name": "process:table"}), connection = connection)
 
 	A custom content handler must be created in order to pass the
 	connection keyword argument to the DBTable class when instances are
@@ -606,7 +606,7 @@ class DBTable(table.Table):
 		if not hasattr(cls, "tableName"):
 			# no, try to retrieve it from lsctables
 			attrs, = args
-			name = table.Table.TableName(attrs[u"Name"])
+			name = table.Table.TableName(attrs["Name"])
 			if name in lsctables.TableByName:
 				# found metadata in lsctables, construct
 				# custom subclass.  the class from
@@ -1036,7 +1036,7 @@ def use_in(ContentHandler):
 		return __orig_startStream(self, parent, attrs)
 
 	def startTable(self, parent, attrs):
-		name = table.Table.TableName(attrs[u"Name"])
+		name = table.Table.TableName(attrs["Name"])
 		if name in TableByName:
 			return TableByName[name](attrs, connection = self.connection)
 		return DBTable(attrs, connection = self.connection)

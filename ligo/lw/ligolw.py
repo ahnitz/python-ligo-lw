@@ -56,14 +56,14 @@ from functools import reduce
 #
 
 
-NameSpace = u"http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt"
+NameSpace = "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt"
 
 
-Header = u"""<?xml version='1.0' encoding='utf-8'?>
+Header = """<?xml version='1.0' encoding='utf-8'?>
 <!DOCTYPE LIGO_LW SYSTEM "%s">""" % NameSpace
 
 
-Indent = u"\t"
+Indent = "\t"
 
 
 #
@@ -121,7 +121,7 @@ class attributeproxy(property):
 	Example:
 
 	>>> class Test(Element):
-	...	Scale = attributeproxy(u"Scale", enc = u"%.17g".__mod__, dec = float, default = 1.0, doc = "This is the scale (default = 1).")
+	...	Scale = attributeproxy("Scale", enc = "%.17g".__mod__, dec = float, default = 1.0, doc = "This is the scale (default = 1).")
 	...
 	>>> x = Test()
 	>>> # have not set value, default will be returned
@@ -230,13 +230,13 @@ class Element(object):
 		"""
 		Generate the string for the element's start tag.
 		"""
-		return u"%s<%s%s>" % (indent, self.tagName, u"".join(u" %s=\"%s\"" % keyvalue for keyvalue in self.attributes.items()))
+		return "%s<%s%s>" % (indent, self.tagName, "".join(" %s=\"%s\"" % keyvalue for keyvalue in self.attributes.items()))
 
 	def end_tag(self, indent):
 		"""
 		Generate the string for the element's end tag.
 		"""
-		return u"%s</%s>" % (indent, self.tagName)
+		return "%s</%s>" % (indent, self.tagName)
 
 	def appendChild(self, child):
 		"""
@@ -376,21 +376,21 @@ class Element(object):
 		"""
 		pass
 
-	def write(self, fileobj = sys.stdout, indent = u""):
+	def write(self, fileobj = sys.stdout, indent = ""):
 		"""
 		Recursively write an element and it's children to a file.
 		"""
 		fileobj.write(self.start_tag(indent))
-		fileobj.write(u"\n")
+		fileobj.write("\n")
 		for c in self.childNodes:
 			if c.tagName not in self.validchildren:
 				raise ElementError("invalid child %s for %s" % (c.tagName, self.tagName))
 			c.write(fileobj, indent + Indent)
 		if self.pcdata is not None:
 			fileobj.write(xmlescape(self.pcdata))
-			fileobj.write(u"\n")
+			fileobj.write("\n")
 		fileobj.write(self.end_tag(indent))
-		fileobj.write(u"\n")
+		fileobj.write("\n")
 
 
 class EmptyElement(Element):
@@ -438,12 +438,12 @@ class LLWNameAttr(str):
 	>>> class Test(Element):
 	...	class TestName(LLWNameAttr):
 	...		dec_pattern = re.compile(r"(?P<Name>[a-z0-9_]+):test\Z")
-	...		enc_pattern = u"%s:test"
+	...		enc_pattern = "%s:test"
 	...
-	...	Name = attributeproxy(u"Name", enc = TestName.enc, dec = TestName)
+	...	Name = attributeproxy("Name", enc = TestName.enc, dec = TestName)
 	...
 	>>> x = Test()
-	>>> x.Name = u"blah"
+	>>> x.Name = "blah"
 	>>> # internally, suffix has been appended
 	>>> print(x.getAttribute("Name"))
 	blah:test
@@ -451,14 +451,14 @@ class LLWNameAttr(str):
 	>>> print(x.Name)
 	blah
 	>>> # only lower-case Latin letters, numerals, and '_' are allowed
-	>>> x.Name = u"Hello-world"
+	>>> x.Name = "Hello-world"
 	Traceback (most recent call last):
 	  File "<stdin>", line 1, in <module>
 	ValueError: invalid Name 'Hello-world'
 	"""
 	def __new__(cls, name):
 		try:
-			name = cls.dec_pattern.search(name).group(u"Name")
+			name = cls.dec_pattern.search(name).group("Name")
 		except AttributeError:
 			pass
 		return name
@@ -485,11 +485,11 @@ class LIGO_LW(EmptyElement):
 	"""
 	LIGO_LW element.
 	"""
-	tagName = u"LIGO_LW"
-	validchildren = frozenset([u"LIGO_LW", u"Comment", u"Param", u"Table", u"Array", u"Stream", u"IGWDFrame", u"AdcData", u"AdcInterval", u"Time", u"Detector"])
+	tagName = "LIGO_LW"
+	validchildren = frozenset(["LIGO_LW", "Comment", "Param", "Table", "Array", "Stream", "IGWDFrame", "AdcData", "AdcInterval", "Time", "Detector"])
 
-	Name = attributeproxy(u"Name")
-	Type = attributeproxy(u"Type")
+	Name = attributeproxy("Name")
+	Type = attributeproxy("Type")
 
 	@classmethod
 	def get_ligo_lw(cls, xmldoc, name = None):
@@ -501,7 +501,7 @@ class LIGO_LW(EmptyElement):
 		"""
 		elems = xmldoc.getElementsByTagName(cls.tagName)
 		if name is not None:
-			elems = [elem for elem in elems if elem.hasAttribute(u"Name") and elem.Name == name]
+			elems = [elem for elem in elems if elem.hasAttribute("Name") and elem.Name == name]
 		if len(elems) != 1:
 			raise ValueError("document must contain exactly one %s element%s" % (cls.tagName, (" named %s" % name if name is not None else "")))
 		return elems[0]
@@ -511,40 +511,40 @@ class Comment(Element):
 	"""
 	Comment element.
 	"""
-	tagName = u"Comment"
+	tagName = "Comment"
 
-	def write(self, fileobj = sys.stdout, indent = u""):
+	def write(self, fileobj = sys.stdout, indent = ""):
 		fileobj.write(self.start_tag(indent))
 		if self.pcdata is not None:
 			fileobj.write(xmlescape(self.pcdata))
-		fileobj.write(self.end_tag(u""))
-		fileobj.write(u"\n")
+		fileobj.write(self.end_tag(""))
+		fileobj.write("\n")
 
 
 class Param(Element):
 	"""
 	Param element.
 	"""
-	tagName = u"Param"
-	validchildren = frozenset([u"Comment"])
+	tagName = "Param"
+	validchildren = frozenset(["Comment"])
 
-	DataUnit = attributeproxy(u"DataUnit")
-	Name = attributeproxy(u"Name")
-	Scale = attributeproxy(u"Scale")
-	Start = attributeproxy(u"Start")
-	Type = attributeproxy(u"Type")
-	Unit = attributeproxy(u"Unit")
+	DataUnit = attributeproxy("DataUnit")
+	Name = attributeproxy("Name")
+	Scale = attributeproxy("Scale")
+	Start = attributeproxy("Start")
+	Type = attributeproxy("Type")
+	Unit = attributeproxy("Unit")
 
 
 class Table(EmptyElement):
 	"""
 	Table element.
 	"""
-	tagName = u"Table"
-	validchildren = frozenset([u"Comment", u"Column", u"Stream"])
+	tagName = "Table"
+	validchildren = frozenset(["Comment", "Column", "Stream"])
 
-	Name = attributeproxy(u"Name")
-	Type = attributeproxy(u"Type")
+	Name = attributeproxy("Name")
+	Type = attributeproxy("Type")
 
 	def _verifyChildren(self, i):
 		ncomment = 0
@@ -571,42 +571,42 @@ class Column(EmptyElement):
 	"""
 	Column element.
 	"""
-	tagName = u"Column"
+	tagName = "Column"
 
-	Name = attributeproxy(u"Name")
-	Type = attributeproxy(u"Type")
-	Unit = attributeproxy(u"Unit")
+	Name = attributeproxy("Name")
+	Type = attributeproxy("Type")
+	Unit = attributeproxy("Unit")
 
 	def start_tag(self, indent):
 		"""
 		Generate the string for the element's start tag.
 		"""
-		return u"%s<%s%s/>" % (indent, self.tagName, u"".join(u" %s=\"%s\"" % keyvalue for keyvalue in self.attributes.items()))
+		return "%s<%s%s/>" % (indent, self.tagName, "".join(" %s=\"%s\"" % keyvalue for keyvalue in self.attributes.items()))
 
 	def end_tag(self, indent):
 		"""
 		Generate the string for the element's end tag.
 		"""
-		return u""
+		return ""
 
-	def write(self, fileobj = sys.stdout, indent = u""):
+	def write(self, fileobj = sys.stdout, indent = ""):
 		"""
 		Recursively write an element and it's children to a file.
 		"""
 		fileobj.write(self.start_tag(indent))
-		fileobj.write(u"\n")
+		fileobj.write("\n")
 
 
 class Array(EmptyElement):
 	"""
 	Array element.
 	"""
-	tagName = u"Array"
-	validchildren = frozenset([u"Dim", u"Stream"])
+	tagName = "Array"
+	validchildren = frozenset(["Dim", "Stream"])
 
-	Name = attributeproxy(u"Name")
-	Type = attributeproxy(u"Type")
-	Unit = attributeproxy(u"Unit")
+	Name = attributeproxy("Name")
+	Type = attributeproxy("Type")
+	Unit = attributeproxy("Unit")
 
 	def _verifyChildren(self, i):
 		nstream = 0
@@ -624,48 +624,48 @@ class Dim(Element):
 	"""
 	Dim element.
 	"""
-	tagName = u"Dim"
+	tagName = "Dim"
 
-	Name = attributeproxy(u"Name")
-	Scale = attributeproxy(u"Scale", enc = ligolwtypes.FormatFunc[u"real_8"], dec = ligolwtypes.ToPyType[u"real_8"])
-	Start = attributeproxy(u"Start", enc = ligolwtypes.FormatFunc[u"real_8"], dec = ligolwtypes.ToPyType[u"real_8"])
-	Unit = attributeproxy(u"Unit")
+	Name = attributeproxy("Name")
+	Scale = attributeproxy("Scale", enc = ligolwtypes.FormatFunc["real_8"], dec = ligolwtypes.ToPyType["real_8"])
+	Start = attributeproxy("Start", enc = ligolwtypes.FormatFunc["real_8"], dec = ligolwtypes.ToPyType["real_8"])
+	Unit = attributeproxy("Unit")
 
 	@property
 	def n(self):
-		return ligolwtypes.ToPyType[u"int_8s"](self.pcdata) if self.pcdata is not None else None
+		return ligolwtypes.ToPyType["int_8s"](self.pcdata) if self.pcdata is not None else None
 
 	@n.setter
 	def n(self, val):
-		self.pcdata = ligolwtypes.FormatFunc[u"int_8s"](val) if val is not None else None
+		self.pcdata = ligolwtypes.FormatFunc["int_8s"](val) if val is not None else None
 
 	@n.deleter
 	def n(self):
 		self.pcdata = None
 
-	def write(self, fileobj = sys.stdout, indent = u""):
+	def write(self, fileobj = sys.stdout, indent = ""):
 		fileobj.write(self.start_tag(indent))
 		if self.pcdata is not None:
 			fileobj.write(xmlescape(self.pcdata))
-		fileobj.write(self.end_tag(u""))
-		fileobj.write(u"\n")
+		fileobj.write(self.end_tag(""))
+		fileobj.write("\n")
 
 
 class Stream(Element):
 	"""
 	Stream element.
 	"""
-	tagName = u"Stream"
+	tagName = "Stream"
 
-	Content = attributeproxy(u"Content")
-	Delimiter = attributeproxy(u"Delimiter", default = u",")
-	Encoding = attributeproxy(u"Encoding")
-	Name = attributeproxy(u"Name")
-	Type = attributeproxy(u"Type", default = u"Local")
+	Content = attributeproxy("Content")
+	Delimiter = attributeproxy("Delimiter", default = ",")
+	Encoding = attributeproxy("Encoding")
+	Name = attributeproxy("Name")
+	Type = attributeproxy("Type", default = "Local")
 
 	def __init__(self, *args):
 		super(Stream, self).__init__(*args)
-		if self.Type not in (u"Remote", u"Local"):
+		if self.Type not in ("Remote", "Local"):
 			raise ElementError("invalid Type for Stream: '%s'" % self.Type)
 
 
@@ -673,52 +673,52 @@ class IGWDFrame(EmptyElement):
 	"""
 	IGWDFrame element.
 	"""
-	tagName = u"IGWDFrame"
-	validchildren = frozenset([u"Comment", u"Param", u"Time", u"Detector", u"AdcData", u"LIGO_LW", u"Stream", u"Array", u"IGWDFrame"])
+	tagName = "IGWDFrame"
+	validchildren = frozenset(["Comment", "Param", "Time", "Detector", "AdcData", "LIGO_LW", "Stream", "Array", "IGWDFrame"])
 
-	Name = attributeproxy(u"Name")
+	Name = attributeproxy("Name")
 
 
 class Detector(EmptyElement):
 	"""
 	Detector element.
 	"""
-	tagName = u"Detector"
-	validchildren = frozenset([u"Comment", u"Param", u"LIGO_LW"])
+	tagName = "Detector"
+	validchildren = frozenset(["Comment", "Param", "LIGO_LW"])
 
-	Name = attributeproxy(u"Name")
+	Name = attributeproxy("Name")
 
 
 class AdcData(EmptyElement):
 	"""
 	AdcData element.
 	"""
-	tagName = u"AdcData"
-	validchildren = frozenset([u"AdcData", u"Comment", u"Param", u"Time", u"LIGO_LW", u"Array"])
+	tagName = "AdcData"
+	validchildren = frozenset(["AdcData", "Comment", "Param", "Time", "LIGO_LW", "Array"])
 
-	Name = attributeproxy(u"Name")
+	Name = attributeproxy("Name")
 
 
 class AdcInterval(EmptyElement):
 	"""
 	AdcInterval element.
 	"""
-	tagName = u"AdcInterval"
-	validchildren = frozenset([u"AdcData", u"Comment", u"Time"])
+	tagName = "AdcInterval"
+	validchildren = frozenset(["AdcData", "Comment", "Time"])
 
-	DeltaT = attributeproxy(u"DeltaT", enc = ligolwtypes.FormatFunc[u"real_8"], dec = ligolwtypes.ToPyType[u"real_8"])
-	Name = attributeproxy(u"Name")
-	StartTime = attributeproxy(u"StartTime")
+	DeltaT = attributeproxy("DeltaT", enc = ligolwtypes.FormatFunc["real_8"], dec = ligolwtypes.ToPyType["real_8"])
+	Name = attributeproxy("Name")
+	StartTime = attributeproxy("StartTime")
 
 
 class Time(Element):
 	"""
 	Time element.
 	"""
-	tagName = u"Time"
+	tagName = "Time"
 
-	Name = attributeproxy(u"Name")
-	Type = attributeproxy(u"Type", default = u"ISO-8601")
+	Name = attributeproxy("Name")
+	Type = attributeproxy("Type", default = "ISO-8601")
 
 	def __init__(self, *args):
 		super(Time, self).__init__(*args)
@@ -726,14 +726,14 @@ class Time(Element):
 			raise ElementError("invalid Type for Time: '%s'" % self.Type)
 
 	def endElement(self):
-		if self.Type == u"ISO-8601":
+		if self.Type == "ISO-8601":
 			self.pcdata = dateutil.parser.parse(self.pcdata)
-		elif self.Type == u"GPS":
+		elif self.Type == "GPS":
 			from lal import LIGOTimeGPS
 			# FIXME:  remove cast to string when lal swig
 			# can cast from unicode
 			self.pcdata = LIGOTimeGPS(str(self.pcdata))
-		elif self.Type == u"Unix":
+		elif self.Type == "Unix":
 			self.pcdata = float(self.pcdata)
 		else:
 			# unsupported time type.  not impossible that
@@ -741,15 +741,15 @@ class Time(Element):
 			# ligo.lw.types;  just accept it as a string
 			pass
 
-	def write(self, fileobj = sys.stdout, indent = u""):
+	def write(self, fileobj = sys.stdout, indent = ""):
 		fileobj.write(self.start_tag(indent))
 		if self.pcdata is not None:
-			if self.Type == u"ISO-8601":
+			if self.Type == "ISO-8601":
 				fileobj.write(xmlescape(str(self.pcdata.isoformat())))
-			elif self.Type == u"GPS":
+			elif self.Type == "GPS":
 				fileobj.write(xmlescape(str(self.pcdata)))
-			elif self.Type == u"Unix":
-				fileobj.write(xmlescape(u"%.16g" % self.pcdata))
+			elif self.Type == "Unix":
+				fileobj.write(xmlescape("%.16g" % self.pcdata))
 			else:
 				# unsupported time type.  not impossible.
 				# assume correct thing to do is cast to
@@ -757,8 +757,8 @@ class Time(Element):
 				# how to ensure that does the correct
 				# thing.
 				fileobj.write(xmlescape(str(self.pcdata)))
-		fileobj.write(self.end_tag(u""))
-		fileobj.write(u"\n")
+		fileobj.write(self.end_tag(""))
+		fileobj.write("\n")
 
 	@classmethod
 	def now(cls, Name = None):
@@ -784,7 +784,7 @@ class Time(Element):
 		time, not a copy of it.  Subsequent modification of the GPS
 		time object will be reflected in what gets written to disk.
 		"""
-		self = cls(AttributesImpl({u"Type": u"GPS"}))
+		self = cls(AttributesImpl({"Type": "GPS"}))
 		if Name is not None:
 			self.Name = Name
 		self.pcdata = gps
@@ -795,17 +795,17 @@ class Document(EmptyElement):
 	"""
 	Description of a LIGO LW file.
 	"""
-	tagName = u"Document"
-	validchildren = frozenset([u"LIGO_LW"])
+	tagName = "Document"
+	validchildren = frozenset(["LIGO_LW"])
 
 	def write(self, fileobj = sys.stdout, xsl_file = None):
 		"""
 		Write the document.
 		"""
 		fileobj.write(Header)
-		fileobj.write(u"\n")
+		fileobj.write("\n")
 		if xsl_file is not None:
-			fileobj.write(u'<?xml-stylesheet type="text/xsl" href="%s" ?>\n' % xsl_file)
+			fileobj.write('<?xml-stylesheet type="text/xsl" href="%s" ?>\n' % xsl_file)
 		for c in self.childNodes:
 			if c.tagName not in self.validchildren:
 				raise ElementError("invalid child %s for %s" % (c.tagName, self.tagName))

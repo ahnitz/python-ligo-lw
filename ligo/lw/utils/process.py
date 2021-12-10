@@ -67,7 +67,7 @@ def doc_includes_process(xmldoc, program):
 	Return True if the process table in xmldoc includes entries for a
 	program named program.
 	"""
-	return program in lsctables.ProcessTable.get_table(xmldoc).getColumnByName(u"program")
+	return program in lsctables.ProcessTable.get_table(xmldoc).getColumnByName("program")
 
 
 def register_to_xmldoc(xmldoc, program, paramdict, **kwargs):
@@ -109,7 +109,7 @@ def register_to_xmldoc(xmldoc, program, paramdict, **kwargs):
 	for name, values in paramdict.items():
 		# change the name back to the form it had on the command
 		# line
-		name = u"--%s" % name.replace("_", "-")
+		name = "--%s" % name.replace("_", "-")
 
 		# skip options that aren't set;  ensure values is something
 		# that can be iterated over even if there is only one value

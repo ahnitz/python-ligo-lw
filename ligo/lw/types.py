@@ -50,12 +50,12 @@ for your files, for example if you wish your XML files to be lossless,
 simply include the lines::
 
 	ligo.lw.types.FormatFunc.update({
-		"real_4": u"%.9g".__mod__,
-		"real_8": u"%.17g".__mod__,
-		"float": u"%.9g".__mod__,
-		"double": u"%.17g".__mod__,
-		u"complex_8": ligo.lw.types.mk_complex_format_func(u"%.9g"),
-		u"complex_16": ligo.lw.types.mk_complex_format_func(u"%.17g")
+		"real_4": "%.9g".__mod__,
+		"real_8": "%.17g".__mod__,
+		"float": "%.9g".__mod__,
+		"double": "%.17g".__mod__,
+		"complex_8": ligo.lw.types.mk_complex_format_func("%.9g"),
+		"complex_16": ligo.lw.types.mk_complex_format_func("%.17g")
 	})
 
 anywhere in your code, but before you write the document to a file.
@@ -81,25 +81,25 @@ from . import __author__, __date__, __version__
 #
 
 
-BlobTypes = set([u"blob", u"ilwd:char_u"])
+BlobTypes = set(["blob", "ilwd:char_u"])
 """LIGO Light-Weight XML type strings for binary blob-like data."""
 
-StringTypes = set([u"char_s", u"char_v", u"lstring", u"string", u"ilwd:char"])
+StringTypes = set(["char_s", "char_v", "lstring", "string", "ilwd:char"])
 """LIGO Light-Weight XML type strings for string-like data."""
 
-IntTypes = set([u"int_2s", u"int_2u", u"int_4s", u"int_4u", u"int_8s", u"int_8u", u"int"])
+IntTypes = set(["int_2s", "int_2u", "int_4s", "int_4u", "int_8s", "int_8u", "int"])
 """LIGO Light-Weight XML type strings for integer-like data."""
 
-FloatTypes = set([u"real_4", u"real_8", u"float", u"double"])
+FloatTypes = set(["real_4", "real_8", "float", "double"])
 """LIGO Light-Weight XML type strings for floating-point-like data."""
 
-ComplexTypes = set([u"complex_8", u"complex_16"])
+ComplexTypes = set(["complex_8", "complex_16"])
 """LIGO Light-Weight XML type strings for complex-like data."""
 
 NumericTypes = IntTypes | FloatTypes | ComplexTypes
 """LIGO Light-Weight XML type strings for number-like data."""
 
-TimeTypes = set([u"GPS", u"Unix", u"ISO-8601"])
+TimeTypes = set(["GPS", "Unix", "ISO-8601"])
 """LIGO Light-Weight XML type strings for time-like data."""
 
 Types = BlobTypes | StringTypes | NumericTypes | TimeTypes
@@ -121,7 +121,7 @@ def string_format_func(s):
 	Escapes back-slashes and quotes, and wraps the resulting string in
 	quotes.
 	"""
-	return u"\"%s\"" % str(s).replace(u"\\", u"\\\\").replace(u"\"", u"\\\"")
+	return "\"%s\"" % str(s).replace("\\", "\\\\").replace("\"", "\\\"")
 
 
 def blob_format_func(b):
@@ -129,7 +129,7 @@ def blob_format_func(b):
 	Function used internally to format binary data.  Base64-encodes the
 	data and wraps the resulting string in quotes.
 	"""
-	return u"\"%s\"" % base64.standard_b64encode(b)
+	return "\"%s\"" % base64.standard_b64encode(b)
 
 
 def mk_complex_format_func(fmt):
@@ -137,33 +137,33 @@ def mk_complex_format_func(fmt):
 	Function used internally to generate functions to format complex
 	valued data.
 	"""
-	fmt = fmt + u"+i" + fmt
+	fmt = fmt + "+i" + fmt
 	def complex_format_func(z):
 		return fmt % (z.real, z.imag)
 	return complex_format_func
 
 
 FormatFunc = {
-	u"char_s": string_format_func,
-	u"char_v": string_format_func,
-	u"ilwd:char": u"\"%s\"".__mod__,
-	u"ilwd:char_u": blob_format_func,
-	u"blob": blob_format_func,
-	u"lstring": string_format_func,
-	u"string": string_format_func,
-	u"int_2s": u"%d".__mod__,
-	u"int_2u": u"%u".__mod__,
-	u"int_4s": u"%d".__mod__,
-	u"int_4u": u"%u".__mod__,
-	u"int_8s": u"%d".__mod__,
-	u"int_8u": u"%u".__mod__,
-	u"int": u"%d".__mod__,
-	u"real_4": u"%.8g".__mod__,
-	u"real_8": u"%.16g".__mod__,
-	u"float": u"%.8g".__mod__,
-	u"double": u"%.16g".__mod__,
-	u"complex_8": mk_complex_format_func(u"%.8g"),
-	u"complex_16": mk_complex_format_func(u"%.16g")
+	"char_s": string_format_func,
+	"char_v": string_format_func,
+	"ilwd:char": "\"%s\"".__mod__,
+	"ilwd:char_u": blob_format_func,
+	"blob": blob_format_func,
+	"lstring": string_format_func,
+	"string": string_format_func,
+	"int_2s": "%d".__mod__,
+	"int_2u": "%u".__mod__,
+	"int_4s": "%d".__mod__,
+	"int_4u": "%u".__mod__,
+	"int_8s": "%d".__mod__,
+	"int_8u": "%u".__mod__,
+	"int": "%d".__mod__,
+	"real_4": "%.8g".__mod__,
+	"real_8": "%.16g".__mod__,
+	"float": "%.8g".__mod__,
+	"double": "%.16g".__mod__,
+	"complex_8": mk_complex_format_func("%.8g"),
+	"complex_16": mk_complex_format_func("%.16g")
 }
 """
 Look-up table mapping LIGO Light-Weight XML data type strings to functions
@@ -182,26 +182,26 @@ ligo.lw XML writing codes.
 
 
 ToPyType = {
-	u"char_s": str,
-	u"char_v": str,
-	u"ilwd:char": str,
-	u"ilwd:char_u": lambda s: memoryview(base64.b64decode(s)),
-	u"blob": lambda s: memoryview(base64.b64decode(s)),
-	u"lstring": str,
-	u"string": str,
-	u"int_2s": int,
-	u"int_2u": int,
-	u"int_4s": int,
-	u"int_4u": int,
-	u"int_8s": int,
-	u"int_8u": int,
-	u"int": int,
-	u"real_4": float,
-	u"real_8": float,
-	u"float": float,
-	u"double": float,
-	u"complex_8": lambda s: complex(*map(float, s.split(u"+i"))),
-	u"complex_16": lambda s: complex(*map(float, s.split(u"+i")))
+	"char_s": str,
+	"char_v": str,
+	"ilwd:char": str,
+	"ilwd:char_u": lambda s: memoryview(base64.b64decode(s)),
+	"blob": lambda s: memoryview(base64.b64decode(s)),
+	"lstring": str,
+	"string": str,
+	"int_2s": int,
+	"int_2u": int,
+	"int_4s": int,
+	"int_4u": int,
+	"int_8s": int,
+	"int_8u": int,
+	"int": int,
+	"real_4": float,
+	"real_8": float,
+	"float": float,
+	"double": float,
+	"complex_8": lambda s: complex(*map(float, s.split("+i"))),
+	"complex_16": lambda s: complex(*map(float, s.split("+i")))
 }
 """
 Look-up table mapping LIGO Light-Weight XML data type strings to functions
@@ -222,13 +222,13 @@ class FromPyTypeCls(dict):
 
 
 FromPyType = FromPyTypeCls({
-	memoryview: u"blob",
-	str: u"lstring",
-	str: u"lstring",
-	bool: u"int_4s",
-	int: u"int_8s",
-	float: u"real_8",
-	complex: u"complex_16"
+	memoryview: "blob",
+	str: "lstring",
+	str: "lstring",
+	bool: "int_4s",
+	int: "int_8s",
+	float: "real_8",
+	complex: "complex_16"
 })
 """
 Look-up table used to guess LIGO Light-Weight XML data type strings from
@@ -247,19 +247,19 @@ objects.
 
 
 ToNumPyType = {
-	u"int_2s": "int16",
-	u"int_2u": "uint16",
-	u"int_4s": "int32",
-	u"int_4u": "uint32",
-	u"int_8s": "int64",
-	u"int_8u": "uint64",
-	u"int": "int32",
-	u"real_4": "float32",
-	u"real_8": "float64",
-	u"float": "float32",
-	u"double": "float64",
-	u"complex_8": "complex64",
-	u"complex_16": "complex128"
+	"int_2s": "int16",
+	"int_2u": "uint16",
+	"int_4s": "int32",
+	"int_4u": "uint32",
+	"int_8s": "int64",
+	"int_8u": "uint64",
+	"int": "int32",
+	"real_4": "float32",
+	"real_8": "float64",
+	"float": "float32",
+	"double": "float64",
+	"complex_8": "complex64",
+	"complex_16": "complex128"
 }
 """
 Look-up table mapping LIGO Light-Weight XML data type strings to numpy
@@ -268,16 +268,16 @@ array type strings.  Used by ligo.lw array reading codes.
 
 
 FromNumPyType = {
-	"int16": u"int_2s",
-	"uint16": u"int_2u",
-	"int32": u"int_4s",
-	"uint32": u"int_4u",
-	"int64": u"int_8s",
-	"uint64": u"int_8u",
-	"float32": u"real_4",
-	"float64": u"real_8",
-	"complex64": u"complex_8",
-	"complex128": u"complex_16"
+	"int16": "int_2s",
+	"uint16": "int_2u",
+	"int32": "int_4s",
+	"uint32": "int_4u",
+	"int64": "int_8s",
+	"uint64": "int_8u",
+	"float32": "real_4",
+	"float64": "real_8",
+	"complex64": "complex_8",
+	"complex128": "complex_16"
 }
 """
 Look-up table mapping numpy array type strings to LIGO Light-Weight XML
@@ -302,24 +302,24 @@ data type strings.  Uesd by ligo.lw array writing codes.
 
 
 ToMySQLType = {
-	u"char_s": "CHAR(20)",
-	u"char_v": "VARCHAR(64)",
-	u"ilwd:char": "VARCHAR(64)",
-	u"ilwd:char_u": "BLOB",
-	u"blob": "BLOB",
-	u"lstring": "VARCHAR(255)",
-	u"string": "VARCHAR(255)",
-	u"int_2s": "SMALLINT",
-	u"int_2u": "SMALLINT",
-	u"int_4s": "INTEGER",
-	u"int_4u": "INTEGER",
-	u"int_8s": "BIGINT",
-	u"int_8u": "BIGINT",
-	u"int": "INTEGER",
-	u"real_4": "FLOAT",
-	u"real_8": "DOUBLE",
-	u"float": "FLOAT",
-	u"double": "DOUBLE"
+	"char_s": "CHAR(20)",
+	"char_v": "VARCHAR(64)",
+	"ilwd:char": "VARCHAR(64)",
+	"ilwd:char_u": "BLOB",
+	"blob": "BLOB",
+	"lstring": "VARCHAR(255)",
+	"string": "VARCHAR(255)",
+	"int_2s": "SMALLINT",
+	"int_2u": "SMALLINT",
+	"int_4s": "INTEGER",
+	"int_4u": "INTEGER",
+	"int_8s": "BIGINT",
+	"int_8u": "BIGINT",
+	"int": "INTEGER",
+	"real_4": "FLOAT",
+	"real_8": "DOUBLE",
+	"float": "FLOAT",
+	"double": "DOUBLE"
 }
 """
 Look-up table mapping LIGO Light-Weight XML data type strings to MySQL
@@ -328,24 +328,24 @@ column types.  Used by XML --> MySQL conversion codes.
 
 
 ToSQLiteType = {
-	u"char_s": "TEXT",
-	u"char_v": "TEXT",
-	u"ilwd:char": "TEXT",
-	u"ilwd:char_u": "BLOB",
-	u"blob": "BLOB",
-	u"lstring": "TEXT",
-	u"string": "TEXT",
-	u"int_2s": "INTEGER",
-	u"int_2u": "INTEGER",
-	u"int_4s": "INTEGER",
-	u"int_4u": "INTEGER",
-	u"int_8s": "INTEGER",
-	u"int_8u": "INTEGER",
-	u"int": "INTEGER",
-	u"real_4": "REAL",
-	u"real_8": "REAL",
-	u"float": "REAL",
-	u"double": "REAL"
+	"char_s": "TEXT",
+	"char_v": "TEXT",
+	"ilwd:char": "TEXT",
+	"ilwd:char_u": "BLOB",
+	"blob": "BLOB",
+	"lstring": "TEXT",
+	"string": "TEXT",
+	"int_2s": "INTEGER",
+	"int_2u": "INTEGER",
+	"int_4s": "INTEGER",
+	"int_4u": "INTEGER",
+	"int_8s": "INTEGER",
+	"int_8u": "INTEGER",
+	"int": "INTEGER",
+	"real_4": "REAL",
+	"real_8": "REAL",
+	"float": "REAL",
+	"double": "REAL"
 }
 """
 Look-up table mapping LIGO Light-Weight XML data type strings to SQLite
@@ -354,11 +354,11 @@ column types.  Used by XML --> SQLite conversion codes.
 
 
 FromSQLiteType = {
-	"BLOB": u"blob",
-	"TEXT": u"lstring",
-	"STRING": u"lstring",
-	"INTEGER": u"int_4s",
-	"REAL": u"real_8"
+	"BLOB": "blob",
+	"TEXT": "lstring",
+	"STRING": "lstring",
+	"INTEGER": "int_4s",
+	"REAL": "real_8"
 }
 """
 Look-up table used to guess LIGO Light-Weight XML data type strings from
