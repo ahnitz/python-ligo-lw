@@ -9,7 +9,7 @@
 #export DH_VERBOSE=1
 
 % :
-	dh $@ --with=python2,python3 --buildsystem=pybuild
+	dh $@ --with=python3 --buildsystem=pybuild
 
 # do not run tests, run /bin/true instead
 override_dh_auto_test :

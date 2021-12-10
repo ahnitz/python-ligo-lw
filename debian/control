@@ -7,11 +7,6 @@ Build-Depends:
  dh-python,
 # for xmllint tool used by test suite
  libxml2-utils,
- python-all,
- python-all-dev,
- python-ligo-common,
- python-setuptools,
- python-six,
  python3-all,
  python3-all-dev,
  python3-setuptools,
@@ -19,55 +14,6 @@ Build-Depends:
 X-Python-Version: >= 2.7
 X-Python3-Version: >= 3.4
 Standards-Version: 3.9.3
-
-Package: python-ligo-lw
-Architecture: any
-Depends:
- ${shlibs:Depends},
- ${misc:Depends},
- ${python:Depends},
- python-dateutil,
- python-ligo-common,
- python-ligo-segments,
- python-numpy (>= 1.6),
- python-six,
- python-tqdm,
- python-yaml
-Recommends:
- python-glue,
- python-lal,
- python-lalburst,
- python-ligo-lw-bin
-Description: LIGO Light-Weight XML I/O library
- The LIGO Light-Weight XML format is used extensively by compact object
- detection pipelines and associate tool sets.  This package provides a
- Python I/O library for reading, writing, and interacting with documents in
- this format.
-
-Package: python-ligo-lw-bin
-Architecture: any
-Depends:
- ${shlibs:Depends},
- ${misc:Depends},
- ${python:Depends},
- python-ligo-lw,
- python-ligo-segments
-Recommends:
- python-glue,
- python-lal
-Conflicts:
- python-glue-ligolw-tools,
- python-glue (<< 2.0),
- python-pylal
-Replaces:
- python-glue-ligolw-tools
-Provides:
- python-glue-ligolw-tools
-Description: LIGO Light-Weight XML I/O library
- The LIGO Light-Weight XML format is used extensively by compact object
- detection pipelines and associate tool sets.  This package provides
- several programs to performe common, basic, manipulations of files in this
- format.
 
 Package: python3-ligo-lw
 Architecture: any
