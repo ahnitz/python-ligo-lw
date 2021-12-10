@@ -397,8 +397,11 @@ class LigolwSegments(set):
 		</Table>
 	</LIGO_LW>
 	>>> xmlsegments = LigolwSegments(xmldoc)
-	>>> xmlsegments.get_by_name("test")
-	{'H1': [segment(LIGOTimeGPS(0, 0), LIGOTimeGPS(10, 0))], 'L1': [segment(LIGOTimeGPS(5, 0), LIGOTimeGPS(15, 0))]}
+	>>> segs = xmlsegments.get_by_name("test")
+	>>> segs["H1"]
+	[segment(LIGOTimeGPS(0, 0), LIGOTimeGPS(10, 0))]
+	>>> segs["L1"]
+	[segment(LIGOTimeGPS(5, 0), LIGOTimeGPS(15, 0))]
 	>>> xmlsegments.get_by_name("wrong name")
 	Traceback (most recent call last):
 		...
