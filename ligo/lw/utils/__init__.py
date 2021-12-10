@@ -35,10 +35,11 @@ import contextlib
 import gzip
 import lzma
 import os
-from six.moves import urllib
 import signal
 import stat
 import sys
+import urllib.parse
+import urllib.request
 
 
 from .. import __author__, __date__, __version__
@@ -452,9 +453,7 @@ def load_url(url, verbose = False, **kwargs):
 		sys.stderr.write("reading %s ...\n" % (("'%s'" % url) if url is not None else "stdin"))
 	urlopen_kwargs = dict((kwarg, kwargs.pop(kwarg)) for kwarg in ("context", "timeout") if kwarg in kwargs)
 	if url is None:
-		# In Python 3, ``sys.stdin`` has an attribute called
-		# ``buffer`` that is the underyling byte-oriented stream.
-		return load_fileobj(sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin, **kwargs)
+		return load_fileobj(sys.stdin.buffer, **kwargs)
 	scheme, host, path = urllib.parse.urlparse(url)[:3]
 	if scheme.lower() in ("", "file") and host.lower() in ("", "localhost"):
 		with open(path, "rb") as fileobj:
@@ -624,9 +623,7 @@ def write_filename(xmldoc, filename, verbose = False, compress = None, with_mv =
 		sys.stderr.write("writing %s ...\n" % (("'%s'" % filename) if filename is not None else "stdout"))
 	with SignalsTrap(trap_signals):
 		if filename is None:
-			# In Python 3, sys.stdout has a .buffer attribute
-			# that is the underyling byte-oriented stream.
-			write_fileobj(xmldoc, sys.stdout.buffer if hasattr(sys.stdout, "buffer") else sys.stdout, compress = compress, **kwargs)
+			write_fileobj(xmldoc, sys.stdout.buffer, compress = compress, **kwargs)
 		else:
 			binary_open = lambda filename: open(filename, "wb")
 			with (binary_open if not with_mv else tildefile)(filename) as fileobj:

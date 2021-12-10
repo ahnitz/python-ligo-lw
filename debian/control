@@ -9,9 +9,7 @@ Build-Depends:
  libxml2-utils,
  python3-all,
  python3-all-dev,
- python3-setuptools,
- python3-six
-X-Python-Version: >= 2.7
+ python3-setuptools
 X-Python3-Version: >= 3.4
 Standards-Version: 3.9.3
 
@@ -24,7 +22,6 @@ Depends:
  python3-dateutil,
  python3-ligo-segments,
  python3-numpy (>= 1.6),
- python3-six,
  python3-tqdm,
  python3-yaml
 Recommends:

@@ -70,13 +70,6 @@ import base64
 
 
 from . import __author__, __date__, __version__
-import six
-
-
-try:  # python < 3
-	long
-except NameError:  # python >= 3
-	long = int
 
 
 #
@@ -128,7 +121,7 @@ def string_format_func(s):
 	Escapes back-slashes and quotes, and wraps the resulting string in
 	quotes.
 	"""
-	return u"\"%s\"" % six.text_type(s).replace(u"\\", u"\\\\").replace(u"\"", u"\\\"")
+	return u"\"%s\"" % str(s).replace(u"\\", u"\\\\").replace(u"\"", u"\\\"")
 
 
 def blob_format_func(b):
@@ -189,13 +182,13 @@ ligo.lw XML writing codes.
 
 
 ToPyType = {
-	u"char_s": six.text_type,
-	u"char_v": six.text_type,
-	u"ilwd:char": six.text_type,
+	u"char_s": str,
+	u"char_v": str,
+	u"ilwd:char": str,
 	u"ilwd:char_u": lambda s: memoryview(base64.b64decode(s)),
 	u"blob": lambda s: memoryview(base64.b64decode(s)),
-	u"lstring": six.text_type,
-	u"string": six.text_type,
+	u"lstring": str,
+	u"string": str,
 	u"int_2s": int,
 	u"int_2u": int,
 	u"int_4s": int,
@@ -231,10 +224,9 @@ class FromPyTypeCls(dict):
 FromPyType = FromPyTypeCls({
 	memoryview: u"blob",
 	str: u"lstring",
-	six.text_type: u"lstring",
+	str: u"lstring",
 	bool: u"int_4s",
 	int: u"int_8s",
-	long: u"int_8s",
 	float: u"real_8",
 	complex: u"complex_16"
 })

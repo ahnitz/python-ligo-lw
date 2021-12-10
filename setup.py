@@ -76,7 +76,6 @@ setup(
 		"License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
 		"Natural Language :: English",
 		"Operating System :: POSIX",
-		"Programming Language :: Python :: 2.7",
 		"Programming Language :: Python :: 3",
 		"Topic :: Scientific/Engineering :: Astronomy",
 		"Topic :: Scientific/Engineering :: Physics",
@@ -89,7 +88,6 @@ setup(
 		"numpy",
 		"python-dateutil",
 		"pyyaml",
-		"six",
 		"tqdm"
 	]
 )

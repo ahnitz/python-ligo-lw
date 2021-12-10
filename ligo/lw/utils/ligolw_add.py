@@ -30,8 +30,8 @@ Add (merge) LIGO LW XML files containing LSC tables.
 
 
 import os
+import urllib.parse
 import sys
-from six.moves import urllib
 
 
 from tqdm import tqdm

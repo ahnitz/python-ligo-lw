@@ -110,27 +110,18 @@ PyObject *llwtokenizer_build_formats(PyObject *sequence)
 "various data storage units."
 
 
-#if PY_MAJOR_VERSION < 3
-PyMODINIT_FUNC inittokenizer(void); /* Silence -Wmissing-prototypes */
-PyMODINIT_FUNC inittokenizer(void)
-#else
 PyMODINIT_FUNC PyInit_tokenizer(void); /* Silence -Wmissing-prototypes */
 PyMODINIT_FUNC PyInit_tokenizer(void)
-#endif
 {
 	/*
 	 * Create the module.
 	 */
 
-#if PY_MAJOR_VERSION < 3
-	PyObject *module = Py_InitModule3(MODULE_NAME, NULL, MODULE_DOC);
-#else
 	static PyModuleDef moduledef = {
 		PyModuleDef_HEAD_INIT,
 		MODULE_NAME, MODULE_DOC, -1, NULL
 	};
 	PyObject *module = PyModule_Create(&moduledef);
-#endif
 	if (!module)
 		goto done;
 
@@ -171,9 +162,5 @@ PyMODINIT_FUNC PyInit_tokenizer(void)
 	 */
 
 done:
-#if PY_MAJOR_VERSION < 3
-	return;
-#else
 	return module;
-#endif
 }

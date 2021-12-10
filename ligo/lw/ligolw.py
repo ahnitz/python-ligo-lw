@@ -44,7 +44,6 @@ from xml.sax.saxutils import unescape as xmlunescape
 
 from . import __author__, __date__, __version__
 from . import types as ligolwtypes
-import six
 from functools import reduce
 
 
@@ -147,7 +146,7 @@ class attributeproxy(property):
 	>>> x.Scale
 	1.0
 	"""
-	def __init__(self, name, enc = six.text_type, dec = six.text_type, default = None, doc = None):
+	def __init__(self, name, enc = str, dec = str, default = None, doc = None):
 		# define get/set/del implementations, relying on Python's
 		# closure mechanism to remember values for name, default,
 		# etc.
@@ -340,7 +339,7 @@ class Element(object):
 		# modifies its internal data.  probably not a good idea,
 		# but I don't know how else to edit an attribute because
 		# the stupid things don't export a method to do it.
-		self.attributes._attrs[attrname] = six.text_type(value)
+		self.attributes._attrs[attrname] = str(value)
 
 	def removeAttribute(self, attrname):
 		# cafeful:  this digs inside an AttributesImpl object and
@@ -422,7 +421,7 @@ def WalkChildren(elem):
 #
 
 
-class LLWNameAttr(six.text_type):
+class LLWNameAttr(str):
 	"""
 	Baseclass to hide pattern-matching of various element names.
 	Subclasses must provide a .dec_pattern compiled regular expression
@@ -746,9 +745,9 @@ class Time(Element):
 		fileobj.write(self.start_tag(indent))
 		if self.pcdata is not None:
 			if self.Type == u"ISO-8601":
-				fileobj.write(xmlescape(six.text_type(self.pcdata.isoformat())))
+				fileobj.write(xmlescape(str(self.pcdata.isoformat())))
 			elif self.Type == u"GPS":
-				fileobj.write(xmlescape(six.text_type(self.pcdata)))
+				fileobj.write(xmlescape(str(self.pcdata)))
 			elif self.Type == u"Unix":
 				fileobj.write(xmlescape(u"%.16g" % self.pcdata))
 			else:
@@ -757,7 +756,7 @@ class Time(Element):
 				# unicode and let calling code figure out
 				# how to ensure that does the correct
 				# thing.
-				fileobj.write(xmlescape(six.text_type(self.pcdata)))
+				fileobj.write(xmlescape(str(self.pcdata)))
 		fileobj.write(self.end_tag(u""))
 		fileobj.write(u"\n")
 

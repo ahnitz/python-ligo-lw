@@ -35,7 +35,6 @@ Requires:	python%{python3_pkgversion}-dateutil
 #Requires:	python%{python3_pkgversion}-lalburst
 Requires:	python%{python3_pkgversion}-ligo-segments
 Requires:	python%{python3_pkgversion}-numpy >= 1.6
-Requires:	python%{python3_pkgversion}-six
 Requires:	python%{python3_pkgversion}-tqdm
 Requires:	python%{python3_pkgversion}-PyYAML
 %{?python_provide:%python_provide python%{python3_pkgversion}-%{shortname}}
