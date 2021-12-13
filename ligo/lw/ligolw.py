@@ -510,6 +510,41 @@ class LIGO_LW(EmptyElement):
 			raise ValueError("document must contain exactly one %s element%s" % (cls.tagName, (" named %s" % name if name is not None else "")))
 		return elems[0]
 
+	def reassign_table_row_ids(self):
+		"""
+		Recurses over all Table elements within this LIGO_LW elem
+		whose next_id attributes are not None, and uses the
+		.get_next_id() method of each of those Tables to generate
+		and assign new IDs to their rows.  The modifications are
+		recorded, and finally all ID attributes in all rows of all
+		tables are updated to fix cross references to the modified
+		IDs.
+
+		This function is used by ligolw_add to assign new IDs to
+		rows when merging documents in order to make sure there are
+		no ID collisions.  Using this function in this way requires
+		the .get_next_id() methods of all Table elements to yield
+		unused IDs, otherwise collisions will result anyway.  See
+		the .sync_next_id() method of the Table class for a way to
+		initialize the .next_id attributes so that collisions will
+		not occur.
+
+		Example:
+
+		>>> from ligo.lw import ligolw
+		>>> from ligo.lw import lsctables
+		>>> xmldoc = ligolw.Document()
+		>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
+		[]
+		>>> xmldoc.childNodes[-1].reassign_table_row_ids()
+		"""
+		mapping = {}
+		for tbl in self.getElementsByTagName(Table.tagName):
+			if tbl.next_id is not None:
+				tbl.updateKeyMapping(mapping)
+		for tbl in self.getElementsByTagName(Table.tagName):
+			tbl.applyKeyMapping(mapping)
+
 
 class Comment(Element):
 	"""

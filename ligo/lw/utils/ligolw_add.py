@@ -37,7 +37,6 @@ import sys
 from tqdm import tqdm
 from .. import __author__, __date__, __version__
 from .. import ligolw
-from .. import table
 from .. import lsctables
 from .. import utils
 
@@ -96,7 +95,7 @@ def reassign_ids(doc, verbose = False):
 	# construct a fresh old --> new mapping within each LIGO_LW block.
 	for elem in tqdm(doc.childNodes, desc='reassigning row IDs', disable=not verbose):
 		if elem.tagName == ligolw.LIGO_LW.tagName:
-			table.reassign_ids(elem)
+			elem.reassign_table_row_ids()
 	return doc
 
 
