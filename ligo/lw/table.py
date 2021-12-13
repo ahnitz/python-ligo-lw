@@ -1,4 +1,4 @@
-# Copyright (C) 2006--2020  Kipp Cannon
+# Copyright (C) 2006--2021  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -135,8 +135,8 @@ class Column(ligolw.Column):
 	>>> import sys
 	>>> tbl = Table(AttributesImpl({"Name": "test"}))
 	>>> col = tbl.appendChild(Column(AttributesImpl({"Name": "test:snr", "Type": "real_8"})))
-	>>> tbl.appendChild(TableStream(AttributesImpl({"Name": "test"})))	# doctest: +ELLIPSIS
-	<ligo.lw.table.TableStream object at ...>
+	>>> tbl.appendChild(tbl.Stream(AttributesImpl({"Name": "test"})))	# doctest: +ELLIPSIS
+	<ligo.lw.table.Table.Stream object at ...>
 	>>> print(col.Name)
 	snr
 	>>> print(col.Type)
@@ -348,107 +348,6 @@ class Column(ligolw.Column):
 #
 # =============================================================================
 #
-#                                Stream Element
-#
-# =============================================================================
-#
-
-
-#
-# Stream class
-#
-
-
-class TableStream(ligolw.Stream):
-	"""
-	High-level Stream element for use inside Tables.  This element
-	knows how to parse the delimited character stream into row objects
-	that it appends into the list-like parent element, and knows how to
-	turn the parent's rows back into a character stream.
-	"""
-	#
-	# Select the RowBuilder class to use when parsing tables.
-	#
-
-	RowBuilder = tokenizer.RowBuilder
-
-	def config(self, parentNode):
-		# some initialization that requires access to the
-		# parentNode, and so cannot be done inside the __init__()
-		# function.
-		loadcolumns = set(parentNode.columnnames)
-		if parentNode.loadcolumns is not None:
-			# FIXME:  convert loadcolumns attributes to sets to
-			# avoid the conversion.
-			loadcolumns &= set(parentNode.loadcolumns)
-		self._tokenizer = tokenizer.Tokenizer(self.Delimiter)
-		self._tokenizer.set_types([(pytype if colname in loadcolumns else None) for pytype, colname in zip(parentNode.columnpytypes, parentNode.columnnames)])
-		self._rowbuilder = self.RowBuilder(parentNode.RowType, [name for name in parentNode.columnnames if name in loadcolumns])
-		return self
-
-	def appendData(self, content):
-		# tokenize buffer, pack into row objects, and append to
-		# table
-		appendfunc = self.parentNode.append
-		for row in self._rowbuilder.append(self._tokenizer.append(content)):
-			appendfunc(row)
-
-	def endElement(self):
-		# stream tokenizer uses delimiter to identify end of each
-		# token, so add a final delimiter to induce the last token
-		# to get parsed but only if there's something other than
-		# whitespace left in the tokenizer's buffer.  the writing
-		# code will have put a final delimiter into the stream if
-		# the final token was pure whitespace in order to
-		# unambiguously indicate that token's presence
-		if not self._tokenizer.data.isspace():
-			self.appendData(self.Delimiter)
-		# now we're done with these
-		del self._tokenizer
-		del self._rowbuilder
-
-	def write(self, fileobj = sys.stdout, indent = ""):
-		# retrieve the .write() method of the file object to avoid
-		# doing the attribute lookup in loops
-		w = fileobj.write
-		# loop over parent's rows.  This is complicated because we
-		# need to not put a delimiter at the end of the last row
-		# unless it ends with a null token
-		w(self.start_tag(indent))
-		rowdumper = tokenizer.RowDumper(self.parentNode.columnnames, [ligolwtypes.FormatFunc[coltype] for coltype in self.parentNode.columntypes], self.Delimiter)
-		rowdumper.dump(self.parentNode)
-		try:
-			line = next(rowdumper)
-		except StopIteration:
-			# table is empty
-			pass
-		else:
-			# write first row
-			newline = "\n" + indent + ligolw.Indent
-			w(newline)
-			# the xmlescape() call replaces things like "<"
-			# with "&lt;" so that the string will not confuse
-			# an XML parser when the file is read.  turning
-			# "&lt;" back into "<" during file reading is
-			# handled by the XML parser, so there is no code
-			# in this library related to that.
-			w(xmlescape(line))
-			# now add delimiter and write the remaining rows
-			newline = rowdumper.delimiter + newline
-			for line in rowdumper:
-				w(newline)
-				w(xmlescape(line))
-			if rowdumper.tokens and rowdumper.tokens[-1] == "":
-				# the last token of the last row was null:
-				# add a final delimiter to indicate that a
-				# token is present
-				w(rowdumper.delimiter)
-		w("\n" + self.end_tag(indent) + "\n")
-
-
-#
-# =============================================================================
-#
 #                                Table Element
 #
 # =============================================================================
@@ -492,6 +391,97 @@ class Table(ligolw.Table, list):
 	constraints = None
 	how_to_index = None
 	next_id = None
+
+	class Stream(ligolw.Stream):
+		"""
+		Stream element for use inside Tables.  This element knows
+		how to parse the delimited character stream into row
+		objects that it appends into the list-like parent element,
+		and knows how to turn the parent's rows back into a
+		character stream.
+		"""
+		#
+		# Select the RowBuilder class to use when parsing tables.
+		#
+
+		RowBuilder = tokenizer.RowBuilder
+
+		def config(self, parentNode):
+			# some initialization that requires access to the
+			# parentNode, and so cannot be done inside the
+			# __init__() function.
+			loadcolumns = set(parentNode.columnnames)
+			if parentNode.loadcolumns is not None:
+				# FIXME:  convert loadcolumns attributes to
+				# sets to avoid the conversion.
+				loadcolumns &= set(parentNode.loadcolumns)
+			self._tokenizer = tokenizer.Tokenizer(self.Delimiter)
+			self._tokenizer.set_types([(pytype if colname in loadcolumns else None) for pytype, colname in zip(parentNode.columnpytypes, parentNode.columnnames)])
+			self._rowbuilder = self.RowBuilder(parentNode.RowType, [name for name in parentNode.columnnames if name in loadcolumns])
+			return self
+
+		def appendData(self, content):
+			# tokenize buffer, pack into row objects, and
+			# append to table
+			appendfunc = self.parentNode.append
+			for row in self._rowbuilder.append(self._tokenizer.append(content)):
+				appendfunc(row)
+
+		def endElement(self):
+			# stream tokenizer uses delimiter to identify end
+			# of each token, so add a final delimiter to induce
+			# the last token to get parsed but only if there's
+			# something other than whitespace left in the
+			# tokenizer's buffer.  the writing code will have
+			# put a final delimiter into the stream if the
+			# final token was pure whitespace in order to
+			# unambiguously indicate that token's presence
+			if not self._tokenizer.data.isspace():
+				self.appendData(self.Delimiter)
+			# now we're done with these
+			del self._tokenizer
+			del self._rowbuilder
+
+		def write(self, fileobj = sys.stdout, indent = ""):
+			# retrieve the .write() method of the file object
+			# to avoid doing the attribute lookup in loops
+			w = fileobj.write
+			# loop over parent's rows.  This is complicated
+			# because we need to not put a delimiter at the end
+			# of the last row unless it ends with a null token
+			w(self.start_tag(indent))
+			rowdumper = tokenizer.RowDumper(self.parentNode.columnnames, [ligolwtypes.FormatFunc[coltype] for coltype in self.parentNode.columntypes], self.Delimiter)
+			rowdumper.dump(self.parentNode)
+			try:
+				line = next(rowdumper)
+			except StopIteration:
+				# table is empty
+				pass
+			else:
+				# write first row
+				newline = "\n" + indent + ligolw.Indent
+				w(newline)
+				# the xmlescape() call replaces things like
+				# "<" with "&lt;" so that the string will
+				# not confuse an XML parser when the file
+				# is read.  turning "&lt;" back into "<"
+				# during file reading is handled by the XML
+				# parser, so there is no code in this
+				# library related to that.
+				w(xmlescape(line))
+				# now add delimiter and write the remaining
+				# rows
+				newline = rowdumper.delimiter + newline
+				for line in rowdumper:
+					w(newline)
+					w(xmlescape(line))
+				if rowdumper.tokens and rowdumper.tokens[-1] == "":
+					# the last token of the last row
+					# was null: add a final delimiter
+					# to indicate that a token is
+					# present
+					w(rowdumper.delimiter)
+			w("\n" + self.end_tag(indent) + "\n")
 
 	class RowType(object):
 		"""
@@ -972,7 +962,7 @@ def use_in(ContentHandler):
 	def startStream(self, parent, attrs, __orig_startStream = ContentHandler.startStream):
 		if parent.tagName == ligolw.Table.tagName:
 			parent._end_of_columns()
-			return TableStream(attrs).config(parent)
+			return parent.Stream(attrs).config(parent)
 		return __orig_startStream(self, parent, attrs)
 
 	def startTable(self, parent, attrs):

@@ -152,7 +152,7 @@ def New(cls, columns = None, **kwargs):
 	for name in columns if columns is not None else sorted(new.validcolumns):
 		new.appendColumn(name)
 	new._end_of_columns()
-	new.appendChild(table.TableStream(sax.xmlreader.AttributesImpl({"Name": new.getAttribute("Name"), "Delimiter": table.TableStream.Delimiter.default, "Type": table.TableStream.Type.default})))
+	new.appendChild(new.Stream(sax.xmlreader.AttributesImpl({"Name": new.getAttribute("Name"), "Delimiter": new.Stream.Delimiter.default, "Type": new.Stream.Type.default})))
 	return new
 
 

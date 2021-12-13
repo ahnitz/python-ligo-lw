@@ -528,7 +528,7 @@ def get_xml(connection, table_names = None):
 				column_type = ligolwtypes.FromSQLiteType[column_type]
 			table_elem.appendChild(table.Column(AttributesImpl({"Name": column_name, "Type": column_type})))
 		table_elem._end_of_columns()
-		table_elem.appendChild(table.TableStream(AttributesImpl({"Name": "%s:table" % table_name, "Delimiter": table.TableStream.Delimiter.default, "Type": table.TableStream.Type.default})))
+		table_elem.appendChild(table_elem.Stream(AttributesImpl({"Name": "%s:table" % table_name, "Delimiter": table_elem.Stream.Delimiter.default, "Type": table_elem.Stream.Type.default})))
 		ligo_lw.appendChild(table_elem)
 	return ligo_lw
 
@@ -540,14 +540,6 @@ def get_xml(connection, table_names = None):
 #
 # =============================================================================
 #
-
-
-# FIXME:  is this needed?
-class DBTableStream(table.TableStream):
-	def endElement(self):
-		super(DBTableStream, self).endElement()
-		if hasattr(self.parentNode, "connection"):
-			self.parentNode.connection.commit()
 
 
 class DBTable(table.Table):
@@ -601,6 +593,13 @@ class DBTable(table.Table):
 	database-backed version of the class.  Your mileage may vary.
 
 	"""
+	# FIXME:  is this needed?
+	class Stream(table.Table.Stream):
+		def endElement(self):
+			super(DBTable.Stream, self).endElement()
+			if hasattr(self.parentNode, "connection"):
+				self.parentNode.connection.commit()
+
 	def __new__(cls, *args, **kwargs):
 		# does this class already have table-specific metadata?
 		if not hasattr(cls, "tableName"):
@@ -1032,7 +1031,7 @@ def use_in(ContentHandler):
 	def startStream(self, parent, attrs, __orig_startStream = ContentHandler.startStream):
 		if parent.tagName == ligolw.Table.tagName:
 			parent._end_of_columns()
-			return DBTableStream(attrs).config(parent)
+			return parent.Stream(attrs).config(parent)
 		return __orig_startStream(self, parent, attrs)
 
 	def startTable(self, parent, attrs):
