@@ -1558,6 +1558,19 @@ class Column(EmptyElement):
 		name = cls.ColumnName(name)
 		return elem.getElements(lambda e: (e.tagName == cls.tagName) and (e.Name == name))
 
+	class next_id(int):
+		"""
+		Type for .next_id attributes of tables with int_8s ID columns.
+		"""
+		column_name = None
+
+		def __add__(self, other):
+			return type(self)(super(Column.next_id, self).__add__(other))
+
+		@classmethod
+		def type(cls, column_name):
+			return type(str("next_%s" % column_name), (cls,), {"column_name": column_name})
+
 
 class Array(EmptyElement):
 	"""

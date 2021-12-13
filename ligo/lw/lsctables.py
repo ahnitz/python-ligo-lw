@@ -90,7 +90,6 @@ import lal
 from lal import LIGOTimeGPS
 from . import __author__, __date__, __version__
 from . import ligolw
-from . import table
 from . import types as ligolwtypes
 
 
@@ -455,7 +454,7 @@ class segmentproperty(object):
 #
 
 
-ProcessID = table.next_id.type("process_id")
+ProcessID = ligolw.Column.next_id.type("process_id")
 
 
 class ProcessTable(ligolw.Table):
@@ -837,7 +836,7 @@ SearchSummaryTable.RowType = SearchSummary
 #
 
 
-SearchSummVarsID = table.next_id.type("search_summvar_id")
+SearchSummVarsID = ligolw.Column.next_id.type("search_summvar_id")
 
 
 class SearchSummVarsTable(ligolw.Table):
@@ -869,7 +868,7 @@ SearchSummVarsTable.RowType = SearchSummVars
 #
 
 
-SnglBurstID = table.next_id.type("event_id")
+SnglBurstID = ligolw.Column.next_id.type("event_id")
 
 
 class SnglBurstTable(ligolw.Table):
@@ -1039,7 +1038,7 @@ SnglBurstTable.RowType = SnglBurst
 #
 
 
-SnglInspiralID = table.next_id.type("event_id")
+SnglInspiralID = ligolw.Column.next_id.type("event_id")
 
 
 class SnglInspiralTable(ligolw.Table):
@@ -1243,7 +1242,7 @@ CoincInspiralTable.RowType = CoincInspiral
 #
 
 
-SnglRingdownID = table.next_id.type("event_id")
+SnglRingdownID = ligolw.Column.next_id.type("event_id")
 
 
 class SnglRingdownTable(ligolw.Table):
@@ -1344,7 +1343,7 @@ CoincRingdownTable.RowType = CoincRingdown
 #
 
 
-SimInspiralID = table.next_id.type("simulation_id")
+SimInspiralID = ligolw.Column.next_id.type("simulation_id")
 
 
 class SimInspiralTable(ligolw.Table):
@@ -1618,7 +1617,7 @@ SimInspiralTable.RowType = SimInspiral
 #
 
 
-SimBurstID = table.next_id.type("simulation_id")
+SimBurstID = ligolw.Column.next_id.type("simulation_id")
 
 
 class SimBurstTable(ligolw.Table):
@@ -1728,7 +1727,7 @@ SimBurstTable.RowType = SimBurst
 #
 
 
-SimRingdownID = table.next_id.type("simulation_id")
+SimRingdownID = ligolw.Column.next_id.type("simulation_id")
 
 
 class SimRingdownTable(ligolw.Table):
@@ -1831,7 +1830,7 @@ SimRingdownTable.RowType = SimRingdown
 #
 
 
-SummValueID = table.next_id.type("summ_value_id")
+SummValueID = ligolw.Column.next_id.type("summ_value_id")
 
 
 class SummValueTable(ligolw.Table):
@@ -1895,7 +1894,7 @@ SummValueTable.RowType = SummValue
 #
 
 
-SegmentID = table.next_id.type("segment_id")
+SegmentID = ligolw.Column.next_id.type("segment_id")
 
 
 class SegmentTable(ligolw.Table):
@@ -2036,7 +2035,7 @@ SegmentTable.RowType = Segment
 #
 
 
-SegmentDefID = table.next_id.type("segment_def_id")
+SegmentDefID = ligolw.Column.next_id.type("segment_def_id")
 
 
 class SegmentDefTable(ligolw.Table):
@@ -2082,7 +2081,7 @@ SegmentDefTable.RowType = SegmentDef
 #
 
 
-SegmentSumID = table.next_id.type("segment_sum_id")
+SegmentSumID = ligolw.Column.next_id.type("segment_sum_id")
 
 
 class SegmentSumTable(ligolw.Table):
@@ -2136,7 +2135,7 @@ SegmentSumTable.RowType = SegmentSum
 #
 
 
-TimeSlideID = table.next_id.type("time_slide_id")
+TimeSlideID = ligolw.Column.next_id.type("time_slide_id")
 
 
 class TimeSlideTable(ligolw.Table):
@@ -2261,7 +2260,7 @@ TimeSlideTable.RowType = TimeSlide
 #
 
 
-CoincDefID = table.next_id.type("coinc_def_id")
+CoincDefID = ligolw.Column.next_id.type("coinc_def_id")
 
 
 class CoincDefTable(ligolw.Table):
@@ -2328,7 +2327,7 @@ CoincDefTable.RowType = CoincDef
 #
 
 
-CoincID = table.next_id.type("coinc_event_id")
+CoincID = ligolw.Column.next_id.type("coinc_event_id")
 
 
 class CoincTable(ligolw.Table):
@@ -2411,8 +2410,8 @@ CoincMapTable.RowType = CoincMap
 #
 
 
-DQSpecListID = table.next_id.type("dq_list_id")
-DQSpecListRowID = table.next_id.type("dq_list_row_id")
+DQSpecListID = ligolw.Column.next_id.type("dq_list_id")
+DQSpecListRowID = ligolw.Column.next_id.type("dq_list_row_id")
 
 
 class DQSpecListTable(ligolw.Table):
