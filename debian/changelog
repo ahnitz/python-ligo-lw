@@ -12,6 +12,7 @@ python-ligo-lw (2.0.0-1) unstable; urgency=medium
   * deprecate table module, move Column and Table classes to ligolw module
   * move table.next_id class definition to ligolw.Column.next_id
   * move table.reassign_ids() to ligolw.LIGO_LW.reassign_table_row_ids()
+  * deprecate array module, migrate Array class to ligolw module
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
 

@@ -37,7 +37,6 @@ from optparse import OptionParser
 from lal.utils.cache import CacheEntry
 from ligo.lw import __version__, __date__
 from ligo.lw import ligolw
-from ligo.lw import array as ligolw_array
 from ligo.lw import lsctables
 from ligo.lw import utils as ligolw_utils
 from ligo.lw.utils import ligolw_add
@@ -100,7 +99,6 @@ options, urls = parse_command_line()
 
 if options.ilwdchar_compat:
 	from glue.ligolw import ligolw
-	from glue.ligolw import array as ligolw_array
 	from glue.ligolw import lsctables
 	from glue.ligolw import utils as ligolw_utils
 	from glue.ligolw.utils import ligolw_add
@@ -111,7 +109,6 @@ if options.ilwdchar_compat:
 #
 
 
-@ligolw_array.use_in
 @lsctables.use_in
 class ContentHandler(ligolw.LIGOLWContentHandler):
 	pass

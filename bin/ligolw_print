@@ -36,7 +36,6 @@ from optparse import OptionParser
 
 from lal.utils.cache import CacheEntry
 from ligo.lw import __date__, __version__
-from ligo.lw import array as ligolw_array
 from ligo.lw import ligolw
 from ligo.lw import lsctables
 from ligo.lw import types as ligolw_types
@@ -80,7 +79,7 @@ def parse_command_line():
 		options.table = list(map(ligolw.Table.TableName, options.table))
 
 	if options.array:
-		options.array = list(map(ligolw_array.Array.ArrayName, options.array))
+		options.array = list(map(ligolw.Array.ArrayName, options.array))
 
 	# turn row requests into a segment list
 	try:
@@ -169,9 +168,7 @@ if not (options.table or options.array):
 else:
 	class ContentHandler(ligolw.PartialLIGOLWContentHandler):
 		def __init__(self, xmldoc):
-			super(ContentHandler, self).__init__(xmldoc, lambda name, attrs: (name in (ligolw.Table.tagName, ligolw.Array.tagName)) and (ligolw.Table.TableName(attrs["Name"]) in options.table or ligolw_array.Array.ArrayName(attrs["Name"]) in options.array))
-
-ligolw_array.use_in(ContentHandler)
+			super(ContentHandler, self).__init__(xmldoc, lambda name, attrs: (name in (ligolw.Table.tagName, ligolw.Array.tagName)) and (ligolw.Table.TableName(attrs["Name"]) in options.table or ligolw.Array.ArrayName(attrs["Name"]) in options.array))
 
 if options.constrain_lsc_tables:
 	lsctables.use_in(ContentHandler)

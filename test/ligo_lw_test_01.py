@@ -9,14 +9,9 @@ import numpy
 import sys
 
 from ligo.lw import ligolw
-from ligo.lw import array as ligolw_array
 from ligo.lw import utils as ligolw_utils
 
-@ligolw_array.use_in
-class ContentHandler(ligolw.LIGOLWContentHandler):
-	pass
-
-xmldoc = ligolw_utils.load_filename("ligo_lw_test_01.xml", contenthandler = ContentHandler, verbose = True)
+xmldoc = ligolw_utils.load_filename("ligo_lw_test_01.xml", contenthandler = ligolw.LIGOLWContentHandler, verbose = True)
 ligolw_utils.write_filename(xmldoc, "/dev/null")
 
 t, = xmldoc.getElementsByTagName(ligolw.Time.tagName)
@@ -37,4 +32,4 @@ for n, a in enumerate(xmldoc.getElementsByTagName(ligolw.Array.tagName)):
 	print("done.", file=sys.stderr)
 
 	# try turning it back into XML
-	ligolw_array.Array.build(a.Name, a.array)
+	ligolw.Array.build(a.Name, a.array)

@@ -86,7 +86,6 @@ __all__ = [
 	"__author__",
 	"__date__",
 	"__version__",
-	"array",
 	"ligolw",
 	"lsctables",
 	"types",
