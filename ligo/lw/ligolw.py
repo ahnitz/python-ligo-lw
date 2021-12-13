@@ -33,6 +33,7 @@ constructing a parser.
 """
 
 
+import copy
 import datetime
 import dateutil.parser
 import re
@@ -45,6 +46,7 @@ import yaml
 
 
 from . import __author__, __date__, __version__
+from . import tokenizer
 from . import types as ligolwtypes
 from functools import reduce
 
@@ -699,17 +701,416 @@ class Param(Element):
 		return elems[0]
 
 
-class Table(EmptyElement):
+class Stream(Element):
 	"""
-	Table element.
+	Stream element.
+	"""
+	tagName = "Stream"
+
+	Content = attributeproxy("Content")
+	Delimiter = attributeproxy("Delimiter", default = ",")
+	Encoding = attributeproxy("Encoding")
+	Name = attributeproxy("Name")
+	Type = attributeproxy("Type", default = "Local")
+
+	def __init__(self, *args):
+		super(Stream, self).__init__(*args)
+		if self.Type not in ("Remote", "Local"):
+			raise ElementError("invalid Type for Stream: '%s'" % self.Type)
+
+
+class Table(EmptyElement, list):
+	"""
+	Table element that knows about its columns and a provides a
+	list-like interface to its rows.
+
+	Special Attributes
+	------------------
+
+	These are used by table-specific subclasses to provide information
+	about the Table they define.  Set to None when not used.
+
+	.validcolumns:  Dictionary of column name/type pairs defining the
+	set of columns instances of this Table may have.
+
+	.loadcolumns:  Sequence of names of columns to be loaded.  If not
+	None, only names appearing in the list will be loaded, the rest
+	will be skipped.  Can be used to reduce memory use.
+
+	.constraints:  Text to be included as constraints in the SQL
+	statement used to construct the Table.
+
+	.how_to_index:  Dictionary mapping SQL index name to an interable
+	of column names over which to construct that index.
+
+	.next_id:  object giving the next ID to assign to a row in this
+	Table, and carrying the ID column name as a .column_name attribute
 	"""
 	tagName = "Table"
 	validchildren = frozenset(["Comment", "Column", "Stream"])
 
-	Name = attributeproxy("Name")
+	class TableName(LLWNameAttr):
+		dec_pattern = re.compile(r"(?:\A[a-z0-9_]+:|\A)(?P<Name>[a-z0-9_]+):table\Z")
+		enc_pattern = "%s:table"
+
+	Name = attributeproxy("Name", enc = TableName.enc, dec = TableName)
 	Type = attributeproxy("Type")
 
+	validcolumns = None
+	loadcolumns = None
+	constraints = None
+	how_to_index = None
+	next_id = None
+
+	class Stream(Stream):
+		"""
+		Stream element for use inside Tables.  This element knows
+		how to parse the delimited character stream into row
+		objects that it appends into the list-like parent element,
+		and knows how to turn the parent's rows back into a
+		character stream.
+		"""
+		#
+		# Select the RowBuilder class to use when parsing tables.
+		#
+
+		RowBuilder = tokenizer.RowBuilder
+
+		def config(self, parentNode):
+			# some initialization that requires access to the
+			# parentNode, and so cannot be done inside the
+			# __init__() function.
+			loadcolumns = set(parentNode.columnnames)
+			if parentNode.loadcolumns is not None:
+				# FIXME:  convert loadcolumns attributes to
+				# sets to avoid the conversion.
+				loadcolumns &= set(parentNode.loadcolumns)
+			self._tokenizer = tokenizer.Tokenizer(self.Delimiter)
+			self._tokenizer.set_types([(pytype if colname in loadcolumns else None) for pytype, colname in zip(parentNode.columnpytypes, parentNode.columnnames)])
+			self._rowbuilder = self.RowBuilder(parentNode.RowType, [name for name in parentNode.columnnames if name in loadcolumns])
+			return self
+
+		def appendData(self, content):
+			# tokenize buffer, pack into row objects, and
+			# append to Table
+			appendfunc = self.parentNode.append
+			for row in self._rowbuilder.append(self._tokenizer.append(content)):
+				appendfunc(row)
+
+		def endElement(self):
+			# stream tokenizer uses delimiter to identify end
+			# of each token, so add a final delimiter to induce
+			# the last token to get parsed but only if there's
+			# something other than whitespace left in the
+			# tokenizer's buffer.  the writing code will have
+			# put a final delimiter into the stream if the
+			# final token was pure whitespace in order to
+			# unambiguously indicate that token's presence
+			if not self._tokenizer.data.isspace():
+				self.appendData(self.Delimiter)
+			# now we're done with these
+			del self._tokenizer
+			del self._rowbuilder
+
+		def write(self, fileobj = sys.stdout, indent = ""):
+			# retrieve the .write() method of the file object
+			# to avoid doing the attribute lookup in loops
+			w = fileobj.write
+			# loop over parent's rows.  This is complicated
+			# because we need to not put a delimiter at the end
+			# of the last row unless it ends with a null token
+			w(self.start_tag(indent))
+			rowdumper = tokenizer.RowDumper(self.parentNode.columnnames, [ligolwtypes.FormatFunc[coltype] for coltype in self.parentNode.columntypes], self.Delimiter)
+			rowdumper.dump(self.parentNode)
+			try:
+				line = next(rowdumper)
+			except StopIteration:
+				# Table is empty
+				pass
+			else:
+				# write first row
+				newline = "\n" + indent + Indent
+				w(newline)
+				# the xmlescape() call replaces things like
+				# "<" with "&lt;" so that the string will
+				# not confuse an XML parser when the file
+				# is read.  turning "&lt;" back into "<"
+				# during file reading is handled by the XML
+				# parser, so there is no code in this
+				# library related to that.
+				w(xmlescape(line))
+				# now add delimiter and write the remaining
+				# rows
+				newline = rowdumper.delimiter + newline
+				for line in rowdumper:
+					w(newline)
+					w(xmlescape(line))
+				if rowdumper.tokens and rowdumper.tokens[-1] == "":
+					# the last token of the last row
+					# was null: add a final delimiter
+					# to indicate that a token is
+					# present
+					w(rowdumper.delimiter)
+			w("\n" + self.end_tag(indent) + "\n")
+
+	class RowType(object):
+		"""
+		Helpful parent class for row objects.  Also used as the
+		default row class by Table instances.  Provides an
+		__init__() method that accepts keyword arguments from which
+		the object's attributes can be initialized.
+
+		Example:
+
+		>>> x = Table.RowType(a = 0.0, b = "test", c = True)
+		>>> x.a
+		0.0
+		>>> x.b
+		'test'
+		>>> x.c
+		True
+
+		Also provides .__getstate__() and .__setstate__() methods
+		to allow row objects to be pickled (otherwise, because they
+		all use __slots__ to reduce their memory footprint, they
+		aren't pickleable).
+		"""
+		def __init__(self, **kwargs):
+			for key, value in kwargs.items():
+				setattr(self, key, value)
+
+		def __getstate__(self):
+			if not hasattr(self, "__slots__"):
+				raise NotImplementedError
+			return dict((key, getattr(self, key)) for key in self.__slots__ if hasattr(self, key))
+
+		def __setstate__(self, state):
+			self.__init__(**state)
+
+	@property
+	def columnnames(self):
+		"""
+		The stripped (without table prefixes attached) Name
+		attributes of the Column elements in this Table, in order.
+		These are the names of the attributes that row objects in
+		this taable possess.
+		"""
+		return [child.Name for child in self.getElementsByTagName(Column.tagName)]
+
+	@property
+	def columnnamesreal(self):
+		"""
+		The non-stripped (with table prefixes attached) Name
+		attributes of the Column elements in this Table, in order.
+		These are the Name attributes as they appear in the XML.
+		"""
+		return [child.getAttribute("Name") for child in self.getElementsByTagName(Column.tagName)]
+
+	@property
+	def columntypes(self):
+		"""
+		The Type attributes of the Column elements in this Table,
+		in order.
+		"""
+		return [child.Type for child in self.getElementsByTagName(Column.tagName)]
+
+	@property
+	def columnpytypes(self):
+		"""
+		The Python types corresponding to the Type attributes of
+		the Column elements in this Table, in order.
+		"""
+		return [ligolwtypes.ToPyType[child.Type] for child in self.getElementsByTagName(Column.tagName)]
+
+
+	#
+	# Table retrieval
+	#
+
+
+	@classmethod
+	def getTablesByName(cls, elem, name):
+		"""
+		Return a list of Table elements named name under elem.  See
+		also .get_table().
+		"""
+		name = cls.TableName(name)
+		return elem.getElements(lambda e: (e.tagName == cls.tagName) and (e.Name == name))
+
+	@classmethod
+	def get_table(cls, xmldoc, name = None):
+		"""
+		Scan xmldoc for a Table element named name.  Raises
+		ValueError if not exactly 1 such Table is found.  If name
+		is None (default), then the .tableName attribute of this
+		class is used.  The Table class does not provide a
+		.tableName attribute, but sub-classes, for example those in
+		lsctables.py, do provide a value for that attribute.
+
+		Example:
+
+		>>> from ligo.lw import ligolw
+		>>> from ligo.lw import lsctables
+		>>> xmldoc = ligolw.Document()
+		>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
+		[]
+		>>> # find Table
+		>>> sngl_inspiral_table = lsctables.SnglInspiralTable.get_table(xmldoc)
+
+		See also .getTablesByName().
+		"""
+		if name is None:
+			name = cls.tableName
+		elems = cls.getTablesByName(xmldoc, name)
+		if len(elems) != 1:
+			raise ValueError("document must contain exactly one %s Table" % cls.TableName(name))
+		return elems[0]
+
+	def copy(self):
+		"""
+		Construct and return a new Table document subtree whose
+		structure is the same as this Table, that is it has the
+		same Columns etc..  The rows are not copied.  Note that a
+		fair amount of metadata is shared between the original and
+		new Tables.  In particular, a copy of the Table object
+		itself is created (but with no rows), and copies of the
+		child nodes are created.  All other object references are
+		shared between the two instances, such as the RowType
+		attribute on the Table object.
+		"""
+		new = copy.copy(self)
+		new.childNodes = []	# got reference to original list
+		for elem in self.childNodes:
+			new.appendChild(copy.copy(elem))
+		del new[:]
+		new._end_of_columns()
+		return new
+
+
+	@classmethod
+	def CheckElement(cls, elem):
+		"""
+		Return True if element is a Table element whose Name
+		attribute matches the .tableName attribute of this class ;
+		return False otherwise.  See also .CheckProperties().
+		"""
+		return cls.CheckProperties(elem.tagName, elem.attributes)
+
+
+	@classmethod
+	def CheckProperties(cls, tagname, attrs):
+		"""
+		Return True if tagname and attrs are the XML tag name and
+		element attributes, respectively, of a Table element whose
+		Name attribute matches the .tableName attribute of this
+		class;  return False otherwise.  The Table parent class
+		does not provide a .tableName attribute, but sub-classes,
+		especially those in lsctables.py, do provide a value for
+		that attribute.  See also .CheckElement()
+
+		Example:
+
+		>>> from ligo.lw import lsctables
+		>>> lsctables.ProcessTable.CheckProperties("Table", {"Name": "process:table"})
+		True
+		"""
+		return tagname == cls.tagName and cls.TableName(attrs["Name"]) == cls.tableName
+
+
+	#
+	# Column access
+	#
+
+
+	def getColumnByName(self, name):
+		"""
+		Retrieve and return the Column child element named name.
+		The comparison is done using the stripped names.  Raises
+		KeyError if this Table has no Column by that name.
+
+		Example:
+
+		>>> from ligo.lw import lsctables
+		>>> tbl = lsctables.New(lsctables.SnglInspiralTable)
+		>>> col = tbl.getColumnByName("mass1")
+		"""
+		try:
+			col, = Column.getColumnsByName(self, name)
+		except ValueError:
+			# did not find exactly 1 matching child
+			raise KeyError(name)
+		return col
+
+
+	def appendColumn(self, name):
+		"""
+		Append a Column element named "name" to the Table.  Returns
+		the new child.  Raises ValueError if the Table already has
+		a Column by that name, and KeyError if the validcolumns
+		attribute of this Table does not contain an entry for a
+		Column by that name.
+
+		Example:
+
+		>>> from ligo.lw import lsctables
+		>>> tbl = lsctables.New(lsctables.ProcessParamsTable, [])
+		>>> col = tbl.appendColumn("param")
+		>>> print(col.getAttribute("Name"))
+		param
+		>>> print(col.Name)
+		param
+		>>> col = tbl.appendColumn("process:process_id")
+		>>> print(col.getAttribute("Name"))
+		process:process_id
+		>>> print(col.Name)
+		process_id
+		"""
+		try:
+			self.getColumnByName(name)
+			# if we get here the Table already has that Column
+			raise ValueError("duplicate Column '%s'" % name)
+		except KeyError:
+			pass
+		if name in self.validcolumns:
+			coltype = self.validcolumns[name]
+		elif Column.ColumnName(name) in self.validcolumns:
+			coltype = self.validcolumns[Column.ColumnName(name)]
+		else:
+			raise ElementError("invalid Column '%s' for Table '%s'" % (name, self.Name))
+		column = Column(AttributesImpl({"Name": "%s" % name, "Type": coltype}))
+		streams = self.getElementsByTagName(Stream.tagName)
+		if streams:
+			self.insertBefore(column, streams[0])
+		else:
+			self.appendChild(column)
+		return column
+
+
+	#
+	# Row access
+	#
+
+	def appendRow(self, *args, **kwargs):
+		"""
+		Create and append a new row to this Table, then return it
+
+		All positional and keyword arguments are passed to the RowType
+		constructor for this Table.
+		"""
+		row = self.RowType(*args, **kwargs)
+		self.append(row)
+		return row
+
+
+	#
+	# Element methods
+	#
+
 	def _verifyChildren(self, i):
+		"""
+		Used for validation during parsing.  For internal use only.
+		"""
+		# first confirm the number and order of children
 		ncomment = 0
 		ncolumn = 0
 		nstream = 0
@@ -729,6 +1130,191 @@ class Table(EmptyElement):
 					raise ElementError("only one Stream allowed in Table")
 				nstream += 1
 
+		# check consistency rules for Column and Stream children
+		child = self.childNodes[i]
+		if child.tagName == Column.tagName:
+			if self.validcolumns is not None:
+				if child.Name in self.validcolumns:
+					expected_type = self.validcolumns[child.Name]
+				elif child.getAttribute("Name") in self.validcolumns:
+					expected_type = self.validcolumns[child.getAttribute("Name")]
+				else:
+					raise ElementError("invalid Column '%s' for Table '%s'" % (child.Name, self.Name))
+				if expected_type != child.Type:
+					raise ElementError("invalid type '%s' for Column '%s' in Table '%s', expected type '%s'" % (child.Type, child.Name, self.Name, expected_type))
+			try:
+				ligolwtypes.ToPyType[child.Type]
+			except KeyError:
+				raise ElementError("unrecognized Type '%s' for Column '%s' in Table '%s'" % (child.Type, child.Name, self.Name))
+			# since this is called after each child is
+			# appeneded, the first failure occurs on the
+			# offending child, so the error message reports the
+			# current child as the offender
+			# FIXME:  this is O(n^2 log n) in the number of
+			# Columns.  think about a better way
+			if len(set(self.columnnames)) != len(self.columnnames):
+				raise ElementError("duplicate Column '%s' in Table '%s'" % (child.Name, self.Name))
+		elif child.tagName == Stream.tagName:
+			# require agreement of non-stripped strings
+			if child.getAttribute("Name") != self.getAttribute("Name"):
+				raise ElementError("Stream Name '%s' does not match Table Name '%s'" % (child.getAttribute("Name"), self.getAttribute("Name")))
+
+	def _end_of_columns(self):
+		"""
+		Called during parsing to indicate that the last Column
+		child element has been added.  Subclasses can override this
+		to perform any special action that should occur following
+		the addition of the last Column element.
+		"""
+		pass
+
+	def unlink(self):
+		"""
+		Break internal references within the document tree rooted
+		on this element to promote garbage collection.
+		"""
+		super(Table, self).unlink()
+		del self[:]
+
+	def endElement(self):
+		# Table elements are allowed to contain 0 Stream children,
+		# but _end_of_columns() hook must be called regardless, so
+		# we do that here if needed.
+		if self.childNodes[-1].tagName != Stream.tagName:
+			self._end_of_columns()
+
+
+	#
+	# Row ID manipulation
+	#
+
+
+	@classmethod
+	def get_next_id(cls):
+		"""
+		Returns the current value of the next_id class attribute,
+		and increments the next_id class attribute by 1.  Raises
+		ValueError if the Table does not have an ID generator
+		associated with it.
+		"""
+		# = None if no ID generator
+		next_id = cls.next_id
+		cls.next_id += 1
+		return next_id
+
+	@classmethod
+	def set_next_id(cls, next_id):
+		"""
+		Sets the value of the next_id class attribute.  This is a
+		convenience function to help prevent accidentally assigning
+		a value to an instance attribute instead of the class
+		attribute.
+		"""
+		cls.next_id = type(cls.next_id)(next_id)
+
+	@classmethod
+	def reset_next_id(cls):
+		"""
+		If the current value of the next_id class attribute is not
+		None then set it to 0, otherwise it is left unmodified.
+
+		Example:
+
+		>>> from ligo.lw import lsctables
+		>>> for cls in lsctables.TableByName.values(): cls.reset_next_id()
+		"""
+		if cls.next_id is not None:
+			cls.set_next_id(0)
+
+	def sync_next_id(self):
+		"""
+		Determines the highest-numbered ID in this Table, and sets
+		the Table's .next_id attribute to the next highest ID in
+		sequence.  If the .next_id attribute is already set to a
+		value greater than the highest value found, then it is left
+		unmodified.  The return value is the ID identified by this
+		method.  If the Table's .next_id attribute is None, then
+		this function is a no-op.
+
+		Note that Tables of the same name typically share a common
+		.next_id attribute (it is a class attribute, not an
+		attribute of each instance) so that IDs can be generated
+		that are unique across all Tables in the document.  Running
+		sync_next_id() on all the Tables in a document that are of
+		the same type will have the effect of setting the ID to the
+		next ID higher than any ID in any of those Tables.
+
+		Example:
+
+		>>> from ligo.lw import lsctables
+		>>> tbl = lsctables.New(lsctables.ProcessTable)
+		>>> print(tbl.sync_next_id())
+		0
+		"""
+		if self.next_id is not None:
+			if len(self):
+				n = max(self.getColumnByName(self.next_id.column_name)) + 1
+			else:
+				n = 0
+			if n > self.next_id:
+				self.set_next_id(n)
+		return self.next_id
+
+	def updateKeyMapping(self, mapping):
+		"""
+		Used as the first half of the row key reassignment
+		algorithm.  Accepts a dictionary mapping old key --> new
+		key.  Iterates over the rows in this Table, using the
+		Table's next_id attribute to assign a new ID to each row,
+		recording the changes in the mapping.  Returns the mapping.
+		Raises ValueError if the Table's next_id attribute is None.
+		"""
+		if self.next_id is None:
+			raise ValueError(self)
+		try:
+			column = self.getColumnByName(self.next_id.column_name)
+		except KeyError:
+			# Table is missing its ID Column, this is a no-op
+			return mapping
+		table_name = self.Name
+		for i, old in enumerate(column):
+			if old is None:
+				raise ValueError("null row ID encountered in Table '%s', row %d" % (self.Name, i))
+			key = table_name, old
+			if key in mapping:
+				column[i] = mapping[key]
+			else:
+				column[i] = mapping[key] = self.get_next_id()
+		return mapping
+
+	def applyKeyMapping(self, mapping):
+		"""
+		Used as the second half of the key reassignment algorithm.
+		Loops over each row in the Table, replacing references to
+		old row keys with the new values from the mapping.
+		"""
+		for colname in self.columnnames:
+			column = self.getColumnByName(colname)
+			try:
+				table_name = column.table_name
+			except ValueError:
+				# if we get here the Column's name does not
+				# have a Table name component, so by
+				# convention it cannot contain IDs pointing
+				# to other Tables
+				continue
+			# make sure it's not our own ID Column (by
+			# convention this should not be possible, but it
+			# doesn't hurt to check)
+			if self.next_id is not None and colname == self.next_id.column_name:
+				continue
+			# replace IDs with new values from mapping
+			for i, old in enumerate(column):
+				try:
+					column[i] = mapping[table_name, old]
+				except KeyError:
+					pass
+
 
 class Column(EmptyElement):
 	"""
@@ -739,11 +1325,10 @@ class Column(EmptyElement):
 
 	>>> from xml.sax.xmlreader import AttributesImpl
 	>>> import sys
-	>>> from ligo.lw import table
-	>>> tbl = table.Table(AttributesImpl({"Name": "test"}))
+	>>> tbl = Table(AttributesImpl({"Name": "test"}))
 	>>> col = tbl.appendChild(Column(AttributesImpl({"Name": "test:snr", "Type": "real_8"})))
 	>>> tbl.appendChild(tbl.Stream(AttributesImpl({"Name": "test"})))	# doctest: +ELLIPSIS
-	<ligo.lw.table.Table.Stream object at ...>
+	<ligo.lw.ligolw.Table.Stream object at ...>
 	>>> print(col.Name)
 	snr
 	>>> print(col.Type)
@@ -1028,24 +1613,6 @@ class Dim(Element):
 		fileobj.write("\n")
 
 
-class Stream(Element):
-	"""
-	Stream element.
-	"""
-	tagName = "Stream"
-
-	Content = attributeproxy("Content")
-	Delimiter = attributeproxy("Delimiter", default = ",")
-	Encoding = attributeproxy("Encoding")
-	Name = attributeproxy("Name")
-	Type = attributeproxy("Type", default = "Local")
-
-	def __init__(self, *args):
-		super(Stream, self).__init__(*args)
-		if self.Type not in ("Remote", "Local"):
-			raise ElementError("invalid Type for Stream: '%s'" % self.Type)
-
-
 class IGWDFrame(EmptyElement):
 	"""
 	IGWDFrame element.
@@ -1281,6 +1848,9 @@ class LIGOLWContentHandler(sax.handler.ContentHandler, object):
 		return Param(attrs)
 
 	def startStream(self, parent, attrs):
+		if parent.tagName == Table.tagName:
+			parent._end_of_columns()
+			return parent.Stream(attrs).config(parent)
 		return Stream(attrs)
 
 	def startTable(self, parent, attrs):

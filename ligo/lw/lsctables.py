@@ -53,7 +53,7 @@ as instances of the generic ligo.lw.Table class).
 
 Example:
 
->>> class MyCustomTable(table.Table):
+>>> class MyCustomTable(ligolw.Table):
 ...	tableName = "custom"
 ...
 >>> TableByName[MyCustomTable.tableName] = MyCustomTable
@@ -65,7 +65,7 @@ the .RowType attribute with no arguments.
 
 Example:
 
->>> class MyCustomTableRow(table.Table.RowType):
+>>> class MyCustomTableRow(ligolw.Table.RowType):
 ...	pass
 ...
 >>> MyCustomTable.RowType = MyCustomTableRow
@@ -458,7 +458,7 @@ class segmentproperty(object):
 ProcessID = table.next_id.type("process_id")
 
 
-class ProcessTable(table.Table):
+class ProcessTable(ligolw.Table):
 	tableName = "process"
 	validcolumns = {
 		"program": "lstring",
@@ -512,7 +512,7 @@ class ProcessTable(table.Table):
 			raise KeyError
 
 
-class Process(table.Table.RowType):
+class Process(ligolw.Table.RowType):
 	"""
 	Example:
 
@@ -621,7 +621,7 @@ ProcessTable.RowType = Process
 #
 
 
-class ProcessParamsTable(table.Table):
+class ProcessParamsTable(ligolw.Table):
 	tableName = "process_params"
 	validcolumns = {
 		"program": "lstring",
@@ -642,7 +642,7 @@ class ProcessParamsTable(table.Table):
 		super(ProcessParamsTable, self).append(row)
 
 
-class ProcessParams(table.Table.RowType):
+class ProcessParams(ligolw.Table.RowType):
 	"""
 	Example:
 
@@ -710,7 +710,7 @@ ProcessParamsTable.RowType = ProcessParams
 #
 
 
-class SearchSummaryTable(table.Table):
+class SearchSummaryTable(ligolw.Table):
 	tableName = "search_summary"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -771,7 +771,7 @@ class SearchSummaryTable(table.Table):
 		return seglists
 
 
-class SearchSummary(table.Table.RowType):
+class SearchSummary(ligolw.Table.RowType):
 	"""
 	Example:
 
@@ -840,7 +840,7 @@ SearchSummaryTable.RowType = SearchSummary
 SearchSummVarsID = table.next_id.type("search_summvar_id")
 
 
-class SearchSummVarsTable(table.Table):
+class SearchSummVarsTable(ligolw.Table):
 	tableName = "search_summvars"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -853,7 +853,7 @@ class SearchSummVarsTable(table.Table):
 	next_id = SearchSummVarsID(0)
 
 
-class SearchSummVars(table.Table.RowType):
+class SearchSummVars(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, SearchSummVarsTable.validcolumns))
 
 
@@ -872,7 +872,7 @@ SearchSummVarsTable.RowType = SearchSummVars
 SnglBurstID = table.next_id.type("event_id")
 
 
-class SnglBurstTable(table.Table):
+class SnglBurstTable(ligolw.Table):
 	tableName = "sngl_burst"
 	validcolumns = {
 		"creator_db": "int_4s",
@@ -928,7 +928,7 @@ class SnglBurstTable(table.Table):
 	next_id = SnglBurstID(0)
 
 
-class SnglBurst(table.Table.RowType):
+class SnglBurst(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, SnglBurstTable.validcolumns))
 
 	#
@@ -1042,7 +1042,7 @@ SnglBurstTable.RowType = SnglBurst
 SnglInspiralID = table.next_id.type("event_id")
 
 
-class SnglInspiralTable(table.Table):
+class SnglInspiralTable(ligolw.Table):
 	tableName = "sngl_inspiral"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -1114,7 +1114,7 @@ class SnglInspiralTable(table.Table):
 	next_id = SnglInspiralID(0)
 
 
-class SnglInspiral(table.Table.RowType):
+class SnglInspiral(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, SnglInspiralTable.validcolumns))
 
 	@staticmethod
@@ -1187,7 +1187,7 @@ SnglInspiralTable.RowType = SnglInspiral
 #
 
 
-class CoincInspiralTable(table.Table):
+class CoincInspiralTable(ligolw.Table):
 	tableName = "coinc_inspiral"
 	validcolumns = {
 		"coinc_event:coinc_event_id": "int_8s",
@@ -1208,7 +1208,7 @@ class CoincInspiralTable(table.Table):
 	}
 
 
-class CoincInspiral(table.Table.RowType):
+class CoincInspiral(ligolw.Table.RowType):
 	"""
 	Example:
 
@@ -1246,7 +1246,7 @@ CoincInspiralTable.RowType = CoincInspiral
 SnglRingdownID = table.next_id.type("event_id")
 
 
-class SnglRingdownTable(table.Table):
+class SnglRingdownTable(ligolw.Table):
 	tableName = "sngl_ringdown"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -1278,7 +1278,7 @@ class SnglRingdownTable(table.Table):
 	next_id = SnglRingdownID(0)
 
 
-class SnglRingdown(table.Table.RowType):
+class SnglRingdown(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, SnglRingdownTable.validcolumns))
 
 	start = gpsproperty_with_gmst("start_time", "start_time_ns", "start_time_gmst")
@@ -1296,7 +1296,7 @@ SnglRingdownTable.RowType = SnglRingdown
 #
 
 
-class CoincRingdownTable(table.Table):
+class CoincRingdownTable(ligolw.Table):
 	tableName = "coinc_ringdown"
 	validcolumns = {
 		"coinc_event:coinc_event_id": "int_8s",
@@ -1324,7 +1324,7 @@ class CoincRingdownTable(table.Table):
 	}
 
 
-class CoincRingdown(table.Table.RowType):
+class CoincRingdown(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, CoincRingdownTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
@@ -1347,7 +1347,7 @@ CoincRingdownTable.RowType = CoincRingdown
 SimInspiralID = table.next_id.type("simulation_id")
 
 
-class SimInspiralTable(table.Table):
+class SimInspiralTable(ligolw.Table):
 	tableName = "sim_inspiral"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -1413,7 +1413,7 @@ class SimInspiralTable(table.Table):
 	next_id = SimInspiralID(0)
 
 
-class SimInspiral(table.Table.RowType):
+class SimInspiral(ligolw.Table.RowType):
 	"""
 	Example:
 
@@ -1621,7 +1621,7 @@ SimInspiralTable.RowType = SimInspiral
 SimBurstID = table.next_id.type("simulation_id")
 
 
-class SimBurstTable(table.Table):
+class SimBurstTable(ligolw.Table):
 	tableName = "sim_burst"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -1649,7 +1649,7 @@ class SimBurstTable(table.Table):
 	next_id = SimBurstID(0)
 
 
-class SimBurst(table.Table.RowType):
+class SimBurst(ligolw.Table.RowType):
 	"""
 	Example:
 
@@ -1731,7 +1731,7 @@ SimBurstTable.RowType = SimBurst
 SimRingdownID = table.next_id.type("simulation_id")
 
 
-class SimRingdownTable(table.Table):
+class SimRingdownTable(ligolw.Table):
 	tableName = "sim_ringdown"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -1771,7 +1771,7 @@ class SimRingdownTable(table.Table):
 	next_id = SimRingdownID(0)
 
 
-class SimRingdown(table.Table.RowType):
+class SimRingdown(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, SimRingdownTable.validcolumns))
 
 	geocent_start = gpsproperty_with_gmst("geocent_start_time", "geocent_start_time_ns", "start_time_gmst")
@@ -1834,7 +1834,7 @@ SimRingdownTable.RowType = SimRingdown
 SummValueID = table.next_id.type("summ_value_id")
 
 
-class SummValueTable(table.Table):
+class SummValueTable(ligolw.Table):
 	tableName = "summ_value"
 	validcolumns = {
 		"summ_value_id": "int_8s",
@@ -1857,7 +1857,7 @@ class SummValueTable(table.Table):
 	next_id = SummValueID(0)
 
 
-class SummValue(table.Table.RowType):
+class SummValue(ligolw.Table.RowType):
 	"""
 	Example:
 
@@ -1898,7 +1898,7 @@ SummValueTable.RowType = SummValue
 SegmentID = table.next_id.type("segment_id")
 
 
-class SegmentTable(table.Table):
+class SegmentTable(ligolw.Table):
 	tableName = "segment"
 	validcolumns = {
 		"creator_db": "int_4s",
@@ -1916,7 +1916,7 @@ class SegmentTable(table.Table):
 
 
 @functools.total_ordering
-class Segment(table.Table.RowType):
+class Segment(ligolw.Table.RowType):
 	"""
 	Example:
 
@@ -2039,7 +2039,7 @@ SegmentTable.RowType = Segment
 SegmentDefID = table.next_id.type("segment_def_id")
 
 
-class SegmentDefTable(table.Table):
+class SegmentDefTable(ligolw.Table):
 	tableName = "segment_definer"
 	validcolumns = {
 		"creator_db": "int_4s",
@@ -2055,7 +2055,7 @@ class SegmentDefTable(table.Table):
 	next_id = SegmentDefID(0)
 
 
-class SegmentDef(table.Table.RowType):
+class SegmentDef(ligolw.Table.RowType):
 	"""
 	Example:
 
@@ -2085,7 +2085,7 @@ SegmentDefTable.RowType = SegmentDef
 SegmentSumID = table.next_id.type("segment_sum_id")
 
 
-class SegmentSumTable(table.Table):
+class SegmentSumTable(ligolw.Table):
 	tableName = "segment_summary"
 	validcolumns = {
 		"creator_db": "int_4s",
@@ -2139,7 +2139,7 @@ SegmentSumTable.RowType = SegmentSum
 TimeSlideID = table.next_id.type("time_slide_id")
 
 
-class TimeSlideTable(table.Table):
+class TimeSlideTable(ligolw.Table):
 	tableName = "time_slide"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -2245,7 +2245,7 @@ class TimeSlideTable(table.Table):
 		return self.append_offsetvector(offsetdict, create_new)
 
 
-class TimeSlide(table.Table.RowType):
+class TimeSlide(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, TimeSlideTable.validcolumns))
 
 
@@ -2264,7 +2264,7 @@ TimeSlideTable.RowType = TimeSlide
 CoincDefID = table.next_id.type("coinc_def_id")
 
 
-class CoincDefTable(table.Table):
+class CoincDefTable(ligolw.Table):
 	tableName = "coinc_definer"
 	validcolumns = {
 		"coinc_def_id": "int_8s",
@@ -2312,7 +2312,7 @@ class CoincDefTable(table.Table):
 		return coinc_def_id
 
 
-class CoincDef(table.Table.RowType):
+class CoincDef(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, CoincDefTable.validcolumns))
 
 
@@ -2331,7 +2331,7 @@ CoincDefTable.RowType = CoincDef
 CoincID = table.next_id.type("coinc_event_id")
 
 
-class CoincTable(table.Table):
+class CoincTable(ligolw.Table):
 	tableName = "coinc_event"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -2350,7 +2350,7 @@ class CoincTable(table.Table):
 	}
 
 
-class Coinc(table.Table.RowType):
+class Coinc(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, CoincTable.validcolumns))
 
 	insts = instrumentsproperty("instruments")
@@ -2368,7 +2368,7 @@ CoincTable.RowType = Coinc
 #
 
 
-class CoincMapTable(table.Table):
+class CoincMapTable(ligolw.Table):
 	tableName = "coinc_event_map"
 	validcolumns = {
 		"coinc_event:coinc_event_id": "int_8s",
@@ -2395,7 +2395,7 @@ class CoincMapTable(table.Table):
 				pass
 
 
-class CoincMap(table.Table.RowType):
+class CoincMap(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, CoincMapTable.validcolumns))
 
 
@@ -2415,7 +2415,7 @@ DQSpecListID = table.next_id.type("dq_list_id")
 DQSpecListRowID = table.next_id.type("dq_list_row_id")
 
 
-class DQSpecListTable(table.Table):
+class DQSpecListTable(ligolw.Table):
 	tableName = "dq_list"
 	validcolumns = {
 		"dq_list:dq_list_id": "int_8s",
@@ -2429,7 +2429,7 @@ class DQSpecListTable(table.Table):
 	next_id = DQSpecListID(0)
 
 
-class DQSpec(table.Table.RowType):
+class DQSpec(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, DQSpecListTable.validcolumns))
 
 	def apply_to_segmentlist(self, seglist):
@@ -2453,7 +2453,7 @@ DQSpecListTable.RowType = DQSpec
 #
 
 
-class VetoDefTable(table.Table):
+class VetoDefTable(ligolw.Table):
 	tableName = "veto_definer"
 	validcolumns = {
 		"process:process_id": "int_8s",
@@ -2501,7 +2501,7 @@ class VetoDefTable(table.Table):
 		return seglists
 
 
-class VetoDef(table.Table.RowType):
+class VetoDef(ligolw.Table.RowType):
 	__slots__ = tuple(map(ligolw.Column.ColumnName, VetoDefTable.validcolumns))
 
 	# because detchar refuses to allow vetoes to have non-integer
@@ -2634,10 +2634,8 @@ def use_in(ContentHandler):
 	>>> use_in(MyContentHandler)
 	<class 'ligo.lw.lsctables.MyContentHandler'>
 	"""
-	ContentHandler = table.use_in(ContentHandler)
-
 	def startTable(self, parent, attrs, __orig_startTable = ContentHandler.startTable):
-		name = table.Table.TableName(attrs["Name"])
+		name = ligolw.Table.TableName(attrs["Name"])
 		if name in TableByName:
 			return TableByName[name](attrs)
 		return __orig_startTable(self, parent, attrs)

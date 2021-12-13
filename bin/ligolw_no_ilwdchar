@@ -31,12 +31,10 @@ from optparse import OptionParser
 from ligo.lw import __version__, __date__
 from ligo.lw import array as ligolw_array
 from ligo.lw import ligolw
-from ligo.lw import table as ligolw_table
 from ligo.lw import utils as ligolw_utils
 from ligo.lw.utils import ilwd
 
 
-@ligolw_table.use_in
 @ligolw_array.use_in
 class LIGOLWContentHandler(ligolw.LIGOLWContentHandler):
 	pass

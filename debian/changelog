@@ -9,6 +9,7 @@ python-ligo-lw (2.0.0-1) unstable; urgency=medium
   * array:  move ArrayStream declaration into Array class
   * table:  move TableStream declaration into Table class
   * deprecate param module, migrate Param class to ligolw module
+  * deprecate table module, move Column and Table classes to ligolw module
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
 

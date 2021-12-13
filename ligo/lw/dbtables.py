@@ -48,7 +48,6 @@ import warnings
 
 from . import __author__, __date__, __version__
 from . import ligolw
-from . import table
 from . import lsctables
 from . import types as ligolwtypes
 from . import utils as ligolw_utils
@@ -542,7 +541,7 @@ def get_xml(connection, table_names = None):
 #
 
 
-class DBTable(table.Table):
+class DBTable(ligolw.Table):
 	"""
 	A version of the Table class using an SQL database for storage.
 	Many of the features of the Table class are not available here, but
@@ -594,7 +593,7 @@ class DBTable(table.Table):
 
 	"""
 	# FIXME:  is this needed?
-	class Stream(table.Table.Stream):
+	class Stream(ligolw.Table.Stream):
 		def endElement(self):
 			super(DBTable.Stream, self).endElement()
 			if hasattr(self.parentNode, "connection"):
@@ -605,7 +604,7 @@ class DBTable(table.Table):
 		if not hasattr(cls, "tableName"):
 			# no, try to retrieve it from lsctables
 			attrs, = args
-			name = table.Table.TableName(attrs["Name"])
+			name = ligolw.Table.TableName(attrs["Name"])
 			if name in lsctables.TableByName:
 				# found metadata in lsctables, construct
 				# custom subclass.  the class from
@@ -632,11 +631,11 @@ class DBTable(table.Table):
 
 				# replace input argument with new class
 				cls = CustomDBTable
-		return table.Table.__new__(cls, *args)
+		return ligolw.Table.__new__(cls, *args)
 
 	def __init__(self, *args, **kwargs):
 		# chain to parent class
-		table.Table.__init__(self, *args)
+		ligolw.Table.__init__(self, *args)
 
 		# retrieve connection object from kwargs
 		self.connection = kwargs.pop("connection")
@@ -646,13 +645,13 @@ class DBTable(table.Table):
 
 	def copy(self, *args, **kwargs):
 		"""
-		This method is not implemented.  See ligo.lw.table.Table
-		for more information.
+		This method is not implemented.  See ligo.lw.Table for more
+		information.
 		"""
 		raise NotImplementedError
 
 	def _end_of_columns(self):
-		table.Table._end_of_columns(self)
+		ligolw.Table._end_of_columns(self)
 		# dbcolumnnames and types have the "not loaded" columns
 		# removed
 		if self.loadcolumns is not None:
@@ -778,7 +777,7 @@ class DBTable(table.Table):
 	_row_from_cols = row_from_cols
 
 	def unlink(self):
-		table.Table.unlink(self)
+		ligolw.Table.unlink(self)
 		self.connection = None
 		self.cursor = None
 
@@ -1028,19 +1027,12 @@ def use_in(ContentHandler):
 	"""
 	ContentHandler = lsctables.use_in(ContentHandler)
 
-	def startStream(self, parent, attrs, __orig_startStream = ContentHandler.startStream):
-		if parent.tagName == ligolw.Table.tagName:
-			parent._end_of_columns()
-			return parent.Stream(attrs).config(parent)
-		return __orig_startStream(self, parent, attrs)
-
 	def startTable(self, parent, attrs):
-		name = table.Table.TableName(attrs["Name"])
+		name = ligolw.Table.TableName(attrs["Name"])
 		if name in TableByName:
 			return TableByName[name](attrs, connection = self.connection)
 		return DBTable(attrs, connection = self.connection)
 
-	ContentHandler.startStream = startStream
 	ContentHandler.startTable = startTable
 
 	return ContentHandler

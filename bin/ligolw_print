@@ -39,7 +39,6 @@ from ligo.lw import __date__, __version__
 from ligo.lw import array as ligolw_array
 from ligo.lw import ligolw
 from ligo.lw import lsctables
-from ligo.lw import table as ligolw_table
 from ligo.lw import types as ligolw_types
 from ligo.lw import utils as ligolw_utils
 from ligo.segments import utils as segmentsUtils
@@ -63,7 +62,6 @@ def parse_command_line():
 		usage = "%prog [options] [url ...]",
 		description = "Prints the contents of table elements from one or more LIGO Light Weight XML files to stdout in delimited ASCII format.  In addition to regular files, the program can read from many common URLs such as http:// and ftp://.  Gzipped files will be automatically detected and decompressed.  If no filenames or URLs are given, then input is read from stdin."
 	)
-	parser.add_option("--ilwdchar-compat", action = "store_true", help = "Use obsolete ilwd:char based table definitions and ID reassignment algorithm (default = use new int_8s based table definitions and ID reassignment algorithm).")
 	parser.add_option("-i", "--input-cache", metavar = "name", action = "append", default = [], help = "Get URLs from the LAL cache file.  Can be provided multiple times to name several caches to iterate over.")
 	parser.add_option("-c", "--column", metavar = "name", action = "append", help = "Print only the contents of the given column.  Can be provided multiple times to print multiple columns.  The default is to print all columns from each table.")
 	parser.add_option("-d", "--delimiter", metavar = "string", default = ",", help = "Delimit output with the given string.  The default is \",\".")
@@ -79,7 +77,7 @@ def parse_command_line():
 
 	# strip table names
 	if options.table:
-		options.table = list(map(ligolw_table.Table.TableName, options.table))
+		options.table = list(map(ligolw.Table.TableName, options.table))
 
 	if options.array:
 		options.array = list(map(ligolw_array.Array.ArrayName, options.array))
@@ -148,15 +146,6 @@ def print_array(array_elem):
 options, urls = parse_command_line()
 
 
-if options.ilwdchar_compat:
-	from glue.ligolw import array as ligolw_array
-	from glue.ligolw import ligolw
-	from glue.ligolw import lsctables
-	from glue.ligolw import table as ligolw_table
-	from glue.ligolw import types as ligolw_types
-	from glue.ligolw import utils as ligolw_utils
-
-
 #
 # don't quote strings when printing them
 #
@@ -180,14 +169,12 @@ if not (options.table or options.array):
 else:
 	class ContentHandler(ligolw.PartialLIGOLWContentHandler):
 		def __init__(self, xmldoc):
-			super(ContentHandler, self).__init__(xmldoc, lambda name, attrs: (name in (ligolw.Table.tagName, ligolw.Array.tagName)) and (ligolw_table.Table.TableName(attrs["Name"]) in options.table or ligolw_array.Array.ArrayName(attrs["Name"]) in options.array))
+			super(ContentHandler, self).__init__(xmldoc, lambda name, attrs: (name in (ligolw.Table.tagName, ligolw.Array.tagName)) and (ligolw.Table.TableName(attrs["Name"]) in options.table or ligolw_array.Array.ArrayName(attrs["Name"]) in options.array))
 
 ligolw_array.use_in(ContentHandler)
 
 if options.constrain_lsc_tables:
 	lsctables.use_in(ContentHandler)
-else:
-	ligolw_table.use_in(ContentHandler)
 
 
 #
@@ -196,7 +183,7 @@ else:
 
 
 if options.column is not None:
-	ligolw_table.Table.loadcolumns = set(options.column)
+	ligolw.Table.loadcolumns = set(options.column)
 
 
 #
