@@ -87,7 +87,6 @@ __all__ = [
 	"__date__",
 	"__version__",
 	"array",
-	"ilwd",
 	"ligolw",
 	"lsctables",
 	"param",
