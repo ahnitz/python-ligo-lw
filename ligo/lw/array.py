@@ -1,4 +1,4 @@
-# Copyright (C) 2006--2020  Kipp Cannon
+# Copyright (C) 2006--2021  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -64,80 +64,6 @@ from . import types as ligolwtypes
 #
 
 
-class ArrayStream(ligolw.Stream):
-	"""
-	High-level Stream element for use inside Arrays.  This element
-	knows how to parse the delimited character stream into the parent's
-	array attribute, and knows how to turn the parent's array attribute
-	back into a character stream.
-	"""
-
-	Delimiter = ligolw.attributeproxy("Delimiter", default = " ")
-
-	def __init__(self, *args):
-		super(ArrayStream, self).__init__(*args)
-		try:
-			self.Encoding
-		except AttributeError:
-			pass
-		else:
-			raise ligolw.ElementError("non-default encoding '%s' not supported.  if this is critical, please report." % self.Encoding)
-		self._tokenizer = tokenizer.Tokenizer(self.Delimiter)
-
-	def config(self, parentNode):
-		# some initialization that can only be done once parentNode
-		# has been set.
-		self._tokenizer.set_types([ligolwtypes.ToPyType[parentNode.Type]])
-		parentNode.array = numpy.zeros(parentNode.shape, ligolwtypes.ToNumPyType[parentNode.Type])
-		self._array_view = parentNode.array.T.flat
-		self._index = 0
-		return self
-
-	def appendData(self, content):
-		# tokenize buffer, and assign to array
-		tokens = tuple(self._tokenizer.append(content))
-		next_index = self._index + len(tokens)
-		self._array_view[self._index : next_index] = tokens
-		self._index = next_index
-
-	def endElement(self):
-		# stream tokenizer uses delimiter to identify end of each
-		# token, so add a final delimiter to induce the last token
-		# to get parsed.
-		self.appendData(self.Delimiter)
-		if self._index != len(self._array_view):
-			raise ValueError("length of Stream (%d elements) does not match array size (%d elements)" % (self._index, len(self._array_view)))
-		del self._array_view
-		del self._index
-
-	def write(self, fileobj = sys.stdout, indent = ""):
-		# avoid symbol and attribute look-ups in inner loop
-		w = fileobj.write
-		w(self.start_tag(indent))
-
-		array = self.parentNode.array
-		if array is not None and array.size:
-			# avoid symbol and attribute look-ups in inner
-			# loop.  we use self.parentNode.shape to retrieve
-			# the array's shape, rather than just asking the
-			# array, to induce a sanity check that the Dim
-			# elements are correct for the array
-			linelen = self.parentNode.shape[0]
-			lines = array.size // linelen
-			tokens = iter(map(ligolwtypes.FormatFunc[self.parentNode.Type], array.T.flat))
-			islice = itertools.islice
-			join = self.Delimiter.join
-
-			newline = "\n" + indent + ligolw.Indent
-			w(newline)
-			w(xmlescape(join(islice(tokens, linelen))))
-			newline = self.Delimiter + newline
-			for i in range(lines - 1):
-				w(newline)
-				w(xmlescape(join(islice(tokens, linelen))))
-		w("\n" + self.end_tag(indent) + "\n")
-
-
 class Array(ligolw.Array):
 	"""
 	High-level Array element.
@@ -201,6 +127,80 @@ class Array(ligolw.Array):
 		enc_pattern = "%s:array"
 
 	Name = ligolw.attributeproxy("Name", enc = ArrayName.enc, dec = ArrayName)
+
+	class Stream(ligolw.Stream):
+		"""
+		Stream element for use inside Arrays.  This element knows
+		how to parse the delimited character stream into the
+		parent's array attribute, and knows how to turn the
+		parent's array attribute back into a character stream.
+		"""
+
+		Delimiter = ligolw.attributeproxy("Delimiter", default = " ")
+
+		def __init__(self, *args):
+			super(Array.Stream, self).__init__(*args)
+			try:
+				self.Encoding
+			except AttributeError:
+				pass
+			else:
+				raise ligolw.ElementError("non-default encoding '%s' not supported.  if this is critical, please report." % self.Encoding)
+			self._tokenizer = tokenizer.Tokenizer(self.Delimiter)
+
+		def config(self, parentNode):
+			# some initialization that can only be done once
+			# parentNode has been set.
+			self._tokenizer.set_types([ligolwtypes.ToPyType[parentNode.Type]])
+			parentNode.array = numpy.zeros(parentNode.shape, ligolwtypes.ToNumPyType[parentNode.Type])
+			self._array_view = parentNode.array.T.flat
+			self._index = 0
+			return self
+
+		def appendData(self, content):
+			# tokenize buffer, and assign to array
+			tokens = tuple(self._tokenizer.append(content))
+			next_index = self._index + len(tokens)
+			self._array_view[self._index : next_index] = tokens
+			self._index = next_index
+
+		def endElement(self):
+			# stream tokenizer uses delimiter to identify end
+			# of each token, so add a final delimiter to induce
+			# the last token to get parsed.
+			self.appendData(self.Delimiter)
+			if self._index != len(self._array_view):
+				raise ValueError("length of Stream (%d elements) does not match array size (%d elements)" % (self._index, len(self._array_view)))
+			del self._array_view
+			del self._index
+
+		def write(self, fileobj = sys.stdout, indent = ""):
+			# avoid symbol and attribute look-ups in inner loop
+			w = fileobj.write
+			w(self.start_tag(indent))
+
+			array = self.parentNode.array
+			if array is not None and array.size:
+				# avoid symbol and attribute look-ups in
+				# inner loop.  we use self.parentNode.shape
+				# to retrieve the array's shape, rather
+				# than just asking the array, to induce a
+				# sanity check that the Dim elements are
+				# correct for the array
+				linelen = self.parentNode.shape[0]
+				lines = array.size // linelen
+				tokens = iter(map(ligolwtypes.FormatFunc[self.parentNode.Type], array.T.flat))
+				islice = itertools.islice
+				join = self.Delimiter.join
+
+				newline = "\n" + indent + ligolw.Indent
+				w(newline)
+				w(xmlescape(join(islice(tokens, linelen))))
+				newline = self.Delimiter + newline
+				for i in range(lines - 1):
+					w(newline)
+					w(xmlescape(join(islice(tokens, linelen))))
+			w("\n" + self.end_tag(indent) + "\n")
 
 	def __init__(self, *args):
 		"""
@@ -314,7 +314,7 @@ class Array(ligolw.Array):
 				raise ValueError("dim_names must be same length as number of dimensions")
 			for child, name in zip(self.getElementsByTagName(ligolw.Dim.tagName), reversed(dim_names)):
 				child.Name = name
-		self.appendChild(ArrayStream(Attributes({"Type": ArrayStream.Type.default, "Delimiter": ArrayStream.Delimiter.default})))
+		self.appendChild(self.Stream(Attributes({"Type": self.Stream.Type.default, "Delimiter": self.Stream.Delimiter.default})))
 		self.array = array
 		return self
 
@@ -377,7 +377,7 @@ def use_in(ContentHandler):
 	"""
 	Modify ContentHandler, a sub-class of
 	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the Array
-	and ArrayStream classes defined in this module when parsing XML
+	and Array.Stream classes defined in this module when parsing XML
 	documents.
 
 	Example:
@@ -391,7 +391,7 @@ def use_in(ContentHandler):
 	"""
 	def startStream(self, parent, attrs, __orig_startStream = ContentHandler.startStream):
 		if parent.tagName == ligolw.Array.tagName:
-			return ArrayStream(attrs).config(parent)
+			return parent.Stream(attrs).config(parent)
 		return __orig_startStream(self, parent, attrs)
 
 	def startArray(self, parent, attrs):

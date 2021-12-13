@@ -6,6 +6,7 @@ python-ligo-lw (2.0.0-1) unstable; urgency=medium
   * remove deprecated array.get_array() function
   * remove deprecated param.get_param(), param.get_pyvalue() functions
   * table.Table:  remove deprecated ._update_column_info() method
+  * array:  move ArrayStream declaration into Array class
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
 
