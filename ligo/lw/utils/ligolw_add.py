@@ -38,7 +38,7 @@ from tqdm import tqdm
 from .. import __author__, __date__, __version__
 from .. import ligolw
 from .. import lsctables
-from .. import utils
+from .. import utils as ligolw_utils
 
 
 #
@@ -184,7 +184,7 @@ def ligolw_add(xmldoc, urls, non_lsc_tables_ok = False, verbose = False, content
 	for n, url in enumerate(urls, 1):
 		if verbose:
 			sys.stderr.write("%d/%d:" % (n, len(urls)))
-		utils.load_url(url, verbose = verbose, xmldoc = xmldoc, contenthandler = contenthandler)
+		ligolw_utils.load_url(url, verbose = verbose, xmldoc = xmldoc, contenthandler = contenthandler)
 
 	# ID reassignment
 	if not non_lsc_tables_ok and lsctables.HasNonLSCTables(xmldoc):
