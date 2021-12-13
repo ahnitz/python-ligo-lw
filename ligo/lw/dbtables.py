@@ -37,13 +37,10 @@ import operator
 import os
 import re
 import shutil
-import signal
 import sqlite3
 import sys
 import tempfile
-import threading
 from xml.sax.xmlreader import AttributesImpl
-import warnings
 
 
 from . import __author__, __date__, __version__
