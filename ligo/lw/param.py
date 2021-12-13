@@ -43,29 +43,6 @@ from . import types as ligolwtypes
 #
 # =============================================================================
 #
-#                                  Utilities
-#
-# =============================================================================
-#
-
-
-def get_param(xmldoc, name):
-	"""
-	Deprecated.  Use Param.get_param(xmldoc, name)
-	"""
-	return Param.get_param(xmldoc, name)
-
-
-def get_pyvalue(xml, name):
-	"""
-	Deprecated.  Use Param.get_param(xml, name).value
-	"""
-	return Param.get_param(xml, name).value
-
-
-#
-# =============================================================================
-#
 #                               Element Classes
 #
 # =============================================================================

@@ -746,12 +746,6 @@ class Table(ligolw.Table, list):
 	# Element methods
 	#
 
-	def _update_column_info(self):
-		"""
-		Deprecated stub.  Do not use.
-		"""
-		pass
-
 	def _verifyChildren(self, i):
 		"""
 		Used for validation during parsing.  For internal use only.
