@@ -67,7 +67,7 @@ def parse_command_line():
 	options, filenames = parser.parse_args()
 
 	# strip column names
-	options.delete_column = set(map(table.Column.ColumnName, options.delete_column))
+	options.delete_column = set(map(ligolw.Column.ColumnName, options.delete_column))
 
 	# parse element specs
 	def parse_delete_element(arg):
@@ -120,7 +120,7 @@ class ElementFilter(object):
 def RemoveColumns(doc, columns):
 	for table_elem in doc.getElementsByTagName(ligolw.Table.tagName):
 		for name in columns:
-			for column in table.Column.getColumnsByName(table_elem, name):
+			for column in ligolw.Column.getColumnsByName(table_elem, name):
 				table_elem.removeChild(column)
 
 

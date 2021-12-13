@@ -28,7 +28,6 @@ import logging
 from .. import __author__, __date__, __version__
 from .. import ligolw
 from .. import lsctables
-from .. import table as ligolw_table
 
 
 #
@@ -60,7 +59,7 @@ def strip_ilwdchar(xmldoc):
 		# have them
 		if table.Name in lsctables.TableByName:
 			validcolumns = lsctables.TableByName[table.Name].validcolumns
-			stripped_column_to_valid_column = dict((ligolw_table.Column.ColumnName(name), name) for name in validcolumns)
+			stripped_column_to_valid_column = dict((ligolw.Column.ColumnName(name), name) for name in validcolumns)
 			for column in table.getElementsByTagName(ligolw.Column.tagName):
 				if column.getAttribute("Name") not in validcolumns:
 					before = column.getAttribute("Name")

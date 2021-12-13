@@ -514,7 +514,7 @@ def get_xml(connection, table_names = None):
 		destrip = {}
 		if table_elem.validcolumns is not None:
 			for name in table_elem.validcolumns:
-				destrip[table.Column.ColumnName(name)] = name
+				destrip[ligolw.Column.ColumnName(name)] = name
 		for column_name, column_type in table_elem.get_column_info():
 			if table_elem.validcolumns is not None:
 				try:
@@ -526,7 +526,7 @@ def get_xml(connection, table_names = None):
 			else:
 				# guess the column type
 				column_type = ligolwtypes.FromSQLiteType[column_type]
-			table_elem.appendChild(table.Column(AttributesImpl({"Name": column_name, "Type": column_type})))
+			table_elem.appendChild(ligolw.Column(AttributesImpl({"Name": column_name, "Type": column_type})))
 		table_elem._end_of_columns()
 		table_elem.appendChild(table_elem.Stream(AttributesImpl({"Name": "%s:table" % table_name, "Delimiter": table_elem.Stream.Delimiter.default, "Type": table_elem.Stream.Type.default})))
 		ligo_lw.appendChild(table_elem)

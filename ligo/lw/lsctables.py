@@ -530,7 +530,7 @@ class Process(table.Table.RowType):
 	>>> x.segment
 	segment(LIGOTimeGPS(10, 0), LIGOTimeGPS(20, 0))
 	"""
-	__slots__ = tuple(map(table.Column.ColumnName, ProcessTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, ProcessTable.validcolumns))
 
 	@property
 	def start_time_ns(eslf):
@@ -674,7 +674,7 @@ class ProcessParams(table.Table.RowType):
 	>>> x.pyvalue
 	1
 	"""
-	__slots__ = tuple(map(table.Column.ColumnName, ProcessParamsTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, ProcessParamsTable.validcolumns))
 
 	@property
 	def pyvalue(self):
@@ -792,7 +792,7 @@ class SearchSummary(table.Table.RowType):
 	>>> print(x.out_segment)
 	None
 	"""
-	__slots__ = tuple(map(table.Column.ColumnName, SearchSummaryTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SearchSummaryTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
 
@@ -854,7 +854,7 @@ class SearchSummVarsTable(table.Table):
 
 
 class SearchSummVars(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, SearchSummVarsTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SearchSummVarsTable.validcolumns))
 
 
 SearchSummVarsTable.RowType = SearchSummVars
@@ -929,7 +929,7 @@ class SnglBurstTable(table.Table):
 
 
 class SnglBurst(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, SnglBurstTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SnglBurstTable.validcolumns))
 
 	#
 	# Tile properties
@@ -1115,7 +1115,7 @@ class SnglInspiralTable(table.Table):
 
 
 class SnglInspiral(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, SnglInspiralTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SnglInspiralTable.validcolumns))
 
 	@staticmethod
 	def chirp_distance(dist, mchirp, ref_mass=1.4):
@@ -1224,7 +1224,7 @@ class CoincInspiral(table.Table.RowType):
 	>>> print(x.end)
 	None
 	"""
-	__slots__ = tuple(map(table.Column.ColumnName, CoincInspiralTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, CoincInspiralTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
 
@@ -1279,7 +1279,7 @@ class SnglRingdownTable(table.Table):
 
 
 class SnglRingdown(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, SnglRingdownTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SnglRingdownTable.validcolumns))
 
 	start = gpsproperty_with_gmst("start_time", "start_time_ns", "start_time_gmst")
 
@@ -1325,7 +1325,7 @@ class CoincRingdownTable(table.Table):
 
 
 class CoincRingdown(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, CoincRingdownTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, CoincRingdownTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
 
@@ -1447,7 +1447,7 @@ class SimInspiral(table.Table.RowType):
 	>>> x.expected_snrs({"H1": 150e6})
 	{'H1': (5.885606799329472-5.605213024437346j)}
 	"""
-	__slots__ = tuple(map(table.Column.ColumnName, SimInspiralTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SimInspiralTable.validcolumns))
 
 	time_geocent = gpsproperty_with_gmst("geocent_end_time", "geocent_end_time_ns", "end_time_gmst")
 
@@ -1671,7 +1671,7 @@ class SimBurst(table.Table.RowType):
 	>>> print(round(x.time_geocent_gmst, 8))
 	-2238.39417156
 	"""
-	__slots__ = tuple(map(table.Column.ColumnName, SimBurstTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SimBurstTable.validcolumns))
 
 	time_geocent = gpsproperty_with_gmst("time_geocent_gps", "time_geocent_gps_ns", "time_geocent_gmst")
 
@@ -1772,7 +1772,7 @@ class SimRingdownTable(table.Table):
 
 
 class SimRingdown(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, SimRingdownTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SimRingdownTable.validcolumns))
 
 	geocent_start = gpsproperty_with_gmst("geocent_start_time", "geocent_start_time_ns", "start_time_gmst")
 
@@ -1874,7 +1874,7 @@ class SummValue(table.Table.RowType):
 	>>> print(x.segment)
 	None
 	"""
-	__slots__ = tuple(map(table.Column.ColumnName, SummValueTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SummValueTable.validcolumns))
 
 	instruments = instrumentsproperty("ifo")
 
@@ -1983,7 +1983,7 @@ class Segment(table.Table.RowType):
 	>>> x.segment
 	segment(-infinity, infinity)
 	"""
-	__slots__ = tuple(map(table.Column.ColumnName, SegmentTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SegmentTable.validcolumns))
 
 	start = gpsproperty("start_time", "start_time_ns")
 	end = gpsproperty("end_time", "end_time_ns")
@@ -2065,7 +2065,7 @@ class SegmentDef(table.Table.RowType):
 	H1,L1
 	>>> assert x.instruments == set(['H1', 'L1'])
 	"""
-	__slots__ = tuple(map(table.Column.ColumnName, SegmentDefTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SegmentDefTable.validcolumns))
 
 	instruments = instrumentsproperty("ifos")
 
@@ -2117,7 +2117,7 @@ class SegmentSumTable(table.Table):
 
 
 class SegmentSum(Segment):
-	__slots__ = tuple(map(table.Column.ColumnName, SegmentSumTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SegmentSumTable.validcolumns))
 
 	start = gpsproperty("start_time", "start_time_ns")
 	end = gpsproperty("end_time", "end_time_ns")
@@ -2246,7 +2246,7 @@ class TimeSlideTable(table.Table):
 
 
 class TimeSlide(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, TimeSlideTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, TimeSlideTable.validcolumns))
 
 
 TimeSlideTable.RowType = TimeSlide
@@ -2313,7 +2313,7 @@ class CoincDefTable(table.Table):
 
 
 class CoincDef(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, CoincDefTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, CoincDefTable.validcolumns))
 
 
 CoincDefTable.RowType = CoincDef
@@ -2351,7 +2351,7 @@ class CoincTable(table.Table):
 
 
 class Coinc(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, CoincTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, CoincTable.validcolumns))
 
 	insts = instrumentsproperty("instruments")
 
@@ -2396,7 +2396,7 @@ class CoincMapTable(table.Table):
 
 
 class CoincMap(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, CoincMapTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, CoincMapTable.validcolumns))
 
 
 CoincMapTable.RowType = CoincMap
@@ -2430,7 +2430,7 @@ class DQSpecListTable(table.Table):
 
 
 class DQSpec(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, DQSpecListTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, DQSpecListTable.validcolumns))
 
 	def apply_to_segmentlist(self, seglist):
 		"""
@@ -2502,7 +2502,7 @@ class VetoDefTable(table.Table):
 
 
 class VetoDef(table.Table.RowType):
-	__slots__ = tuple(map(table.Column.ColumnName, VetoDefTable.validcolumns))
+	__slots__ = tuple(map(ligolw.Column.ColumnName, VetoDefTable.validcolumns))
 
 	# because detchar refuses to allow vetoes to have non-integer
 	# boundaries, even in principle (i.e., by designing out the choice

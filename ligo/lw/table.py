@@ -38,9 +38,7 @@ are the names of the table's columns.  When the document is written out
 again, the Stream element serializes the row objects back into character
 data.
 
-The Table element exports a list-like interface to the rows.  The Column
-elements also provide list-like access to the values in the corresponding
-columns of the table.
+The Table element exports a list-like interface to the rows.
 """
 
 
@@ -113,236 +111,6 @@ def reassign_ids(elem):
 			tbl.updateKeyMapping(mapping)
 	for tbl in elem.getElementsByTagName(ligolw.Table.tagName):
 		tbl.applyKeyMapping(mapping)
-
-
-#
-# =============================================================================
-#
-#                                Column Element
-#
-# =============================================================================
-#
-
-
-class Column(ligolw.Column):
-	"""
-	High-level column element that provides list-like access to the
-	values in a column.
-
-	Example:
-
-	>>> from xml.sax.xmlreader import AttributesImpl
-	>>> import sys
-	>>> tbl = Table(AttributesImpl({"Name": "test"}))
-	>>> col = tbl.appendChild(Column(AttributesImpl({"Name": "test:snr", "Type": "real_8"})))
-	>>> tbl.appendChild(tbl.Stream(AttributesImpl({"Name": "test"})))	# doctest: +ELLIPSIS
-	<ligo.lw.table.Table.Stream object at ...>
-	>>> print(col.Name)
-	snr
-	>>> print(col.Type)
-	real_8
-	>>> print(col.table_name)
-	test
-	>>> # append 3 rows (with nothing in them)
-	>>> tbl.append(tbl.RowType())
-	>>> tbl.append(tbl.RowType())
-	>>> tbl.append(tbl.RowType())
-	>>> # assign values to the rows, in order, in this column
-	>>> col[:] = [8.0, 10.0, 12.0]
-	>>> col[:]
-	[8.0, 10.0, 12.0]
-	>>> col.asarray()	# doctest: +NORMALIZE_WHITESPACE
-	array([ 8., 10., 12.])
-	>>> tbl.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
-	<Table Name="test">
-		<Column Name="test:snr" Type="real_8"/>
-		<Stream Name="test">
-			8,
-			10,
-			12
-		</Stream>
-	</Table>
-	>>> col.index(10)
-	1
-	>>> 12 in col
-	True
-	>>> col[0] = 9.
-	>>> col[1] = 9.
-	>>> col[2] = 9.
-	>>> tbl.write(sys.stdout)		# doctest: +NORMALIZE_WHITESPACE
-	<Table Name="test">
-		<Column Name="test:snr" Type="real_8"/>
-		<Stream Name="test">
-			9,
-			9,
-			9
-		</Stream>
-	</Table>
-	>>> col.count(9)
-	3
-
-	NOTE:  the .Name attribute returns the stripped "Name" attribute of
-	the element, e.g. with the table name prefix removed, but when
-	assigning to the .Name attribute the value provided is stored
-	without modification, i.e. there is no attempt to reattach the
-	table's name to the string.  The calling code is responsible for
-	doing the correct manipulations.  Therefore, the assignment
-	operation below
-
-	>>> print(col.Name)
-	snr
-	>>> print(col.getAttribute("Name"))
-	test:snr
-	>>> col.Name = col.Name
-	>>> print(col.Name)
-	snr
-	>>> print(col.getAttribute("Name"))
-	snr
-
-	does not preserve the value of the "Name" attribute (though it does
-	preserve the stripped form reported by the .Name property).  This
-	asymmetry is necessary because the correct table name string to
-	reattach to the attribute's value cannot always be known, e.g., if
-	the Column object is not part of an XML tree and does not have a
-	parent node.
-	"""
-	# FIXME: the pattern should be
-	#
-	# r"(?:\A[a-z0-9_]+:|\A)(?P<FullName>(?:[a-z0-9_]+:|\A)(?P<Name>[a-z0-9_]+))\Z"
-	#
-	# but people are putting upper case letters in names!!!!!  Someone
-	# is going to get the beats.  There is a reason for requiring names
-	# to be all lower case:  SQL table and column names are case
-	# insensitive, therefore (i) when converting a document to SQL the
-	# columns "Rho" and "rho" would become indistinguishable and so it
-	# would be impossible to convert a document with columns having
-	# names like this into an SQL database;  and (ii) even if that
-	# degeneracy is not encountered the case cannot be preserved and so
-	# when converting back to XML the correct capitalization is lost.
-	# Requiring names to be all lower-case creates the same
-	# degeneracies in XML representations that exist in SQL
-	# representations ensuring compatibility and defines the correct
-	# case to restore the names to when converting to XML.  Other rules
-	# can be imagined that would work as well, this is the one that got
-	# chosen.
-	class ColumnName(ligolw.LLWNameAttr):
-		dec_pattern = re.compile(r"(?:\A\w+:|\A)(?P<FullName>(?:(?P<Table>\w+):|\A)(?P<Name>\w+))\Z")
-		enc_pattern = "%s"
-
-		@classmethod
-		def table_name(cls, name):
-			"""
-			Example:
-
-			>>> Column.ColumnName.table_name("process:process_id")
-			'process'
-			>>> Column.ColumnName.table_name("process_id")
-			Traceback (most recent call last):
-			  File "<stdin>", line 1, in <module>
-			ValueError: table name not found in 'process_id'
-			"""
-			table_name = cls.dec_pattern.match(name).group("Table")
-			if table_name is None:
-				raise ValueError("table name not found in '%s'" % name)
-			return table_name
-
-	Name = ligolw.attributeproxy("Name", enc = ColumnName.enc, dec = ColumnName)
-
-	@property
-	def table_name(self):
-		return self.ColumnName.table_name(self.getAttribute("Name"))
-
-	def __len__(self):
-		"""
-		The number of values in this column.
-		"""
-		return len(self.parentNode)
-
-	def __getitem__(self, i):
-		"""
-		Retrieve the value in this column in row i.
-		"""
-		if isinstance(i, slice):
-			return [getattr(r, self.Name) for r in self.parentNode[i]]
-		else:
-			return getattr(self.parentNode[i], self.Name)
-
-	def __setitem__(self, i, value):
-		"""
-		Set the value in this column in row i.  i may be a slice.
-
-		NOTE:  Unlike normal Python lists, the length of the Column
-		cannot be changed as it is tied to the number of rows in
-		the Table.  Therefore, if i is a slice, value should be an
-		iterable with exactly the correct number of items.  No
-		check is performed to ensure that this is true:  if value
-		contains too many items the extras will be ignored, and if
-		value contains too few items only as many rows will be
-		updated as there are items.
-		"""
-		if isinstance(i, slice):
-			for r, val in zip(self.parentNode[i], value):
-				setattr(r, self.Name, val)
-		else:
-			setattr(self.parentNode[i], self.Name, value)
-
-	def __delitem__(self, *args):
-		raise NotImplementedError
-
-	def __iter__(self):
-		"""
-		Return an iterator object for iterating over values in this
-		column.
-		"""
-		for row in self.parentNode:
-			yield getattr(row, self.Name)
-
-	def count(self, value):
-		"""
-		Return the number of rows with this column equal to value.
-		"""
-		return sum(x == value for x in self)
-
-	def index(self, value):
-		"""
-		Return the smallest index of the row(s) with this column
-		equal to value.
-		"""
-		for i, x in enumerate(self):
-			if x == value:
-				return i
-		raise ValueError(value)
-
-	def __contains__(self, value):
-		"""
-		Returns True or False if there is or is not, respectively,
-		a row containing val in this column.
-		"""
-		return value in iter(self)
-
-	def asarray(self):
-		"""
-		Construct a numpy array from this column.  Note that this
-		creates a copy of the data, so modifications made to the
-		array will *not* be recorded in the original document.
-		"""
-		# most codes don't use this feature, this is the only place
-		# numpy is used here, and importing numpy can be
-		# time-consuming, so we defer the import until needed.
-		import numpy
-		try:
-			dtype = ligolwtypes.ToNumPyType[self.Type]
-		except KeyError as e:
-			raise TypeError("cannot determine numpy dtype for Column '%s': %s" % (self.getAttribute("Name"), e))
-		return numpy.fromiter(self, dtype = dtype)
-
-	@classmethod
-	def getColumnsByName(cls, elem, name):
-		"""
-		Return a list of Column elements named name under elem.
-		"""
-		name = cls.ColumnName(name)
-		return elem.getElements(lambda e: (e.tagName == cls.tagName) and (e.Name == name))
 
 
 #
@@ -665,7 +433,7 @@ class Table(ligolw.Table, list):
 		>>> col = tbl.getColumnByName("mass1")
 		"""
 		try:
-			col, = Column.getColumnsByName(self, name)
+			col, = ligolw.Column.getColumnsByName(self, name)
 		except ValueError:
 			# did not find exactly 1 matching child
 			raise KeyError(name)
@@ -703,11 +471,11 @@ class Table(ligolw.Table, list):
 			pass
 		if name in self.validcolumns:
 			coltype = self.validcolumns[name]
-		elif Column.ColumnName(name) in self.validcolumns:
-			coltype = self.validcolumns[Column.ColumnName(name)]
+		elif ligolw.Column.ColumnName(name) in self.validcolumns:
+			coltype = self.validcolumns[ligolw.Column.ColumnName(name)]
 		else:
 			raise ligolw.ElementError("invalid Column '%s' for Table '%s'" % (name, self.Name))
-		column = Column(AttributesImpl({"Name": "%s" % name, "Type": coltype}))
+		column = ligolw.Column(AttributesImpl({"Name": "%s" % name, "Type": coltype}))
 		streams = self.getElementsByTagName(ligolw.Stream.tagName)
 		if streams:
 			self.insertBefore(column, streams[0])
@@ -943,8 +711,8 @@ class Table(ligolw.Table, list):
 def use_in(ContentHandler):
 	"""
 	Modify ContentHandler, a sub-class of
-	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the Table,
-	Column, and Stream classes defined in this module when parsing XML
+	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the Table
+	and Stream classes defined in this module when parsing XML
 	documents.
 
 	Example:
@@ -956,9 +724,6 @@ def use_in(ContentHandler):
 	>>> use_in(LIGOLWContentHandler)
 	<class 'ligo.lw.table.LIGOLWContentHandler'>
 	"""
-	def startColumn(self, parent, attrs):
-		return Column(attrs)
-
 	def startStream(self, parent, attrs, __orig_startStream = ContentHandler.startStream):
 		if parent.tagName == ligolw.Table.tagName:
 			parent._end_of_columns()
@@ -968,7 +733,6 @@ def use_in(ContentHandler):
 	def startTable(self, parent, attrs):
 		return Table(attrs)
 
-	ContentHandler.startColumn = startColumn
 	ContentHandler.startStream = startStream
 	ContentHandler.startTable = startTable
 
