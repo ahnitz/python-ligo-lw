@@ -1,4 +1,4 @@
-# Copyright (C) 2006  Kipp Cannon
+# Copyright (C) 2006-2014,2016-2018,2020,2021  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -153,6 +153,7 @@ def merge_compatible_tables(elem):
 				# unlink src from parent
 				if src.parentNode is not None:
 					src.parentNode.removeChild(src)
+				src.unlink()
 	return elem
 
 

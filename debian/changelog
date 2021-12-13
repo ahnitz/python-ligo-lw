@@ -1,3 +1,9 @@
+python-ligo-lw (2.0.0-1) unstable; urgency=medium
+
+  * improve ligolw_add garbage collection
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
+
 python-ligo-lw (1.8.2-1) unstable; urgency=medium
 
   * ligolw_segments:  fix python 3 print statements
