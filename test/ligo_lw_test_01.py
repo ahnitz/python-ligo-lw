@@ -10,13 +10,11 @@ import sys
 
 from ligo.lw import ligolw
 from ligo.lw import array as ligolw_array
-from ligo.lw import param as ligolw_param
 from ligo.lw import utils as ligolw_utils
 
+@ligolw_array.use_in
 class ContentHandler(ligolw.LIGOLWContentHandler):
 	pass
-ligolw_array.use_in(ContentHandler)
-ligolw_param.use_in(ContentHandler)
 
 xmldoc = ligolw_utils.load_filename("ligo_lw_test_01.xml", contenthandler = ContentHandler, verbose = True)
 ligolw_utils.write_filename(xmldoc, "/dev/null")

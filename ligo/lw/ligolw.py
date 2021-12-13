@@ -35,11 +35,13 @@ constructing a parser.
 
 import datetime
 import dateutil.parser
+import re
 import sys
 from xml import sax
 from xml.sax.xmlreader import AttributesImpl
 from xml.sax.saxutils import escape as xmlescape
 from xml.sax.saxutils import unescape as xmlunescape
+import yaml
 
 
 from . import __author__, __date__, __version__
@@ -521,19 +523,180 @@ class Comment(Element):
 		fileobj.write("\n")
 
 
+#
+# FIXME: Params of type string should be quoted in order to correctly
+# delimit their extent.  If that were done, then the pcdata in a Param
+# element could be parsed using the Stream tokenizer (i.e., as though it
+# were a single-token stream), which would guarantee that Stream data and
+# Param data is parsed using the exact same rules.  Unfortunately, common
+# practice is to not quote Param string values, so we parse things
+# differently here.  In particular, we strip whitespace from the start and
+# stop of all Param pcdata.  If this causes your string Param values to be
+# corrupted (because you need leading and trailing white space preserved),
+# then you need to make everyone switch to quoting their string Param
+# values, and once that is done then this code will be changed.  Perhaps a
+# warning should be emitted for non-quoted strings to encourage a
+# transition?
+#
+
+
 class Param(Element):
 	"""
-	Param element.
+	Param element.  The value is stored in the pcdata attribute as the
+	native Python type rather than as a string.
 	"""
 	tagName = "Param"
 	validchildren = frozenset(["Comment"])
 
 	DataUnit = attributeproxy("DataUnit")
-	Name = attributeproxy("Name")
-	Scale = attributeproxy("Scale")
+	class ParamName(LLWNameAttr):
+		dec_pattern = re.compile(r"(?P<Name>[a-z0-9_:]+):param\Z")
+		enc_pattern = "%s:param"
+	Name = attributeproxy("Name", enc = ParamName.enc, dec = ParamName)
+	Scale = attributeproxy("Scale", enc = ligolwtypes.FormatFunc["real_8"], dec = ligolwtypes.ToPyType["real_8"])
 	Start = attributeproxy("Start")
-	Type = attributeproxy("Type")
+	Type = attributeproxy("Type", default = "lstring")
 	Unit = attributeproxy("Unit")
+
+	def endElement(self):
+		if self.pcdata is not None:
+			# convert pcdata from string to native Python type
+			if self.Type == "yaml":
+				self.pcdata = yaml.load(self.pcdata)
+			else:
+				self.pcdata = ligolwtypes.ToPyType[self.Type](self.pcdata.strip())
+
+	def write(self, fileobj = sys.stdout, indent = ""):
+		fileobj.write(self.start_tag(indent))
+		for c in self.childNodes:
+			if c.tagName not in self.validchildren:
+				raise ElementError("invalid child %s for %s" % (c.tagName, self.tagName))
+			c.write(fileobj, indent + Indent)
+		if self.pcdata is not None:
+			if self.Type == "yaml":
+				fileobj.write(xmlescape(yaml.dump(self.pcdata).strip()))
+			else:
+				# we have to strip quote characters from
+				# string formats (see comment above).  if
+				# the result is a zero-length string it
+				# will get parsed as None when the document
+				# is loaded, but on this code path we know
+				# that .pcdata is not None, so as a hack
+				# until something better comes along we
+				# replace zero-length strings here with a
+				# bit of whitespace.  whitespace is
+				# stripped from strings during parsing so
+				# this will turn .pcdata back into a
+				# zero-length string.  NOTE:  if .pcdata is
+				# None, then it will become a zero-length
+				# string, which will be turned back into
+				# None on parsing, so this mechanism is how
+				# None is encoded (a zero-length Param is
+				# None)
+				fileobj.write(xmlescape(ligolwtypes.FormatFunc[self.Type](self.pcdata).strip("\"") or " "))
+		fileobj.write(self.end_tag("") + "\n")
+
+	@property
+	def value(self):
+		"""
+		Synonym of .pcdata.  Makes calling code easier to
+		understand.  In the parent class .pcdata is text only.
+		Here it has been translated into a native Python type, but
+		it's not obvious in calling code that that is what has
+		happened so it can be unclear when reading calling codes if
+		one should be expecting a string or a native value.  Using
+		this synonym can clarify the meaning.
+		"""
+		return self.pcdata
+
+	@value.setter
+	def value(self, value):
+		self.pcdata = value
+
+	@classmethod
+	def build(cls, name, Type, value, start = None, scale = None, unit = None, dataunit = None, comment = None):
+		"""
+		Construct a LIGO Light Weight XML Param document subtree.
+		FIXME: document keyword arguments.
+		"""
+		elem = cls()
+		elem.Name = name
+		elem.Type = Type
+		elem.pcdata = value
+		# FIXME:  I have no idea how most of the attributes should be
+		# encoded, I don't even know what they're supposed to be.
+		if dataunit is not None:
+			elem.DataUnit = dataunit
+		if scale is not None:
+			elem.Scale = scale
+		if start is not None:
+			elem.Start = start
+		if unit is not None:
+			elem.Unit = unit
+		if comment is not None:
+			elem.appendChild(Comment()).pcdata = comment
+		return elem
+
+	@classmethod
+	def from_pyvalue(cls, name, value, **kwargs):
+		"""
+		Convenience wrapper for .build() that constructs a Param
+		element from an instance of a Python builtin type.  See
+		.build() for a description of the valid keyword arguments.
+
+		Examples:
+
+		>>> import sys
+		>>> # float
+		>>> Param.from_pyvalue("example", 3.0).write(sys.stdout)
+		<Param Name="example:param" Type="real_8">3</Param>
+		>>> # string
+		>>> Param.from_pyvalue("example", "test").write(sys.stdout)
+		<Param Name="example:param" Type="lstring">test</Param>
+		>>> # short string (non-empty data = not NULL)
+		>>> Param.from_pyvalue("example", "").write(sys.stdout)
+		<Param Name="example:param" Type="lstring"> </Param>
+		>>> # None (empty data = NULL)
+		>>> Param.from_pyvalue("example", None).write(sys.stdout)
+		<Param Name="example:param" Type="None"></Param>
+
+		Note that any type of Param may be NULL-valued.  These
+		examples demonstrate the use of the automatic encoding
+		helper function, which translates None into a None-typed
+		Param because it doesn't know what else it might be, but,
+		for example, a float-typed Param may also be set to None.
+		"""
+		if value is not None:
+			return cls.build(name, ligolwtypes.FromPyType[type(value)], value, **kwargs)
+		return cls.build(name, None, None, **kwargs)
+
+	@classmethod
+	def getParamsByName(cls, elem, name):
+		"""
+		Return a list of params with name name under elem.
+
+		See also .get_param().
+		"""
+		name = cls.ParamName(name)
+		return elem.getElements(lambda e: (e.tagName == cls.tagName) and (e.Name == name))
+
+	@classmethod
+	def get_param(cls, xmldoc, name = None):
+		"""
+		Scan xmldoc for a Param named name.  Raises ValueError if
+		not exactly 1 such Param is found.  If name is None
+		(default), then the .paramName attribute of this class is
+		used.  The Param class does not provide a .paramName
+		attribute, but sub-classes may choose to.
+
+		See also .getParamsByName().
+		"""
+		if name is None:
+			name = cls.paramName
+		elems = Param.getParamsByName(xmldoc, name)
+		if len(elems) != 1:
+			raise ValueError("document must contain exactly one %s Param" % cls.ParamName(name))
+		return elems[0]
 
 
 class Table(EmptyElement):

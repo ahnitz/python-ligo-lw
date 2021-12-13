@@ -89,7 +89,6 @@ __all__ = [
 	"array",
 	"ligolw",
 	"lsctables",
-	"param",
 	"table",
 	"types",
 	"utils"
