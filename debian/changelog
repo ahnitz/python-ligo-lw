@@ -23,7 +23,7 @@ python-ligo-lw (1.8.0-1) unstable; urgency=medium
   * add ligolw_run_sqlite (migrated from lalapps)
   * add support for .bz2 and .xz compression formats
 
- -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Thu, 9 Dec 2021 17:01:20 +0900
 
 python-ligo-lw (1.7.1-1) unstable; urgency=medium
 
