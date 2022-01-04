@@ -224,7 +224,6 @@ class FromPyTypeCls(dict):
 FromPyType = FromPyTypeCls({
 	memoryview: "blob",
 	str: "lstring",
-	str: "lstring",
 	bool: "int_4s",
 	int: "int_8s",
 	float: "real_8",
