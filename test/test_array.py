@@ -4,6 +4,7 @@ import sys
 from ligo.lw import ligolw
 from ligo.lw import utils as ligolw_utils
 import numpy
+import os
 import time
 
 
@@ -23,6 +24,7 @@ def test_io_iteration_order():
 	recov = ligolw.Array.get_array(ligolw_utils.load_filename("big_array.xml.gz", contenthandler = ligolw.LIGOLWContentHandler), "test").array
 	end_read = time.perf_counter()
 	print("reading took %g s" % (end_read - start_read))
+	os.remove("big_array.xml.gz")
 
 	if not (recov == orig).all():
 		raise ValueError("arrays are not the same")
