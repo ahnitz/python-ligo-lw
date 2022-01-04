@@ -33,10 +33,14 @@ import warnings
 
 warnings.warn("ligo.lw.table module is deprecated.  the features previously implemented by the Column and Table classes in this module are now implemented natively by the classes in the ligo.lw.ligolw module proper.  this module will be removed in the next release.")
 
-
 from . import __author__, __date__, __version__
 
-
+# temporary compatibility stubs
+from .ligolw import LIGO_LW, Table, Column
+next_id = Column.next_id
+def reassign_ids(elem):
+	LIGO_LW.reassign_table_row_ids(elem)
+TableStream = Table.Stream
 def use_in(ContentHandler):
 	warnings.warn("ligo.lw.table module is deprecated.  the features previously implemented by the Column and Table classes in this module are now implemented natively by the classes in the ligo.lw.ligolw module proper.  this module will be removed in the next release.")
 	return ContentHandler
