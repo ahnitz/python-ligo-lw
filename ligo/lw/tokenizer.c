@@ -27,10 +27,6 @@
 
 
 #include <Python.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <wchar.h>
 #include <tokenizer.h>
 
 
@@ -83,6 +79,21 @@ PyObject *llwtokenizer_build_attributes(PyObject *sequence)
 }
 
 
+static int type_ready_and_add(PyObject *module, const char *name, PyTypeObject *type)
+{
+	if(!type || PyType_Ready(type) < 0)
+		return -1;
+
+	Py_INCREF(type);
+	if(PyModule_AddObject(module, name, (PyObject *) type) < 0) {
+		Py_DECREF(type);
+		return -1;
+	}
+
+	return 0;
+}
+
+
 /*
  * ============================================================================
  *
@@ -110,45 +121,27 @@ PyMODINIT_FUNC PyInit_tokenizer(void)
 		MODULE_NAME, MODULE_DOC, -1, NULL
 	};
 	PyObject *module = PyModule_Create(&moduledef);
-	if (!module)
-		goto done;
+	if(!module)
+		goto error;
 
 	/*
-	 * Initialize the classes
+	 * Initialize the classes and add to module
 	 */
 
-	if(PyType_Ready(&ligolw_Tokenizer_Type) < 0)
-		goto done;
-	if(PyType_Ready(&ligolw_RowBuilder_Type) < 0)
-		goto done;
-	if(PyType_Ready(&ligolw_RowDumper_Type) < 0)
-		goto done;
-
-	/*
-	 * Add the Tokenizer class.
-	 */
-
-	Py_INCREF(&ligolw_Tokenizer_Type);
-	PyModule_AddObject(module, "Tokenizer", (PyObject *) &ligolw_Tokenizer_Type);
-
-	/*
-	 * Add the RowBuilder class.
-	 */
-
-	Py_INCREF(&ligolw_RowBuilder_Type);
-	PyModule_AddObject(module, "RowBuilder", (PyObject *) &ligolw_RowBuilder_Type);
-
-	/*
-	 * Add the RowDumper class.
-	 */
-
-	Py_INCREF(&ligolw_RowDumper_Type);
-	PyModule_AddObject(module, "RowDumper", (PyObject *) &ligolw_RowDumper_Type);
+	if(type_ready_and_add(module, "Tokenizer", &ligolw_Tokenizer_Type) < 0)
+		goto error;
+	if(type_ready_and_add(module, "RowBuilder", &ligolw_RowBuilder_Type) < 0)
+		goto error;
+	if(type_ready_and_add(module, "RowDumper", &ligolw_RowDumper_Type) < 0)
+		goto error;
 
 	/*
 	 * Done.
 	 */
 
-done:
 	return module;
+
+error:
+	Py_XDECREF(module);
+	return NULL;
 }
