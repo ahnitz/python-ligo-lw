@@ -1,4 +1,4 @@
-# Copyright (C) 2008-2010,2012-2015  Kipp Cannon
+# Copyright (C) 2008-2010,2012-2022  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -25,7 +25,31 @@
 
 
 """
-Ask Kipp to document this!
+Tools for interacting with segment lists in LIGO Light-Weight XML files.
+
+LIGO Light-Weight XML files allow for the encoding of segment lists.  Each
+segment list is a collection of intervals each of which is in one of three
+states:  on, off, or undefined.  The segment lists are encoded as tabular
+data using three tables:  (i) the segment_definer table which provides the
+names, versions, instruments, and descriptions of each of the segment
+lists; (ii) the segment table which provides a collection of (start, stop)
+pairs defining "on" segments; and (iii) the segment_summary table which
+provides a collection of (start, stop) pairs defining the intervals for
+which a segment list's state is defined.
+
+To interact with the segment lists in an XML file, an instance of the
+LigolwSegments class is attached to an XML document tree, at which time it
+removes all rows from the segment, segment_definer, and segment_summary
+tables in the document, converting them into LigolwSegmentList objects.
+These objects can be manipulated algebraically using the rules of Kleene's
+strong ternerary logic.  When the desired manipulations are complete, the
+LigolwSegments is detached from the XML document at which time it
+re-populates the segment, segment_definer, and segment_summary tables from
+the contents of the LigolwSegmentList objects within it.
+
+Only one LigolwSegments object may be attached to an XML document at a
+time.  Attempting to attach multiple LigolwSegments objects to the same XML
+tree yields undefined results.
 """
 
 
@@ -138,12 +162,12 @@ class LigolwSegmentList(object):
 	Often we wish to construct a tri-state list from two tri-state
 	lists such that the final list's interval of validity is the union
 	of the intervals of validity of the two source lists, and the state
-	of the final list in that interval is the union the states of the
-	source lists in that interval.  For example if from one source we
-	know the state of some process spanning some time, and from another
-	source we know the state of the same process spanning some other
-	time, taken together we know the state of that process over the
-	union of those times.  This function is given by
+	of the final list in that interval is the union of the states of
+	the source lists in that interval.  For example if from one source
+	we know the state of some process spanning some time, and from
+	another source we know the state of the same process spanning some
+	other time, taken together we know the state of that process over
+	the union of those times.  This function is given by
 
 	>>> z = ~(x.isfalse() | y.isfalse() | (x & ~x & y & ~y))
 	>>> z.active
@@ -151,9 +175,9 @@ class LigolwSegmentList(object):
 	>>> z.valid
 	[segment(0, 100)]
 
-	Because this is inconvenient to type, slow, and not readable, a
-	special in-place arithmetic operation named .update() is provided
-	to implement this operation.
+	Because this is arithmetic expression is inconvenient to type,
+	slow, and incomprehensible, a special in-place arithmetic operation
+	named .update() is provided to implement this.
 
 	>>> z = LigolwSegmentList(x).update(y)
 	>>> z.active
@@ -163,7 +187,9 @@ class LigolwSegmentList(object):
 
 	The .update() method is not exactly equivalent to the operation
 	above.  The .update() method demands that the two input lists'
-	states be identical where their intervals of validity intersect.
+	states be identical where their intervals of validity intersect,
+	whereas the arithmetic expression above yields their union where
+	their intervals of validity intersect.
 	"""
 	#
 	# the columns the segment_definer, segment_summary and segment
@@ -186,7 +212,7 @@ class LigolwSegmentList(object):
 		"""
 		# if we've only been passed an argument for active, see if
 		# it's an object with the same attributes as ourselves and
-		# if so initialize ourself as a copy of it.
+		# if so initialize ourselves as a copy of it.
 		if not valid and not instruments and name is None and version is None and comment is None:
 			try:
 				self.valid = segments.segmentlist(active.valid)
@@ -210,11 +236,11 @@ class LigolwSegmentList(object):
 
 	def sort(self, *args, **kwargs):
 		"""
-		Sort the internal segment lists.  The optional args are
-		passed to the .sort() method of the segment lists.  This
-		can be used to control the sort order by providing an
-		alternate comparison function.  The default is to sort by
-		start time with ties broken by end time.
+		Sort the internal segment lists.  The optional args and
+		kwargs are passed to the .sort() method of the segment
+		lists.  This can be used to control the sort order by
+		providing an alternate comparison function.  The default is
+		to sort by start time with ties broken by end time.
 		"""
 		self.valid.sort(*args, **kwargs)
 		self.active.sort(*args, **kwargs)
