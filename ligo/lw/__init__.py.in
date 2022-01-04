@@ -1,4 +1,4 @@
-# Copyright (C) 2006,2007,2009,2011,2013,2016,2017  Kipp Cannon
+# Copyright (C) 2006,2007,2009,2011,2013,2016-2021  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -48,7 +48,7 @@ Example:
 ...
 >>> lsctables.use_in(LIGOLWContentHandler)
 >>>
->>> # load a document.  gzip'ed files are auto-detected
+>>> # load a document.  several compressed file formats are recognized
 >>> filename = "demo.xml.gz"
 >>> xmldoc = ligolw_utils.load_filename(filename, contenthandler = LIGOLWContentHandler, verbose = True)
 >>> 
@@ -71,9 +71,39 @@ Example:
 ...	process = index[row.process_id]
 ...	print "%s@%s: %s s" % (process.username, process.node, str(row.end))
 ...
->>> # write document.  must explicitly state whether or not the file is to be
->>> # gzip compressed
->>> ligolw_utils.write_filename(xmldoc, filename, compress = 'gz' if filename.endswith(".gz") else False, verbose = True)
+>>> # write document.  the file is automatically compressed because its name
+>>> # ends with .gz, and several other compression formats are also supported
+>>> ligolw_utils.write_filename(xmldoc, filename, verbose = True)
+
+Version 2 Notes:
+
+The LIGO Light-Weight XML document foramt does not have a formal
+specification, instead it is mostly defined by active implementations.
+Those implementations have differed in incompatible ways in the past, and
+might still do so today.  Historically, this library made an effort to be
+as flexible as posisble with regard to the document content to allow
+documents compatible with all other I/O libraries to be read and written.
+The only true requirement imposed by this library was that documents were
+required to be valid XML and comply with the DTD (when that was supplied).
+Aspects of the file format outside the scope of XML itself, for example how
+to encode a choice of units in a Dim element, did not necessarily have a
+strict specification imposed, but as a consequence high-level features
+could not be implemented because it wasn't possible to ensure input
+documents would comply with the necessary format assumptions.  To implement
+more convenient high-level support for the document contents, for example
+to cause this libray to treat tables as tabular data instead of blocks of
+text, calling codes were required to explicitly enable additional parsing
+rules by constructing a suitable content handler object.  This required
+numerous module imports and cryptic symbol declarations, often for reasons
+that weren't clear to users of the library.  Over time the number of users
+of this file format has dwindled, and with it the motivation for continuing
+to inconvenience the remaining users with the cryptic imports and
+configuration boilerplate required to provide that compatibility.
+Therefore, in version 2.0 that flexibility was removed.  All documents
+processed with this library are now required to comply with the file format
+defined by this library.  Removing the flexibility increases document
+loading speed, and makes calling codes simpler, often reducing the number
+of module imports to a single module.
 """
 
 
