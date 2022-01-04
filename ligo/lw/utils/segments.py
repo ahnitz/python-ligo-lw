@@ -514,6 +514,23 @@ class LigolwSegments(set):
 		#
 
 
+	@property
+	def names(self):
+		"""
+		The names of the segment lists contained in the set.
+		"""
+		return set(seglist.name for seglist in self)
+
+
+	@property
+	def instruments(self):
+		"""
+		The instruments for which the set contains at least one
+		segment list.
+		"""
+		return set(instrument for seglist in self for instrument in seglist.instruments)
+
+
 	def insert_from_segwizard(self, fileobj, instruments, name, version = None, comment = None):
 		"""
 		Parse the contents of the file object fileobj as a
