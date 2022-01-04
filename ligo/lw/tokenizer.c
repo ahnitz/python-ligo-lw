@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006-2009,2016,2017  Kipp C. Cannon
+ * Copyright (C) 2006-2009,2016,2017,2020,2021  Kipp C. Cannon
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -80,18 +80,6 @@ PyObject *llwtokenizer_build_attributes(PyObject *sequence)
 	Py_DECREF(sequence);
 
 	return result;
-}
-
-
-/*
- * Convert a sequence of functions to a tuple of functions.  Creates a
- * reference to a new object, does not decref its argument.
- */
-
-
-PyObject *llwtokenizer_build_formats(PyObject *sequence)
-{
-	return PySequence_Tuple(sequence);
 }
 
 

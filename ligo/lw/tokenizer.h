@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2006,2007,2009  Kipp C. Cannon
+ * Copyright (C) 2006,2007,2009,2012,2017,2022  Kipp C. Cannon
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -46,5 +46,5 @@ extern PyTypeObject ligolw_RowDumper_Type;
  * Functions
  */
 
+
 PyObject *llwtokenizer_build_attributes(PyObject *sequence);
-PyObject *llwtokenizer_build_formats(PyObject *sequence);

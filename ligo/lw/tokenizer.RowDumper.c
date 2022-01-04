@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2007-2009,2011,2015-2017  Kipp C. Cannon
+ * Copyright (C) 2007-2009,2011,2015-2018,2020,2021  Kipp C. Cannon
  *
  * This program is free software; you can redistribute it and/or modify it
  * under the terms of the GNU General Public License as published by the
@@ -104,7 +104,7 @@ static int __init__(PyObject *self, PyObject *args, PyObject *kwds)
 	else
 		rowdumper->delimiter = PyUnicode_FromWideChar(&default_delimiter, 1);
 	rowdumper->attributes = llwtokenizer_build_attributes(rowdumper->attributes);
-	rowdumper->formats = llwtokenizer_build_formats(rowdumper->formats);
+	rowdumper->formats = PySequence_Tuple(rowdumper->formats);
 	if(!rowdumper->delimiter || !rowdumper->attributes || !rowdumper->formats)
 		/* memory clean-up happens in __del__() */
 		return -1;
