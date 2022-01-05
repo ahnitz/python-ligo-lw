@@ -49,6 +49,14 @@
 
 
 /*
+ * The escape character.
+ */
+
+
+#define ESCAPE_CHARACTER L'\\'
+
+
+/*
  * Globally-defined, statically-allocated, default list of quote
  * characters.
  */
@@ -74,8 +82,6 @@ typedef struct {
 	wchar_t delimiter;
 	/* the character(s) to interpret as a quote character */
 	const wchar_t *quote_characters;
-	/* the character to interpret as the escape character */
-	wchar_t escape_character;
 	/* size of internal buffer, minus null terminator */
 	Py_ssize_t allocation;
 	/* internal buffer */
@@ -212,7 +218,7 @@ static void parse_error(PyObject *exception, const wchar_t *buffer, const ptrdif
  */
 
 
-static int unescape(wchar_t *s, wchar_t **end, const wchar_t *escapable_characters, wchar_t escape_character)
+static int unescape(wchar_t *s, wchar_t **end, const wchar_t *escapable_characters)
 {
 	wchar_t *start = s;
 	int escaped = 0;
@@ -224,7 +230,7 @@ static int unescape(wchar_t *s, wchar_t **end, const wchar_t *escapable_characte
 		 */
 
 		if(!escaped) {
-			escaped = *(s++) == escape_character;
+			escaped = *(s++) == ESCAPE_CHARACTER;
 			continue;
 		}
 
@@ -334,7 +340,7 @@ static PyObject *next_token(ligolw_Tokenizer *tokenizer, wchar_t **start, wchar_
 		if(pos >= bailout)
 			goto stop_iteration;
 		while((*pos != quote_character) || escaped) {
-			escaped = (*pos == tokenizer->escape_character) && !escaped;
+			escaped = (*pos == ESCAPE_CHARACTER) && !escaped;
 			if(++pos >= bailout)
 				goto stop_iteration;
 		}
@@ -396,8 +402,8 @@ static PyObject *next_token(ligolw_Tokenizer *tokenizer, wchar_t **start, wchar_
 	if(*end)
 		**end = 0;
 	if(quote_character) {
-		wchar_t escapable_characters[] = {quote_character, tokenizer->escape_character, 0};
-		if(unescape(*start, end, escapable_characters, tokenizer->escape_character))
+		wchar_t escapable_characters[] = {quote_character, ESCAPE_CHARACTER, 0};
+		if(unescape(*start, end, escapable_characters))
 			return NULL;
 	}
 
@@ -496,7 +502,6 @@ static int __init__(PyObject *self, PyObject *args, PyObject *kwds)
 
 	PyUnicode_AsWideChar(arg, &tokenizer->delimiter, 1);
 	tokenizer->quote_characters = default_quote_characters;
-	tokenizer->escape_character = '\\';
 	tokenizer->types = malloc(1 * sizeof(*tokenizer->types));
 	tokenizer->types_length = &tokenizer->types[1];
 	tokenizer->types[0] = (PyObject *) &PyUnicode_Type;
