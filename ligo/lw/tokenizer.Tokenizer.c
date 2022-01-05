@@ -220,54 +220,54 @@ static void parse_error(PyObject *exception, const wchar_t *buffer, const ptrdif
  */
 
 
-static int unescape(wchar_t *s, wchar_t **end, const wchar_t *escapable_characters)
+static int unescape(wchar_t *start, wchar_t **end, const wchar_t *escapable_characters)
 {
-	wchar_t *start = s;
-	int escaped = 0;
+	wchar_t *i, *j;
 
-	while(*s) {
+	/*
+	 * Search for first escape character.  If not found, we have
+	 * nothing to do.  This is a fast-path for the common case of
+	 * strings with no special characters.
+	 */
+
+	i = wcschr(start, ESCAPE_CHARACTER);
+	if(!i)
+		return 0;
+
+	/*
+	 * Process the rest of the string, unescaping special characters by
+	 * shifting them to the left in the buffer.
+	 */
+
+	for(j = i; *i; *(i++) = *(j++)) {
 		/*
-		 * If this character is not escaped, is it the escape
-		 * character?
+		 * Is this character the escape character?
 		 */
 
-		if(!escaped) {
-			escaped = *(s++) == ESCAPE_CHARACTER;
+		if(*j != ESCAPE_CHARACTER)
 			continue;
-		}
 
 		/*
-		 * Check for an unrecognized escape sequence.
+		 * Check for an unrecognized escape sequence, or an escape
+		 * sequence starting in the last character position.
 		 */
 
-		if(!wcschr(escapable_characters, *s)) {
-			parse_error(PyExc_ValueError, start, *end - start - 1, s - 1, "unrecognized escape sequence");
+		if(!*(++j)) {
+			parse_error(PyExc_RuntimeError, start, *end - start - 1, *end - 1, "internal error: incomplete escape sequence at end of string");
+			return -1;
+		} else if(!wcschr(escapable_characters, *j)) {
+			parse_error(PyExc_ValueError, start, *end - start - 1, j - 1, "unrecognized escape sequence");
 			return -1;
 		}
 
 		/*
-		 * Shift the data following the escape character back one
-		 * position, on top of the escape character.
+		 * Update the end pointer
 		 */
 
-		memmove(s - 1, s, (*end - s + 1) * sizeof(*s));
 		(*end)--;
-
-		/*
-		 * Reset
-		 */
-
-		escaped = 0;
 	}
 
-	/*
-	 * String ended with an escape character?  Impossible.
-	 */
-
-	if(escaped) {
-		parse_error(PyExc_RuntimeError, start, *end - start - 1, *end - 1, "internal error: unescaped escape character at end of string");
-		return -1;
-	}
+	assert(i == *end);
 
 	return 0;
 }
