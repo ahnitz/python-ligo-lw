@@ -433,20 +433,16 @@ stop_iteration:
 
 static PyObject *append(PyObject *self, PyObject *data)
 {
-	int fail;
-
-	if(PyUnicode_Check(data)) {
-		/* FIXME:  remove when we require Python >= 3.12 */
-#ifdef PyUnicode_READY
-		PyUnicode_READY(data);
-#endif
-		fail = add_to_data((ligolw_Tokenizer *) self, data);
-	} else {
+	if(!PyUnicode_Check(data)) {
 		PyErr_SetObject(PyExc_TypeError, data);
 		return NULL;
 	}
 
-	if(fail < 0)
+	/* FIXME:  remove when we require Python >= 3.12 */
+#ifdef PyUnicode_READY
+	PyUnicode_READY(data);
+#endif
+	if(add_to_data((ligolw_Tokenizer *) self, data) < 0)
 		return PyErr_NoMemory();
 
 	Py_INCREF(self);
