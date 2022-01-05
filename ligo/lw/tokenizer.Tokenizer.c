@@ -272,12 +272,13 @@ static int unescape(wchar_t *s, wchar_t **end, const wchar_t *escapable_characte
  * Identify the next token to extract from the tokenizer's internal buffer.
  * On success, start will be left pointing to the address of the start of
  * the string, and end will be pointing to the first character after the
- * string.  If an empty token is encountered (only whitespace between two
- * delimiters) then start and end are both set to NULL so that calling code
- * can tell the difference between a zero-length token and an absent token.
- * If a non-empty token is found, it will be NULL terminated.  The return
- * value is the Python type to which the text should be converted, or NULL
- * on error.  On error, the values of start and end are undefined.  Raises
+ * string, which will be set to 0 (the token will be null-terminated).  If
+ * an empty token is encountered (only whitespace between two delimiters)
+ * then start and end are both set to NULL so that calling code can tell
+ * the difference between a zero-length token and an absent token.  If a
+ * non-empty token is found, it will be NULL terminated.  The return value
+ * is the Python type to which the text should be converted, or NULL on
+ * error.  On error, the values of start and end are undefined.  Raises
  * StopIteration if the end of the tokenizer's internal buffer is reached,
  * or ValueError if a parse error occurs.
  *
@@ -554,19 +555,16 @@ static PyObject *next(PyObject *self)
 		Py_INCREF(Py_None);
 		token = Py_None;
 	} else if(type == (PyObject *) &PyFloat_Type) {
-		wchar_t buffer[end - start + 1];
-		wchar_t *buffer_end;
-		memcpy(buffer, start, (void *) end - (void *) start);
-		buffer[end - start] = 0;
-		token = PyFloat_FromDouble(wcstod(buffer, &buffer_end));
-		if(buffer_end == buffer || *buffer_end != 0) {
+		wchar_t *conversion_end;
+		token = PyFloat_FromDouble(wcstod(start, &conversion_end));
+		if(conversion_end == start || *conversion_end != 0) {
 			/*
 			 * wcstod() couldn't convert the token, emulate
 			 * float()'s error message
 			 */
 
 			Py_XDECREF(token);
-			token = PyUnicode_FromWideChar(buffer, -1);
+			token = PyUnicode_FromWideChar(start, -1);
 			PyErr_Format(PyExc_ValueError, "invalid literal for float(): '%U'", token);
 			Py_DECREF(token);
 			token = NULL;
@@ -574,25 +572,22 @@ static PyObject *next(PyObject *self)
 	} else if(type == (PyObject *) &PyUnicode_Type) {
 		token = PyUnicode_FromWideChar(start, end - start);
 	} else if(type == (PyObject *) &PyLong_Type) {
-		wchar_t buffer[end - start + 1];
-		wchar_t *buffer_end;
-		memcpy(buffer, start, (void *) end - (void *) start);
-		buffer[end - start] = 0;
+		wchar_t *conversion_end;
 		/* FIXME:  although Python supports arbitrary precision
 		 * integers, this can only handle numbers that fit into a C
 		 * long long.  in practice, since we invariably
 		 * interoperate with C codes, that should be sufficient,
 		 * but it's a limitation of the library and should probably
 		 * be fixed */
-		token = PyLong_FromLongLong(wcstoll(buffer, &buffer_end, 0));
-		if(buffer_end == buffer || *buffer_end != 0) {
+		token = PyLong_FromLongLong(wcstoll(start, &conversion_end, 0));
+		if(conversion_end == start || *conversion_end != 0) {
 			/*
 			 * wcstoll() couldn't convert the token, emulate
 			 * long()'s error message
 			 */
 
 			Py_XDECREF(token);
-			token = PyUnicode_FromWideChar(buffer, -1);
+			token = PyUnicode_FromWideChar(start, -1);
 			PyErr_Format(PyExc_ValueError, "invalid literal for long(): '%U'", token);
 			Py_DECREF(token);
 			token = NULL;
