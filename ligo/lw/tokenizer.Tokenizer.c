@@ -684,8 +684,8 @@ static PyObject *attribute_get_data(PyObject *obj, void *data)
 
 
 static struct PyMethodDef methods[] = {
-	{"append", append, METH_O, "Append a unicode object to the tokenizer's internal buffer.  Also accepts str objects as input."},
-	{"set_types", set_types, METH_O, "Set the types to be used cyclically for token parsing.  This function accepts an iterable of callables.  Each callable will be passed the token to be converted as a unicode string.  Special fast-paths are included to handle the Python builtin types float, int, long, str, and unicode.  The default is to return all tokens as unicode objects."},
+	{"append", append, METH_O, "Append a unicode string object to the tokenizer's internal buffer."},
+	{"set_types", set_types, METH_O, "Set the types to be used cyclically for token parsing.  This function accepts an iterable of callables.  Each callable will be passed the token to be converted as a unicode string.  Special fast-paths are included to handle the Python builtin types float, int, long, and str.  The default is to return all tokens as unicode string objects."},
 	{NULL,}
 };
 
@@ -705,15 +705,15 @@ PyTypeObject ligolw_Tokenizer_Type = {
 "(usually comma-) delimited text streams into sequences of Python objects.  An\n" \
 "instance is created by calling the class with the delimiter character as the\n" \
 "single argument.  Text is appended to the internal buffer by passing it to the\n" \
-"append() method.  Tokens are extracted by iterating over the instance.  The\n" \
+".append() method.  Tokens are extracted by iterating over the instance.  The\n" \
 "Tokenizer is able to directly extract tokens as various Python types.  The\n" \
-"set_types() method is passed a sequence of the types to which tokens are to be\n" \
+".set_types() method is passed a sequence of the types to which tokens are to be\n" \
 "converted.  The types will be used in order, cyclically.  For example, passing\n" \
 "[int] to set_types() causes all tokens to be converted to integers, while\n" \
 "[str, int] causes the first token to be returned as a string, the second as an\n" \
 "integer, then the third as a string again, and so on.  The default is to\n" \
 "extract all tokens as strings.  If a token type is set to None then the\n" \
-"corresponding tokens are skipped.  For example, invoking set_types() with\n" \
+"corresponding tokens are skipped.  For example, invoking .set_types() with\n" \
 "[int, None] causes the first token to be converted to an integer, the second\n" \
 "to be skipped the third to be converted to an integer, and so on.  This can\n" \
 "be used to improve parsing performance when only a subset of the input stream\n" \
@@ -731,10 +731,10 @@ PyTypeObject ligolw_Tokenizer_Type = {
 "\n" \
 "Notes.  The last token will not be extracted until a delimiter character is\n" \
 "seen to terminate it.  Tokens can be quoted with '\"' characters, which will\n" \
-"removed before conversion to the target type.  An empty token (two delimiters\n" \
-"with only whitespace between them) is returned as None regardless of the\n" \
-"requested type.  To prevent a zero-length string token from being interpreted\n" \
-"as None, place it in quotes.",
+"be removed before conversion to the target type.  An empty token (two\n" \
+"delimiters with only whitespace between them) is returned as None regardless\n" \
+"of the requested type.  To prevent a zero-length string token from being\n" \
+"interpreted as None, place it in quotes.",
 	.tp_flags = Py_TPFLAGS_DEFAULT,
 	.tp_init = __init__,
 	.tp_iter = __iter__,
