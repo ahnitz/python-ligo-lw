@@ -156,7 +156,12 @@ static int add_to_data(ligolw_Tokenizer *tokenizer, PyObject *unicode)
 /*
  * Shift the contents of the tokenizer's buffer so that the data starting
  * at pos is moved to the start of the buffer.  When moving data, add 1 to
- * the length to also move the null terminator.
+ * the length to also move the null terminator.  Only at most 1 token can
+ * remain in the buffer, so the volume of data copied will usually not be
+ * more than a few bytes.  It's not worth trying to avoid this by using a
+ * circular buffer.  That would complicate token parsing elsewhere since
+ * each token's bytes could no longer be trusted to be continguous in
+ * memory.
  */
 
 
