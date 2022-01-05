@@ -79,8 +79,6 @@ typedef struct {
 	PyObject **type;
 	/* delimiter character to be used in parsing */
 	wchar_t delimiter;
-	/* the character(s) to interpret as a quote character */
-	const wchar_t *quote_characters;
 	/* size of internal buffer, minus null terminator */
 	Py_ssize_t allocation;
 	/* internal buffer */
@@ -326,7 +324,7 @@ static PyObject *next_token(ligolw_Tokenizer *tokenizer, wchar_t **start, wchar_
 	while(iswspace(*pos))
 		if(++pos >= bailout)
 			goto stop_iteration;
-	if(wcschr(tokenizer->quote_characters, *pos)) {
+	if(wcschr(default_quote_characters, *pos)) {
 		/*
 		 * Found a quoted token.
 		 */
@@ -500,7 +498,6 @@ static int __init__(PyObject *self, PyObject *args, PyObject *kwds)
 	}
 
 	PyUnicode_AsWideChar(arg, &tokenizer->delimiter, 1);
-	tokenizer->quote_characters = default_quote_characters;
 	tokenizer->types = malloc(1 * sizeof(*tokenizer->types));
 	tokenizer->types_length = &tokenizer->types[1];
 	tokenizer->types[0] = (PyObject *) &PyUnicode_Type;
