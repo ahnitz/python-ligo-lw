@@ -1,3 +1,13 @@
+python-ligo-lw (1.8.1-1) unstable; urgency=medium
+
+  * ligolw_segments:  fix AttributeError
+  * remove ilwd from list of modules in __init__.py
+  * bump debian/compat to 10
+  * fix an invalid type in the demo document used for testing (real8 --> real_8)
+  * correct release date and time for 1.8.0
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Mon, 17 Jan 2022 20:45:00 +0900
+
 python-ligo-lw (1.8.0-1) unstable; urgency=medium
 
   * adjust dbtables.workingcopy error path behaviour
