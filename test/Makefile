@@ -67,7 +67,7 @@ ligolw_test05 :
 	FILENAME=$(shell mktemp --suffix .xml.xz) && { ligolw_add --output $${FILENAME} ligolw_sqlite_test_input.xml.gz && xz --test $${FILENAME} && $(printpassfail) ; } ; rm -f $${FILENAME}
 	@echo "<=== end $@ ==="
 
-ligolw_print_test ligolw_sqlite_test :
+ligolw_print_test ligolw_segments_test ligolw_sqlite_test :
 	@echo "=== start $@ ===>"
 	sh $@.sh && $(printpassfail)
 	@echo "<=== end $@ ==="
