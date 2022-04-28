@@ -168,110 +168,83 @@ class instrumentsproperty(object):
 		self.name = name
 
 	@staticmethod
-	def get(ifos):
+	def get(instruments):
 		"""
 		Parse the values stored in the "ifos" and "instruments"
 		columns found in many tables.  This function is mostly for
 		internal use by the .instruments properties of the
-		corresponding row classes.  The mapping from input to
-		output is as follows (rules are applied in order):
+		corresponding row classes.
 
-		input is None --> output is None
+		If the input is None, then the output is None.  Otherwise,
+		the input is split on ",", the resulting strings stripped
+		of leading and trailing whitespace, and the sequence of
+		non-zero length strings that remain is returned as a set
+		(orderless sequence, with unique elements).
 
-		input contains "," --> output is set of strings split on
-		"," with leading and trailing whitespace stripped from each
-		piece and empty strings removed from the set
-
-		input contains "+" --> output is set of strings split on
-		"+" with leading and trailing whitespace stripped from each
-		piece and empty strings removed from the set
-
-		else, after stripping input of leading and trailing
-		whitespace,
-
-		input has an even length greater than two --> output is set
-		of two-character pieces
-
-		input is a non-empty string --> output is a set containing
-		input as single value
-
-		else output is an empty set.
-
-		NOTE:  the complexity of this algorithm is a consequence of
-		there being several conventions in use for encoding a set
-		of instruments into one of these columns;  it has been
-		proposed that L.L.W.  documents standardize on the
-		comma-delimited variant of the encodings recognized by this
-		function, and for this reason the inverse function,
-		instrumentsproperty.set(), implements that encoding only.
-
-		NOTE:  to force a string containing an even number of
-		characters to be interpreted as a single instrument name
-		and not to be be split into two-character pieces, add a ","
-		character to the end to force the comma-delimited decoding
-		to be used.  instrumentsproperty.set() does this for you.
+		NOTE:  in the past, many tools relied on the convention
+		that instrument names be exactly 2 characters long, and so
+		sets of instruments were represented by simply
+		concatenating the names as there was no ambiguity in how to
+		split the result back into a collection of names.  For a
+		while, some tools encoded sets of instrument names by
+		delimiting them with a "+" character.  This decoder used to
+		support all of these encodings, including the modern
+		","-delimited encoding, by using a complex heuristic set of
+		rules to auto-select the correct decode algorithm.  Because
+		this operation is performend an enormous number of times
+		when processing typical documents, this eventually proved
+		to be a significant performance burden.  For this reason,
+		this code now only supports the ","-delimited encoding.
+		For over a decade, the the corresponding encoder in this
+		library has only generated documents using the
+		","-delimited encoding, so there should no longer be any
+		documents in active use that rely on one of the older
+		encodings.  However, if you find yourself trying to read a
+		very old document be aware that instrument name sets stored
+		in the document might not be decoded the way the original
+		tool that wrote the document intended, and you should be
+		aware of the possible need to do some format translation.
 
 		Example:
 
-		>>> print(instrumentsproperty.get(None))
-		None
+		>>> assert instrumentsproperty.get(None) is None
 		>>> assert instrumentsproperty.get("") == set([])
 		>>> assert instrumentsproperty.get("  ,  ,,") == set([])
 		>>> assert instrumentsproperty.get("H1") == set(['H1'])
-		>>> assert instrumentsproperty.get("SWIFT") == set(['SWIFT'])
-		>>> assert instrumentsproperty.get("H1L1") == set(['H1', 'L1'])
-		>>> assert instrumentsproperty.get("H1L1,") == set(['H1L1'])
+		>>> assert instrumentsproperty.get("H1,") == set(['H1'])
 		>>> assert instrumentsproperty.get("H1,L1") == set(['H1', 'L1'])
-		>>> assert instrumentsproperty.get("H1+L1") == set(['H1', 'L1'])
+		>>> assert instrumentsproperty.get("H1L1") == set(['H1L1'])
+		>>> assert instrumentsproperty.get("H1+L1") == set(['H1+L1'])
 		"""
-		if ifos is None:
+		if instruments is None:
 			return None
-		if "," in ifos:
-			result = set(ifo.strip() for ifo in ifos.split(","))
-			result.discard("")
-			return result
-		if "+" in ifos:
-			result = set(ifo.strip() for ifo in ifos.split("+"))
-			result.discard("")
-			return result
-		ifos = ifos.strip()
-		if len(ifos) > 2 and not len(ifos) % 2:
-			# if ifos is a string with an even number of
-			# characters greater than two, split it into
-			# two-character pieces.  FIXME:  remove this when
-			# the inspiral codes don't write ifos strings like
-			# this anymore
-			return set(ifos[n:n+2] for n in range(0, len(ifos), 2))
-		if ifos:
-			return set([ifos])
-		return set()
+		instruments = set(instrument.strip() for instrument in instruments.split(","))
+		instruments.discard("")
+		return instruments
 
 	@staticmethod
 	def set(instruments):
 		"""
 		Convert an iterable of instrument names into a value
-		suitable for storage in the "ifos" column found in many
-		tables.  This function is mostly for internal use by the
-		.instruments properties of the corresponding row classes.
-		The input can be None or an iterable of zero or more
-		instrument names, none of which may be zero-length, consist
-		exclusively of spaces, or contain "," or "+" characters.
-		The output is a single string containing the unique
-		instrument names concatenated using "," as a delimiter.
-		instruments will only be iterated over once and so can be a
-		generator expression.  Whitespace is allowed in instrument
-		names but might not be preserved.  Repeated names will not
-		be preserved.
+		suitable for storage in the "ifos" or "instruments" columns
+		found in many tables.  This function is mostly for internal
+		use by the .instruments properties of the corresponding row
+		classes.  The input be None or an iterable of zero or more
+		instrument names, none of which may be zero-length, contain
+		whitespace, or contain "," characters.  The output is a
+		single string containing the unique instrument names
+		concatenated using "," as a delimiter.  instruments only be
+		iterated over once and so can be a generator expression.
 
-		NOTE:  in the special case that there is 1 instrument name
-		in the iterable and it has an even number of characters > 2
-		in it, the output will have a "," appended in order to
-		force instrumentsproperty.get() to parse the string back
-		into a single instrument name.  This is a special case
-		included temporarily to disambiguate the encoding until all
-		codes have been ported to the comma-delimited encoding.
-		This behaviour will be discontinued at that time.  DO NOT
-		WRITE CODE THAT RELIES ON THIS!  You have been warned.
+		NOTE:  for performance reasons, because of the large number
+		of times this operation is performed when processing a
+		typical document, very little error checking is performed.
+		If any of the instrument names fail to meet the criteria
+		listed above, that fact will typically go unnoticed.  The
+		document that results will be decodable, under no
+		circumstances will an unreadable document be generated, but
+		what form the decoded instruments string takes is
+		undefined.
 
 		Example:
 
@@ -282,21 +255,9 @@ class instrumentsproperty(object):
 		>>> assert instrumentsproperty.set(("H1","H1","H1")) == 'H1'
 		>>> assert instrumentsproperty.set(("H1","L1")) == 'H1,L1'
 		>>> assert instrumentsproperty.set(("SWIFT",)) == 'SWIFT'
-		>>> assert instrumentsproperty.set(("H1L1",)) == 'H1L1,'
+		>>> assert instrumentsproperty.set(("H1L1",)) == 'H1L1'
 		"""
-		if instruments is None:
-			return None
-		_instruments = sorted(set(instrument.strip() for instrument in instruments))
-		# safety check:  refuse to accept blank names, or names
-		# with commas or pluses in them as they cannot survive the
-		# encode/decode process
-		if not all(_instruments) or any("," in instrument or "+" in instrument for instrument in _instruments):
-			raise ValueError(instruments)
-		if len(_instruments) == 1 and len(_instruments[0]) > 2 and not len(_instruments[0]) % 2:
-			# special case disambiguation.  FIXME:  remove when
-			# everything uses the comma-delimited encoding
-			return "%s," % _instruments[0]
-		return ",".join(_instruments)
+		return None if instruments is None else ",".join(sorted(set(instruments)))
 
 	def __get__(self, obj, cls = None):
 		return self.get(getattr(obj, self.name))
