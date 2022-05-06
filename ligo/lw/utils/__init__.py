@@ -421,9 +421,7 @@ def load_filename(filename, verbose = False, **kwargs):
 	if verbose:
 		sys.stderr.write("reading %s ...\n" % (("'%s'" % filename) if filename is not None else "stdin"))
 	if filename is None:
-		# In Python 3, ``sys.stdin`` has an attribute called
-		# ``buffer`` that is the underyling byte-oriented stream.
-		xmldoc = load_fileobj(sys.stdin.buffer if hasattr(sys.stdin, "buffer") else sys.stdin, **kwargs)
+		xmldoc = load_fileobj(sys.stdin.buffer, **kwargs)
 	else:
 		with open(filename, "rb") as fileobj:
 			xmldoc = load_fileobj(fileobj, **kwargs)
