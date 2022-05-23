@@ -1,4 +1,4 @@
-# Copyright (C) 2006--2013,2016,2017--2019  Kipp Cannon
+# Copyright (C) 2006--2013,2016--2019,2021,2022  Kipp Cannon
 #
 # This program is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by the
@@ -233,6 +233,12 @@ FromPyType = FromPyTypeCls({
 Look-up table used to guess LIGO Light-Weight XML data type strings from
 Python types.  This table is used when auto-generating XML from Python
 objects.
+
+Python objects that are instances of one of the types in this look-up table
+are mapped to the LIGO Light-Weight XML type indicated.  If a Python object
+is not an instance of exactly one of the types in this look-up table, but
+it is an instance of a subclass of one of these types, then it is treated
+as that type and mapped to the corresponding LIGO Light-Weight XML type.
 """
 
 
