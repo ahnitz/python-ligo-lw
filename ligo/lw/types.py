@@ -252,6 +252,13 @@ as that type and mapped to the corresponding LIGO Light-Weight XML type.
 
 
 ToNumPyType = {
+	"char_s": "U20",
+	"char_v": "U64",
+	"ilwd:char": "U64",
+	"ilwd:char_u": "bytes",
+	"blob": "bytes",
+	"lstring": "U255",
+	"string": "U255",
 	"int_2s": "int16",
 	"int_2u": "uint16",
 	"int_4s": "int32",
