@@ -30,6 +30,7 @@ process and process_params tables in LIGO Light-Weight XML documents.
 """
 
 
+import warnings
 from .. import __author__, __date__, __version__
 from .. import lsctables
 
@@ -70,62 +71,6 @@ def doc_includes_process(xmldoc, program):
 	return program in lsctables.ProcessTable.get_table(xmldoc).getColumnByName("program")
 
 
-def register_to_xmldoc(xmldoc, program, paramdict, **kwargs):
-	"""
-	Ensure the document has sensible process and process_params tables,
-	synchronize the process table's ID generator, add a new row to the
-	table for the current process, and add rows to the process_params
-	table describing the options in paramdict.  program is the name of
-	the program.  paramdict is expected to be the .__dict__ contents of
-	an optparse.OptionParser options object, or the equivalent.  Any
-	keyword arguments are passed to lsctables.Process.initialized(),
-	see that method for more information.  The new process row object
-	is returned.
-
-	Example
-
-	>>> from ligo.lw import ligolw
-	>>> xmldoc = ligolw.Document()
-	>>> xmldoc.appendChild(ligolw.LIGO_LW())	# doctest: +ELLIPSIS
-	<ligo.lw.ligolw.LIGO_LW object at ...>
-	>>> process = register_to_xmldoc(xmldoc, "program_name", {"verbose": True})
-	"""
-	try:
-		proctable = lsctables.ProcessTable.get_table(xmldoc)
-	except ValueError:
-		proctable = lsctables.New(lsctables.ProcessTable)
-		xmldoc.childNodes[0].appendChild(proctable)
-
-	proctable.sync_next_id()
-	process = proctable.RowType.initialized(program = program, process_id = proctable.get_next_id(), **kwargs)
-	proctable.append(process)
-
-	try:
-		paramtable = lsctables.ProcessParamsTable.get_table(xmldoc)
-	except ValueError:
-		paramtable = lsctables.New(lsctables.ProcessParamsTable)
-		xmldoc.childNodes[0].appendChild(paramtable)
-
-	for name, values in paramdict.items():
-		# change the name back to the form it had on the command
-		# line
-		name = "--%s" % name.replace("_", "-")
-
-		# skip options that aren't set;  ensure values is something
-		# that can be iterated over even if there is only one value
-		if values is None:
-			continue
-		elif values is True or values is False:
-			# boolen options have no value recorded
-			values = [None]
-		elif not isinstance(values, list):
-			values = [values]
-
-		for value in values:
-			paramtable.append(paramtable.RowType(
-				program = process.program,
-				process_id = process.process_id,
-				param = name,
-				pyvalue = value
-			))
-	return process
+def register_to_xmldoc(xmldoc, *args, **kwargs):
+	warnings.warn("ligo.lw.utils.process.register_to_xmldoc() is deprecated.  use ligo.lw.ligolw.Document.register_process() instead.")
+	return xmldoc.register_process(*args, **kwargs)

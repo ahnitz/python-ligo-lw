@@ -2081,6 +2081,105 @@ class Document(EmptyElement):
 	tagName = "Document"
 	validchildren = frozenset(["LIGO_LW"])
 
+	def ensure_llw_at_toplevel(self):
+		"""
+		Make sure the leading child node is a LIGO_LW element.
+		Used in a variety of places for sanity checking document
+		structure before starting other operations.  Returns self
+		on success, or raises ValueError if the 0th child node of
+		self is not a LIGO_LW element.
+		"""
+		try:
+			LLWelem = self.childNodes[0]
+		except IndexError:
+			raise ValueError("empty document (must have %s element at top level)" % LIGO_LW.tagName)
+		if LLWelem.tagName != LIGO_LW.tagName:
+			raise ValueError("expected %s element at top level of document, found %s" % (LIGO_LW.tagName, LLWelem.tagName))
+		return self
+
+	def register_process(self, program, paramdict, **kwargs):
+		"""
+		Ensure the document has sensible process and process_params
+		tables, synchronize the process table's ID generator, add a
+		new row to the table for the current process, and add rows
+		to the process_params table describing the options in
+		paramdict.  program is the name of the program.  paramdict
+		is expected to be the .__dict__ contents of an
+		optparse.OptionParser options object, or the equivalent.
+		Any keyword arguments are passed to
+		lsctables.Process.initialized(), see that method for more
+		information.  The new process row object is returned.
+
+		The document tree must have a LIGO_LW element at the top
+		level.  ValueError is raised if this condition is not met.
+
+		Example
+
+		>>> xmldoc = Document()
+		>>> xmldoc.appendChild(LIGO_LW())	# doctest: +ELLIPSIS
+		<ligo.lw.ligolw.LIGO_LW object at ...>
+		>>> process = xmldoc.register_process("program_name", {"verbose": True})
+		"""
+		# defer import to avoid cyclic import loop
+		# FIXME:  this is a likely a temporary problem.  I don't
+		# have a specific plan in mind, yet, but at the time of
+		# writing the development goal is to reduce ligo.lw to as
+		# few imports (in application code) as possible, and I
+		# can't see a reason to retain lsctables as a separate
+		# required import at this time.  I also don't want to
+		# simply dump all of its symbols into this module's
+		# namespace.  I don't know what the solution will look
+		# like, but whatever it is should remove the need to hide
+		# this import in here like this.
+		from . import lsctables
+
+		# make sure the top-level element is a LIGO_LW element
+		self.ensure_llw_at_toplevel()
+
+		# retrieve the process table, or add one
+		try:
+			proctable = lsctables.ProcessTable.get_table(self)
+		except ValueError:
+			proctable = lsctables.New(lsctables.ProcessTable)
+			LLWelem.appendChild(proctable)
+
+		# add an entry to the process table
+		proctable.sync_next_id()
+		process = proctable.RowType.initialized(program = program, process_id = proctable.get_next_id(), **kwargs)
+		proctable.append(process)
+
+		# retrieve the process_params table, or add one
+		try:
+			paramtable = lsctables.ProcessParamsTable.get_table(self)
+		except ValueError:
+			paramtable = lsctables.New(lsctables.ProcessParamsTable)
+			LLWelem.appendChild(paramtable)
+
+		# add entries to the process_params table
+		for name, values in paramdict.items():
+			# change the name back to the form it had on the command
+			# line
+			name = "--%s" % name.replace("_", "-")
+
+			# skip options that aren't set;  ensure values is something
+			# that can be iterated over even if there is only one value
+			if values is None:
+				continue
+			elif values is True or values is False:
+				# boolen options have no value recorded
+				values = [None]
+			elif not isinstance(values, list):
+				values = [values]
+
+			for value in values:
+				paramtable.append(paramtable.RowType(
+					program = process.program,
+					process_id = process.process_id,
+					param = name,
+					pyvalue = value
+				))
+		return process
+
 	def write(self, fileobj = sys.stdout, xsl_file = None):
 		"""
 		Write the document.

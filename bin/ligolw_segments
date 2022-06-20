@@ -43,7 +43,6 @@ from ligo.lw import ligolw
 from ligo.lw import lsctables
 from ligo.lw import utils as ligolw_utils
 from ligo.lw.utils import segments as ligolw_segments
-from ligo.lw.utils import process as ligolw_process
 
 
 __author__ = "Kipp Cannon <kipp.cannon@ligo.org>"
@@ -112,7 +111,6 @@ if options.ilwdchar_compat:
 	from glue.ligolw import lsctables
 	from glue.ligolw import utils as ligolw_utils
 	from glue.ligolw.utils import segments as ligolw_segments
-	from glue.ligolw.utils import process as ligolw_process
 
 
 @lsctables.use_in
@@ -145,7 +143,7 @@ for url in urls:
 	#
 
 
-	process = ligolw_process.register_to_xmldoc(xmldoc, "ligolw_segments", paramdict, version = __version__, cvs_repository = "lscsoft", comment = options.comment)
+	process = xmldoc.register_process("ligolw_segments", paramdict, version = __version__, cvs_repository = "lscsoft", comment = options.comment)
 
 
 	#
