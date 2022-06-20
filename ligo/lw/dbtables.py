@@ -501,7 +501,7 @@ def get_xml(connection, table_names = None):
 
 	for table_name in table_names:
 		# build the table document tree.  copied from
-		# lsctables.New()
+		# ligolw.Table.new()
 		try:
 			cls = TableByName[table_name]
 		except KeyError:

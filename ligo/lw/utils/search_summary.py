@@ -53,7 +53,7 @@ def append_search_summary(xmldoc, process, **kwargs):
 	try:
 		tbl = lsctables.SearchSummaryTable.get_table(xmldoc)
 	except ValueError:
-		tbl = xmldoc.childNodes[0].appendChild(lsctables.New(lsctables.SearchSummaryTable))
+		tbl = xmldoc.childNodes[0].appendChild(lsctables.SearchSummaryTable.new())
 	row = tbl.RowType.initialized(process, **kwargs)
 	tbl.append(row)
 	return row

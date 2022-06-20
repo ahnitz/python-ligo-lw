@@ -82,7 +82,6 @@ import os
 import socket
 import time
 import warnings
-from xml import sax
 
 
 from ligo import segments
@@ -126,33 +125,8 @@ from . import types as ligolwtypes
 
 
 def New(cls, columns = None, **kwargs):
-	"""
-	Construct a pre-defined LSC table.  The optional columns argument
-	is a sequence of the names of the columns the table is to be
-	constructed with.  If columns = None, then the table is constructed
-	with all valid columns (use columns = [] to create a table with no
-	columns).
-
-	Example:
-
-	>>> import sys
-	>>> tbl = New(ProcessTable, ["process_id", "start_time", "end_time", "comment"])
-	>>> tbl.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
-	<Table Name="process:table">
-		<Column Name="process_id" Type="int_8s"/>
-		<Column Name="start_time" Type="int_4s"/>
-		<Column Name="end_time" Type="int_4s"/>
-		<Column Name="comment" Type="lstring"/>
-		<Stream Name="process:table" Delimiter="," Type="Local">
-		</Stream>
-	</Table>
-	"""
-	new = cls(sax.xmlreader.AttributesImpl({"Name": cls.TableName.enc(cls.tableName)}), **kwargs)
-	for name in columns if columns is not None else sorted(new.validcolumns):
-		new.appendColumn(name)
-	new._end_of_columns()
-	new.appendChild(new.Stream(sax.xmlreader.AttributesImpl({"Name": new.getAttribute("Name"), "Delimiter": new.Stream.Delimiter.default, "Type": new.Stream.Type.default})))
-	return new
+	warnings.warn("ligo.lw.lsctables.New() is deprecated.  use ligo.lw.Table.new() instead.")
+	return cls.new(columns = columns, **kwargs)
 
 
 def HasNonLSCTables(elem):

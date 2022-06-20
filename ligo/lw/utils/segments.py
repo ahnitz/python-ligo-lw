@@ -447,17 +447,17 @@ class LigolwSegments(set):
 		try:
 			self.segment_def_table = lsctables.SegmentDefTable.get_table(xmldoc)
 		except ValueError:
-			self.segment_def_table = xmldoc.childNodes[0].appendChild(lsctables.New(lsctables.SegmentDefTable, LigolwSegmentList.segment_def_columns))
+			self.segment_def_table = xmldoc.childNodes[0].appendChild(lsctables.SegmentDefTable.new(LigolwSegmentList.segment_def_columns))
 
 		try:
 			self.segment_sum_table = lsctables.SegmentSumTable.get_table(xmldoc)
 		except ValueError:
-			self.segment_sum_table = xmldoc.childNodes[0].appendChild(lsctables.New(lsctables.SegmentSumTable, LigolwSegmentList.segment_sum_columns))
+			self.segment_sum_table = xmldoc.childNodes[0].appendChild(lsctables.SegmentSumTable.new(LigolwSegmentList.segment_sum_columns))
 
 		try:
 			self.segment_table = lsctables.SegmentTable.get_table(xmldoc)
 		except ValueError:
-			self.segment_table = xmldoc.childNodes[0].appendChild(lsctables.New(lsctables.SegmentTable, LigolwSegmentList.segment_columns))
+			self.segment_table = xmldoc.childNodes[0].appendChild(lsctables.SegmentTable.new(LigolwSegmentList.segment_columns))
 
 		#
 		# Transform segment tables into a collection of

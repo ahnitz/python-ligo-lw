@@ -57,7 +57,7 @@ def get_coinc_def_id(xmldoc, search, search_coinc_type, create_new = True, descr
 			raise
 		# FIXME:  doesn't work if the document is stored in a
 		# database.
-		coincdeftable = lsctables.New(lsctables.CoincDefTable)
+		coincdeftable = lsctables.CoincDefTable.new()
 		xmldoc.childNodes[0].appendChild(coincdeftable)
 	# make sure the next_id attribute is correct
 	coincdeftable.sync_next_id()

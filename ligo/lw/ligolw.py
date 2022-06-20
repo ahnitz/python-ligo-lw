@@ -536,7 +536,7 @@ class LIGO_LW(EmptyElement):
 		>>> from ligo.lw import ligolw
 		>>> from ligo.lw import lsctables
 		>>> xmldoc = ligolw.Document()
-		>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
+		>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.SnglInspiralTable.new())
 		[]
 		>>> xmldoc.childNodes[-1].reassign_table_row_ids()
 		"""
@@ -989,6 +989,70 @@ class Table(EmptyElement, list):
 
 
 	#
+	# Constructors
+	#
+
+
+	@classmethod
+	def new(cls, columns = None, **kwargs):
+		"""
+		Construct a pre-defined LSC table.  The optional columns
+		argument is a sequence of the names of the columns the
+		table is to be constructed with.  If columns = None, then
+		the table is constructed with all valid columns (use
+		columns = [] to create a table with no columns).
+
+		NOTE:  this method can only be used with subclasses that
+		provide the metadata required to create the Column
+		elements.
+
+		NOTE:  this method cannot be used with documents stored in
+		databases.
+
+		Example:
+
+		>>> from ligo.lw import lsctables
+		>>> import sys
+		>>> tbl = lsctables.ProcessTable.new(["process_id", "start_time", "end_time", "comment"])
+		>>> tbl.write(sys.stdout)	# doctest: +NORMALIZE_WHITESPACE
+		<Table Name="process:table">
+			<Column Name="process_id" Type="int_8s"/>
+			<Column Name="start_time" Type="int_4s"/>
+			<Column Name="end_time" Type="int_4s"/>
+			<Column Name="comment" Type="lstring"/>
+			<Stream Name="process:table" Delimiter="," Type="Local">
+			</Stream>
+		</Table>
+		"""
+		new = cls(AttributesImpl({"Name": cls.TableName.enc(cls.tableName)}), **kwargs)
+		for name in columns if columns is not None else sorted(new.validcolumns):
+			new.appendColumn(name)
+		new._end_of_columns()
+		new.appendChild(new.Stream(AttributesImpl({"Name": new.getAttribute("Name"), "Delimiter": new.Stream.Delimiter.default, "Type": new.Stream.Type.default})))
+		return new
+
+	def copy(self):
+		"""
+		Construct and return a new Table document subtree whose
+		structure is the same as this Table, that is it has the
+		same Columns etc..  The rows are not copied.  Note that a
+		fair amount of metadata is shared between the original and
+		new Tables.  In particular, a copy of the Table object
+		itself is created (but with no rows), and copies of the
+		child nodes are created.  All other object references are
+		shared between the two instances, such as the RowType
+		attribute on the Table object.
+		"""
+		new = copy.copy(self)
+		new.childNodes = []	# got reference to original list
+		for elem in self.childNodes:
+			new.appendChild(copy.copy(elem))
+		del new[:]
+		new._end_of_columns()
+		return new
+
+
+	#
 	# Table retrieval
 	#
 
@@ -1017,7 +1081,7 @@ class Table(EmptyElement, list):
 		>>> from ligo.lw import ligolw
 		>>> from ligo.lw import lsctables
 		>>> xmldoc = ligolw.Document()
-		>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.New(lsctables.SnglInspiralTable))
+		>>> xmldoc.appendChild(ligolw.LIGO_LW()).appendChild(lsctables.SnglInspiralTable.new())
 		[]
 		>>> # find Table
 		>>> sngl_inspiral_table = lsctables.SnglInspiralTable.get_table(xmldoc)
@@ -1030,32 +1094,6 @@ class Table(EmptyElement, list):
 		if len(elems) != 1:
 			raise ValueError("document must contain exactly one %s Table" % cls.TableName(name))
 		return elems[0]
-
-
-	#
-	# Constructors
-	#
-
-
-	def copy(self):
-		"""
-		Construct and return a new Table document subtree whose
-		structure is the same as this Table, that is it has the
-		same Columns etc..  The rows are not copied.  Note that a
-		fair amount of metadata is shared between the original and
-		new Tables.  In particular, a copy of the Table object
-		itself is created (but with no rows), and copies of the
-		child nodes are created.  All other object references are
-		shared between the two instances, such as the RowType
-		attribute on the Table object.
-		"""
-		new = copy.copy(self)
-		new.childNodes = []	# got reference to original list
-		for elem in self.childNodes:
-			new.appendChild(copy.copy(elem))
-		del new[:]
-		new._end_of_columns()
-		return new
 
 
 	#
@@ -1072,7 +1110,7 @@ class Table(EmptyElement, list):
 		Example:
 
 		>>> from ligo.lw import lsctables
-		>>> tbl = lsctables.New(lsctables.SnglInspiralTable)
+		>>> tbl = lsctables.SnglInspiralTable.new()
 		>>> col = tbl.getColumnByName("mass1")
 		"""
 		try:
@@ -1093,7 +1131,7 @@ class Table(EmptyElement, list):
 		Example:
 
 		>>> from ligo.lw import lsctables
-		>>> tbl = lsctables.New(lsctables.ProcessParamsTable, [])
+		>>> tbl = lsctables.ProcessParamsTable.new([])
 		>>> col = tbl.appendColumn("param")
 		>>> print(col.getAttribute("Name"))
 		param
@@ -1289,7 +1327,7 @@ class Table(EmptyElement, list):
 		Example:
 
 		>>> from ligo.lw import lsctables
-		>>> tbl = lsctables.New(lsctables.ProcessTable)
+		>>> tbl = lsctables.ProcessTable.new()
 		>>> print(tbl.sync_next_id())
 		0
 		"""
@@ -2145,7 +2183,7 @@ class Document(EmptyElement):
 		try:
 			proctable = lsctables.ProcessTable.get_table(self)
 		except ValueError:
-			proctable = lsctables.New(lsctables.ProcessTable)
+			proctable = lsctables.ProcessTable.new()
 			LLWelem.appendChild(proctable)
 
 		# add an entry to the process table
@@ -2157,7 +2195,7 @@ class Document(EmptyElement):
 		try:
 			paramtable = lsctables.ProcessParamsTable.get_table(self)
 		except ValueError:
-			paramtable = lsctables.New(lsctables.ProcessParamsTable)
+			paramtable = lsctables.ProcessParamsTable.new()
 			LLWelem.appendChild(paramtable)
 
 		# add entries to the process_params table
