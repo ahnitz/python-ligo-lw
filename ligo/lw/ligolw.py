@@ -959,6 +959,34 @@ class Table(EmptyElement, list):
 		"""
 		return [ligolwtypes.ToPyType[child.Type] for child in self.getElementsByTagName(Column.tagName)]
 
+	@classmethod
+	def CheckElement(cls, elem):
+		"""
+		Return True if element is a Table element whose Name
+		attribute matches the .tableName attribute of this class ;
+		return False otherwise.  See also .CheckProperties().
+		"""
+		return cls.CheckProperties(elem.tagName, elem.attributes)
+
+	@classmethod
+	def CheckProperties(cls, tagname, attrs):
+		"""
+		Return True if tagname and attrs are the XML tag name and
+		element attributes, respectively, of a Table element whose
+		Name attribute matches the .tableName attribute of this
+		class;  return False otherwise.  The Table parent class
+		does not provide a .tableName attribute, but sub-classes,
+		especially those in lsctables.py, do provide a value for
+		that attribute.  See also .CheckElement()
+
+		Example:
+
+		>>> from ligo.lw import lsctables
+		>>> lsctables.ProcessTable.CheckProperties("Table", {"Name": "process:table"})
+		True
+		"""
+		return tagname == cls.tagName and cls.TableName(attrs["Name"]) == cls.tableName
+
 
 	#
 	# Table retrieval
@@ -1003,6 +1031,12 @@ class Table(EmptyElement, list):
 			raise ValueError("document must contain exactly one %s Table" % cls.TableName(name))
 		return elems[0]
 
+
+	#
+	# Constructors
+	#
+
+
 	def copy(self):
 		"""
 		Construct and return a new Table document subtree whose
@@ -1022,36 +1056,6 @@ class Table(EmptyElement, list):
 		del new[:]
 		new._end_of_columns()
 		return new
-
-
-	@classmethod
-	def CheckElement(cls, elem):
-		"""
-		Return True if element is a Table element whose Name
-		attribute matches the .tableName attribute of this class ;
-		return False otherwise.  See also .CheckProperties().
-		"""
-		return cls.CheckProperties(elem.tagName, elem.attributes)
-
-
-	@classmethod
-	def CheckProperties(cls, tagname, attrs):
-		"""
-		Return True if tagname and attrs are the XML tag name and
-		element attributes, respectively, of a Table element whose
-		Name attribute matches the .tableName attribute of this
-		class;  return False otherwise.  The Table parent class
-		does not provide a .tableName attribute, but sub-classes,
-		especially those in lsctables.py, do provide a value for
-		that attribute.  See also .CheckElement()
-
-		Example:
-
-		>>> from ligo.lw import lsctables
-		>>> lsctables.ProcessTable.CheckProperties("Table", {"Name": "process:table"})
-		True
-		"""
-		return tagname == cls.tagName and cls.TableName(attrs["Name"]) == cls.tableName
 
 
 	#
@@ -1077,7 +1081,6 @@ class Table(EmptyElement, list):
 			# did not find exactly 1 matching child
 			raise KeyError(name)
 		return col
-
 
 	def appendColumn(self, name):
 		"""
@@ -1127,6 +1130,7 @@ class Table(EmptyElement, list):
 	# Row access
 	#
 
+
 	def appendRow(self, *args, **kwargs):
 		"""
 		Create and append a new row to this Table, then return it
@@ -1142,6 +1146,7 @@ class Table(EmptyElement, list):
 	#
 	# Element methods
 	#
+
 
 	def _verifyChildren(self, i):
 		"""
