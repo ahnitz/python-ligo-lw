@@ -175,9 +175,9 @@ class LigolwSegmentList(object):
 	>>> z.valid
 	[segment(0, 100)]
 
-	Because this is arithmetic expression is inconvenient to type,
-	slow, and incomprehensible, a special in-place arithmetic operation
-	named .update() is provided to implement this.
+	Because this arithmetic expression is inconvenient to type, slow to
+	evaluate, and incomprehensible, a special in-place arithmetic
+	operation named .update() is provided to implement this.
 
 	>>> z = LigolwSegmentList(x).update(y)
 	>>> z.active
