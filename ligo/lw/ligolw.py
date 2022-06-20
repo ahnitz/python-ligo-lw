@@ -143,8 +143,8 @@ class attributeproxy(property):
 	>>> # default is read-only
 	>>> Test.Scale.default = 2.
 	Traceback (most recent call last):
-	  File "<stdin>", line 1, in <module>
-	AttributeError: can't set attribute
+	    ...
+	AttributeError: can't set attribute 'default'
 	>>> # internally, value is stored as unicode (for XML)
 	>>> assert x.getAttribute("Scale") == "16"
 	>>> # deleting an attribute restores the default value if defined
@@ -459,7 +459,7 @@ class LLWNameAttr(str):
 	>>> # only lower-case Latin letters, numerals, and '_' are allowed
 	>>> x.Name = "Hello-world"
 	Traceback (most recent call last):
-	  File "<stdin>", line 1, in <module>
+	    ...
 	ValueError: invalid Name 'Hello-world'
 	"""
 	def __new__(cls, name):
@@ -1511,7 +1511,7 @@ class Column(EmptyElement):
 			'process'
 			>>> Column.ColumnName.table_name("process_id")
 			Traceback (most recent call last):
-			  File "<stdin>", line 1, in <module>
+			    ...
 			ValueError: table name not found in 'process_id'
 			"""
 			table_name = cls.dec_pattern.match(name).group("Table")
