@@ -235,6 +235,21 @@ class RewindableInputFile(object):
 
 
 class NoCloseFlushWrapper(object):
+	"""
+	File-like wrapper around a file object that intercepts .close()
+	method calls and replaces them with .flush().  Can be used as a
+	context manager.  .next(), .read(), .write(), .tell() and .flush()
+	are all passed through to the wrapped file object.
+
+	This is useful when writing data to a file object inside a function
+	using some kind of encoder.  It is convenient to use context
+	managers for error handling and clean-up but the file object should
+	not be closed when finished because the calling code expects to
+	have control returned to it with the file still open.  In some
+	cases there is no way to prevent an encoder from .close()ing a file
+	when it exits and cleans up, and this wrapper can be useful as a
+	work-around.
+	"""
 	def __init__(self, fileobj):
 		self.fileobj = fileobj
 		# avoid attribute look-ups
