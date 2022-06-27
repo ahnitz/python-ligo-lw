@@ -339,17 +339,16 @@ class SignalsTrap(object):
 	def __enter__(self):
 		self.oldhandlers = {}
 		self.deferred_signals = []
-		if self.trap_signals is None:
-			return self
-		for sig in self.trap_signals:
-			self.oldhandlers[sig] = signal.getsignal(sig)
-			signal.signal(sig, self.handler)
+		if self.trap_signals is not None:
+			for sig in set(self.trap_signals):
+				self.oldhandlers[sig] = signal.getsignal(sig)
+				signal.signal(sig, self.handler)
 		return self
 
 	def __exit__(self, *args):
 		# restore original handlers
-		for sig, oldhandler in self.oldhandlers.items():
-			signal.signal(sig, oldhandler)
+		while self.oldhandlers:
+			signal.signal(*self.oldhandlers.popitem())
 		# send ourselves the trapped signals in order
 		while self.deferred_signals:
 			os.kill(os.getpid(), self.deferred_signals.pop(0))
