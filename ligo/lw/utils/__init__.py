@@ -298,6 +298,36 @@ class NoCloseFlushWrapper(object):
 
 
 class SignalsTrap(object):
+	"""
+	Context manager that defers signals (by default SIGTERM and
+	SIGTSTP) for the lifetime of the context manager object.  On entry,
+	the context manager replaces the signal handlers for the requested
+	signals with a version that records the occurance of the given
+	signals.  On exit, the original signal handlers are restored, and
+	any signals that were received during the interveneing time are
+	resent to the current process in the order received.
+
+	This is useful to help prevent HTCondor from evicting or
+	terminating a job while it is in the process of writing a file.
+	The default signals are the signals used by HTCondor for these
+	purposes.  If a file write operation is wrapped in this context
+	manager, the eviction or job termination will occur after the file
+	is closed.  If the write process takes too long, HTCondor will
+	eventually lose patience and SIGKILL the process, but the grace
+	period is configurable, and admins can adjust it to be the length
+	of time they are willing to let a process try to finish writing a
+	file before it's forced off the cluster.
+
+	trap_signals may be an empty sequenced or None, in which case no
+	modification of signal handling is performed.  Repeats of signal
+	numbers in trap_signals are ignored.
+
+	NOTE:  the signal.signal() system call cannot be invoked from
+	threads, so code that uses this context manager to protect against
+	eviction, and that might be called from inside a thread, must
+	arrange for trap_signals to be set to None or an empty sequence to
+	disable this code.
+	"""
 	default_signals = (signal.SIGTERM, signal.SIGTSTP)
 
 	def __init__(self, trap_signals = default_signals):
