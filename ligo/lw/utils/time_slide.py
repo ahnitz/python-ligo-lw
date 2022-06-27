@@ -60,17 +60,8 @@ def get_time_slide_id(xmldoc, time_slide, create_new = None, superset_ok = False
 	created.  This effect of the create_new argument is in addition to
 	the effects described by the TimeSlideTable class.
 	"""
-	try:
-		tisitable = lsctables.TimeSlideTable.get_table(xmldoc)
-	except ValueError:
-		# table not found
-		if create_new is None:
-			raise
-		tisitable = lsctables.TimeSlideTable.new()
-		xmldoc.childNodes[0].appendChild(tisitable)
-	# make sure the next_id attribute is correct
+	tisitable = lsctables.TimeSlideTable.ensure_exists(xmldoc, create_new = create_new)
 	tisitable.sync_next_id()
-	# get the id
 	return tisitable.get_time_slide_id(time_slide, create_new = create_new, superset_ok = superset_ok, nonunique_ok = nonunique_ok)
 
 

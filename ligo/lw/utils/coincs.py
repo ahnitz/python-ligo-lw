@@ -49,17 +49,6 @@ def get_coinc_def_id(xmldoc, search, search_coinc_type, create_new = True, descr
 	new coinc_definer table in the document if one does not already
 	exist.
 	"""
-	try:
-		coincdeftable = lsctables.CoincDefTable.get_table(xmldoc)
-	except ValueError:
-		# table not found
-		if not create_new:
-			raise
-		# FIXME:  doesn't work if the document is stored in a
-		# database.
-		coincdeftable = lsctables.CoincDefTable.new()
-		xmldoc.childNodes[0].appendChild(coincdeftable)
-	# make sure the next_id attribute is correct
+	coincdeftable = lsctables.CoincDefTable.ensure_exists(xmldoc, create_new = create_new)
 	coincdeftable.sync_next_id()
-	# get the id
 	return coincdeftable.get_coinc_def_id(search, search_coinc_type, create_new = create_new, description = description)

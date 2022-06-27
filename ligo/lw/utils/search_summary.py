@@ -50,10 +50,7 @@ def append_search_summary(xmldoc, process, **kwargs):
 	search_summary table row.  Any keyword arguments are passed to the
 	.initialized() method of the SearchSummary row type.
 	"""
-	try:
-		tbl = lsctables.SearchSummaryTable.get_table(xmldoc)
-	except ValueError:
-		tbl = xmldoc.childNodes[0].appendChild(lsctables.SearchSummaryTable.new())
+	tbl = lsctables.SearchSummaryTable.ensure_exists(xmldoc)
 	row = tbl.RowType.initialized(process, **kwargs)
 	tbl.append(row)
 	return row

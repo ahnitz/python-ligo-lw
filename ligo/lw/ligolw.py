@@ -1051,6 +1051,39 @@ class Table(EmptyElement, list):
 		new._end_of_columns()
 		return new
 
+	@classmethod
+	def ensure_exists(cls, xmldoc, create_new = True, columns = None):
+		"""
+		A wrapper around .get_table() and .new() that adds the
+		table to the element tree if one is not found.  This only
+		works with subclasses that provide the required metadata.
+		Raises ValueError if not exactly 1 matching table is found,
+		unless create_new is True (the default), in which case a
+		new Table element is appended to the top-level LIGO_LW
+		element, and that new Table object returned.  When creating
+		a new Table element, the names of the columns to include
+		can be passed via the columns parameter, otherwise if
+		columns is None the default columns will be created (all of
+		them).
+		"""
+		try:
+			# return existing table if present
+			return cls.get_table(xmldoc)
+		except ValueError:
+			# not exactly 1 table found.  check that there
+			# isn't more than 1, and if there are 0 check that
+			# we've been asked to create a new one, otherwise
+			# re-raise the exception with its original error
+			# message.  note that .get_table() has already
+			# walked the document tree, and we're repeating
+			# that operation here, but this code path should
+			# never be followed more than once for a given
+			# document, so this isn't a performance-critical
+			# path.
+			if not create_new or len(cls.getTablesByName(xmldoc, cls.tableName)) > 1:
+				raise
+		return xmldoc.ensure_llw_at_toplevel().childNodes[0].appendChild(cls.new(columns = columns))
+
 
 	#
 	# Table retrieval
@@ -2176,27 +2209,15 @@ class Document(EmptyElement):
 		# this import in here like this.
 		from . import lsctables
 
-		# make sure the top-level element is a LIGO_LW element
-		self.ensure_llw_at_toplevel()
-
-		# retrieve the process table, or add one
-		try:
-			proctable = lsctables.ProcessTable.get_table(self)
-		except ValueError:
-			proctable = lsctables.ProcessTable.new()
-			LLWelem.appendChild(proctable)
+		# retrieve the process table and process_params table, or
+		# add them if missing
+		proctable = lsctables.ProcessTable.ensure_exists(self)
+		paramtable = lsctables.ProcessParamsTable.ensure_exists(self)
 
 		# add an entry to the process table
 		proctable.sync_next_id()
 		process = proctable.RowType.initialized(program = program, process_id = proctable.get_next_id(), **kwargs)
 		proctable.append(process)
-
-		# retrieve the process_params table, or add one
-		try:
-			paramtable = lsctables.ProcessParamsTable.get_table(self)
-		except ValueError:
-			paramtable = lsctables.ProcessParamsTable.new()
-			LLWelem.appendChild(paramtable)
 
 		# add entries to the process_params table
 		for name, values in paramdict.items():
