@@ -775,6 +775,9 @@ SearchSummVarsID = ligolw.Column.next_id.type("search_summvar_id")
 
 
 class SearchSummVarsTable(ligolw.Table):
+	"""
+	NOTE:  this table is deprecated and its definition will be removed.
+	"""
 	tableName = "search_summvars"
 	validcolumns = {
 		"process:process_id": "int_8s",
