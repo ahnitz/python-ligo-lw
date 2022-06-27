@@ -61,7 +61,7 @@ __all__ = [
 #
 # =============================================================================
 #
-#                                 Input/Output
+#                             Named File Utilities
 #
 # =============================================================================
 #
@@ -104,6 +104,15 @@ def local_path_from_url(url):
 	if scheme.lower() not in ("", "file") or host.lower() not in ("", "localhost"):
 		raise ValueError("%s is not a local file" % repr(url))
 	return path
+
+
+#
+# =============================================================================
+#
+#                           Context Manager Helpers
+#
+# =============================================================================
+#
 
 
 class RewindableInputFile(object):
@@ -355,6 +364,68 @@ class SignalsTrap(object):
 		return False
 
 
+class tildefile(object):
+	"""
+	Context manager wrapper around open() for use when writing to named
+	files.  Provides a form of protection against failures that occur
+	during the write process when overwriting an existing document.
+	Modifies the filename passed to open() to include a trailing "~"
+	(tilde) character.  Data is written to that file.  When the context
+	manager exits, the file is closed and renamed to the original name
+	without the "~" suffix.  In this way, the original file is only
+	overwritten when the write operation completes successfully.
+
+	NOTE:  if another file exists whose name differs from the target
+	file only by the addition of a tilde character at the end, it will
+	be silently overwritten.  Do not use this in contexts where
+	filenames may take that form.
+
+	NOTE:  if an IOError exception occurs when opening the file with a
+	"~" suffix appended, then this code attempts, instead, to write to
+	the original filename.  If that succeeds, then failures that occur
+	during the write process will leave the target file corrupted.
+	This has been found to result in a lower net failure rate, but that
+	assessment might change in the future, so do not rely on this
+	behaviour.
+	"""
+	def __init__(self, filename):
+		if not filename:
+			raise ValueError(filename)
+		self.filename = filename
+
+	def __enter__(self):
+		try:
+			self.tildefilename = self.filename + "~"
+			self.fobj = open(self.tildefilename, "wb")
+		except IOError:
+			self.tildefilename = None
+			self.fobj = open(self.filename, "wb")
+		return self.fobj
+
+	def __exit__(self, exc_type, exc_val, exc_tb):
+		self.fobj.close()
+		del self.fobj
+
+		#
+		# only rename the "~" version to the final destination if
+		# no exception has occurred.
+		#
+
+		if exc_type is None and self.tildefilename is not None:
+			os.rename(self.tildefilename, self.filename)
+
+		return False
+
+
+#
+# =============================================================================
+#
+#                                 Input/Output
+#
+# =============================================================================
+#
+
+
 def load_fileobj(fileobj, compress = None, xmldoc = None, contenthandler = None):
 	"""
 	Parse the contents of the file object fileobj, and return the
@@ -555,36 +626,6 @@ def write_fileobj(xmldoc, fileobj, compress = None, compresslevel = 3, **kwargs)
 
 		with codecs.getwriter("utf_8")(fileobj) as fileobj:
 			xmldoc.write(fileobj, **kwargs)
-
-
-class tildefile(object):
-	def __init__(self, filename):
-		if not filename:
-			raise ValueError(filename)
-		self.filename = filename
-
-	def __enter__(self):
-		try:
-			self.tildefilename = self.filename + "~"
-			self.fobj = open(self.tildefilename, "wb")
-		except IOError:
-			self.tildefilename = None
-			self.fobj = open(self.filename, "wb")
-		return self.fobj
-
-	def __exit__(self, exc_type, exc_val, exc_tb):
-		self.fobj.close()
-		del self.fobj
-
-		#
-		# only rename the "~" version to the final destination if
-		# no exception has occurred.
-		#
-
-		if exc_type is None and self.tildefilename is not None:
-			os.rename(self.tildefilename, self.filename)
-
-		return False
 
 
 def write_filename(xmldoc, filename, verbose = False, compress = None, with_mv = True, trap_signals = SignalsTrap.default_signals, **kwargs):
