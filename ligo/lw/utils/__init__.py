@@ -436,11 +436,9 @@ def load_filename(filename, verbose = False, **kwargs):
 	if verbose:
 		sys.stderr.write("reading %s ...\n" % (("'%s'" % filename) if filename is not None else "stdin"))
 	if filename is None:
-		xmldoc = load_fileobj(sys.stdin.buffer, **kwargs)
-	else:
-		with open(filename, "rb") as fileobj:
-			xmldoc = load_fileobj(fileobj, **kwargs)
-	return xmldoc
+		return load_fileobj(sys.stdin.buffer, **kwargs)
+	with open(filename, "rb") as fileobj:
+		return load_fileobj(fileobj, **kwargs)
 
 
 def load_url(url, verbose = False, **kwargs):
