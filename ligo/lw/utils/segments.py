@@ -553,10 +553,35 @@ class LigolwSegments(set):
 
 	def coalesce(self):
 		"""
-		Coalesce the segment lists.  Returns self.
+		Applies .coalesce() to all of the objects contained in the
+		set, and then coalesces the LigolwSegmentList objects by
+		applying the .update() operation pair-wise to the elements
+		of the set that share instruments, name, version, and
+		comment.  This latter operation will fail if the segment
+		lists are over-determined.
+
+		Returns self.
 		"""
 		for ligolw_segment_list in self:
 			ligolw_segment_list.coalesce()
+
+		# how to test that two lists should be merged
+		def key(seglist):
+			return tuple(sorted(seglist.instruments)), seglist.name, seglist.version, seglist.comment
+
+		# get a list of the lists sorted by the keyfunc
+		ligolw_segment_lists = sorted(self, key = key)
+
+		# empty ourselves
+		self.clear()
+
+		# get groups of segment lists with matching keyfuncs,
+		# reduce them to a single object using .update(), and put
+		# the result back into ourselves.
+		for _, (result, *ligolw_segment_lists) in itertools.groupby(ligolw_segment_lists, key = key):
+			for ligolw_segment_list in ligolw_segment_lists:
+				result.update(ligolw_segment_list)
+			self.add(result)
 		return self
 
 
