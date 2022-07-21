@@ -3,6 +3,7 @@ python-ligo-lw (2.0.0-1) unstable; urgency=medium
   * improve ligolw_add garbage collection
   * drop support for python < 3
   * drop support for python < 3.3
+  * remove all python 2 packaging support files
   * remove deprecated array.get_array() function
   * remove deprecated param.get_param(), param.get_pyvalue() functions
   * table.Table:  remove deprecated ._update_column_info() method
@@ -10,9 +11,19 @@ python-ligo-lw (2.0.0-1) unstable; urgency=medium
   * table:  move TableStream declaration into Table class
   * deprecate param module, migrate Param class to ligolw module
   * deprecate table module, move Column and Table classes to ligolw module
+  * remove legacy ilwdchar support from ligolw_cut and ligolw_print
   * move table.next_id class definition to ligolw.Column.next_id
   * move table.reassign_ids() to ligolw.LIGO_LW.reassign_table_row_ids()
   * deprecate array module, migrate Array class to ligolw module
+  * ligolw_add now treats Array elements as text when in ilwdchar compat mode (very slow)
+  * add missing metdata to segments.LigolwSegments:  .names, .instruments
+  * many performance improvements in tockenizer C code
+  * lsctables:  drop support for legacy ifos and instruments encodings
+  * types.py:  add support for strings to ToNumPyType
+  * move register_to_xmldoc() to .register_process() method of Document
+  * convert lscdtables.New() function to ligolw.Table.new() class method
+  * Table class:  add .ensure_exists() class method
+  * LigolwSegments.coalesce():  also coalesce the lists
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
 
