@@ -555,12 +555,15 @@ class LigolwSegments(set):
 		"""
 		Applies .coalesce() to all of the objects contained in the
 		set, and then coalesces the LigolwSegmentList objects by
-		applying the .update() operation pair-wise to the elements
-		of the set that share instruments, name, version, and
-		comment.  This latter operation will fail if the segment
-		lists are over-determined.
+		applying the .update() operation to those that share
+		instruments, name, version, and comment.  This latter
+		operation will fail if the segment lists are
+		over-determined, meaning two or more of them describe
+		inconsistent states for the same period of time.
 
 		Returns self.
+
+		NOTE:  failure leaves the contents in an undefined state.
 		"""
 		for ligolw_segment_list in self:
 			ligolw_segment_list.coalesce()
