@@ -376,9 +376,10 @@ class LigolwSegments(set):
 	>>> process = lsctables.Process(process_id = lsctables.ProcessTable.get_next_id())
 	>>> with LigolwSegments(xmldoc, process) as xmlsegments:
 	...	h1segs = segmentlist([segment(LIGOTimeGPS(0), LIGOTimeGPS(10))])
-	...	xmlsegments.insert_from_segmentlistdict({"H1": h1segs}, "test")
+	...	xmlsegments.insert_from_segmentlistdict(segmentlistdict({"H1": h1segs}), "test")
 	...	l1segs = h1segs.shift(5)
 	...	xmlsegments.add(LigolwSegmentList(active = l1segs, valid = segmentlist([segment(-infinity(), infinity())]), instruments = set(["L1"]), name = "test"))
+	... 
 	>>> xmldoc.write(sys.stdout)		# doctest: +NORMALIZE_WHITESPACE
 	<?xml version='1.0' encoding='utf-8'?>
 	<!DOCTYPE LIGO_LW SYSTEM "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt">
@@ -406,6 +407,7 @@ class LigolwSegments(set):
 			<Column Name="comment" Type="lstring"/>
 			<Stream Name="segment_summary:table" Delimiter="," Type="Local">
 				0,0,4294967295,4294967295,2147483647,4294967295,1,,
+				0,1,0,0,10,0,0,,
 			</Stream>
 		</Table>
 		<Table Name="segment:table">
@@ -527,28 +529,44 @@ class LigolwSegments(set):
 		new list of "active" segments into this LigolwSegments
 		object.  A new entry will be created in the segment_definer
 		table for the segment list, and instruments, name and
-		comment are used to populate the entry's metadata.  Note
-		that the "valid" segments are left empty, nominally
-		indicating that there are no periods of validity.  Returns
-		the newly created LigolwSegmentList object.
+		comment are used to populate the entry's metadata.
+
+		Returns the newly created LigolwSegmentList object.
+
+		NOTE:  the "valid" segments are set to the extent of the
+		active segment list, indicating that the input segment list
+		defines, exactly, the given state from the earliest
+		recorded time to the latest recorded time, with no gaps.
+		If this is not correct, the calling code must do the insert
+		itself.
 		"""
-		ligolw_segment_list = LigolwSegmentList(active = segmentsUtils.fromsegwizard(fileobj, coltype = lsctables.LIGOTimeGPS), instruments = instruments, name = name, version = version, comment = comment)
+		active = segmentsUtils.fromsegwizard(fileobj, coltype = lsctables.LIGOTimeGPS)
+		ligolw_segment_list = LigolwSegmentList(active = active, valid = segments.segmentlist([active.extent()]), instruments = instruments, name = name, version = version, comment = comment)
 		self.add(ligolw_segment_list)
 		return ligolw_segment_list
 
 
 	def insert_from_segmentlistdict(self, seglists, name, version = None, comment = None):
 		"""
-		Insert the segments from the segmentlistdict object
-		seglists as a new list of "active" segments into this
-		LigolwSegments object.  The dictionary's keys are assumed
-		to provide the instrument name for each segment list.  A
-		new entry will be created in the segment_definer table for
-		the segment lists, and the dictionary's keys, the name, and
-		comment will be used to populate the entry's metadata.
+		Insert the segment lists from the segmentlistdict object
+		seglists as new LigolwSegmentList objects into this
+		LigolwSegments object.  For each, the segments in the
+		dictionary provide the "active" segments, and the "valid"
+		segments are set to the .extent_all() of the
+		segmentlistdict.  The dictionary key for each segment list
+		provides the instrument name.  The name agument, and
+		optional version and comment arguments provide the
+		remaining metadata.
+
+		NOTE:  the "valid" segments are set to the .extent_all() of
+		the segmentlistdict, indicating that all segment lists
+		define, exactly, their respective states from the earliest
+		of any of their recorded times to the latest of any of
+		their recorded times, with no gaps.  If this is not
+		correct, the calling code must do the insert itself.
 		"""
-		for instrument, segments in seglists.items():
-			self.add(LigolwSegmentList(active = segments, instruments = set([instrument]), name = name, version = version, comment = comment))
+		for instrument, active in seglists.items():
+			self.add(LigolwSegmentList(active = active, valid = segments.segmentlist([seglists.extent_all()]), instruments = set([instrument]), name = name, version = version, comment = comment))
 
 
 	def coalesce(self):
