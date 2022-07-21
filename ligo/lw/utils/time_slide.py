@@ -117,7 +117,9 @@ def time_slides_vacuum(time_slides, verbose = False):
 					ids_to_delete.append(id2)
 			for id2 in ids_to_delete:
 				time_slides.pop(id2)
-			progressbar.update(progressbar.total - len(time_slides))
+			# number of offset vectors removed from time_slides
+			# in this iteration
+			progressbar.update(1 + len(ids_to_delete))
 	# done
 	return mapping
 

@@ -24,6 +24,7 @@ python-ligo-lw (2.0.0-1) unstable; urgency=medium
   * convert lscdtables.New() function to ligolw.Table.new() class method
   * Table class:  add .ensure_exists() class method
   * LigolwSegments.coalesce():  also coalesce the lists
+  * time_slide.py:  fix progress bar
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
 
