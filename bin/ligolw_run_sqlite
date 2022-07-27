@@ -69,57 +69,52 @@ for n, filename in enumerate(databases, 1):
 
 	if options.verbose:
 		print("%d/%d:" % (n, len(databases)), end=' ', file=sys.stderr)
-	if filename.endswith(".xml") or filename.endswith(".xml.gz"):
-		# load XML file into in-ram database for processing
-		fileformat = "xml"
-		working_filename = None
-		connection = sqlite3.connect(":memory:")
-		@dbtables.use_in
-		class LIGOLWContentHandler(ligolw.LIGOLWContentHandler):
-			connection = connection
-		ligolw_sqlite.insert_from_url(filename, contenthandler = LIGOLWContentHandler, preserve_ids = True, verbose = options.verbose)
-		del LIGOLWContentHandler
-	else:
-		# assume it's an SQLite file
-		fileformat = "sqlite"
-		working_filename = dbtables.get_connection_filename(filename, tmp_path = options.tmp_space, verbose = options.verbose)
-		connection = sqlite3.connect(str(working_filename))
-		# disable sync() system calls for the database
-		connection.execute("PRAGMA synchronous = OFF;")
-	# also use the scratch space for sqlite's temp store, but don't try
-	# to do so if the working filename is the same as the original
-	# filename as that most likely indicates some problem was found
-	# with the scratch space like that it's full
-	if options.tmp_space is not None and working_filename != filename:
-		dbtables.set_temp_store_directory(connection, options.tmp_space, verbose = options.verbose)
 
-	#
-	# apply SQL
-	#
+	is_xml = filename.endswith(".xml") or filename.endswith(".xml.gz")
+	with dbtables.workingcopy(filename, tmp_path = options.tmp_space, verbose = options.verbose) as working_filename:
+		if is_xml:
+			# load XML file into in-ram database for processing
+			connection = sqlite3.connect(":memory:")
+			@dbtables.use_in
+			class LIGOLWContentHandler(ligolw.LIGOLWContentHandler):
+				connection = connection
+			ligolw_sqlite.insert_from_url(filename, contenthandler = LIGOLWContentHandler, preserve_ids = True, verbose = options.verbose)
+			del LIGOLWContentHandler
+		else:
+			# assume it's an SQLite file
+			connection = sqlite3.connect(str(working_filename))
+			# disable sync() system calls for the database
+			connection.execute("PRAGMA synchronous = OFF;")
 
-	if options.verbose:
-		print("Executing SQL ...", file=sys.stderr)
-	cursor = connection.cursor()
-	for statement in sql:
+		# also use the scratch space for sqlite's temp store, but don't try
+		# to do so if the working filename is the same as the original
+		# filename as that most likely indicates some problem was found
+		# with the scratch space like that it's full
+		if options.tmp_space is not None and str(working_filename) != filename:
+			working_filename.set_temp_store_directory(connection)
+
+		#
+		# apply SQL
+		#
+
 		if options.verbose:
-			print(statement, file=sys.stderr)
-		cursor.execute(statement)
-		connection.commit()
-	cursor.close()
-	if options.verbose:
-		print("... Done.", file=sys.stderr)
+			print("Executing SQL ...", file=sys.stderr)
+		cursor = connection.cursor()
+		for statement in sql:
+			if options.verbose:
+				print(statement, file=sys.stderr)
+			cursor.execute(statement)
+			connection.commit()
+		cursor.close()
+		if options.verbose:
+			print("... Done.", file=sys.stderr)
 
-	#
-	# commit changes
-	#
+		#
+		# commit changes
+		#
 
-	if fileformat == "xml":
-		# overwrite XML file with in-ram database' contents
-		ligolw_sqlite.extract(connection, filename, verbose = options.verbose)
+		if is_xml:
+			# overwrite XML file with in-ram database' contents
+			ligolw_sqlite.extract(connection, filename, verbose = options.verbose)
+
 		connection.close()
-	elif fileformat == "sqlite":
-		# return SQLite file to its home
-		connection.close()
-		dbtables.put_connection_filename(filename, working_filename, verbose = options.verbose)
-	else:
-		raise Exception("internal error")
