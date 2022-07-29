@@ -1,7 +1,7 @@
 from distutils.core import setup, Extension
 
 
-__version__ = "1.8.2"
+__version__ = "1.8.3"
 __date__ = "2022-07-20"
 
 
