@@ -133,7 +133,7 @@ def merge_compatible_tables(elem):
 	That is, merge all SnglBurstTables that have the same columns into
 	a single table, etc..
 	"""
-	for name in lsctables.TableByName.keys():
+	for name in ligolw.Table.TableByName.keys():
 		tables = ligolw.Table.getTablesByName(elem, name)
 		if tables:
 			dest = tables.pop(0)

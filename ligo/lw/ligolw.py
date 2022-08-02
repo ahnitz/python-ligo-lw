@@ -989,8 +989,30 @@ class Table(EmptyElement, list):
 
 
 	#
+	# Table name ---> table type mapping.  Used by .__new__()
+	#
+
+
+	TableByName = {}
+
+
+	#
 	# Constructors
 	#
+
+
+	def __new__(cls, attrs = None):
+		if attrs is not None:
+			name = Table.TableName(attrs["Name"])
+			if name in cls.TableByName:
+				new = super().__new__(cls.TableByName[name], attrs)
+				# because new is not an instance of cls,
+				# python will not automatically call
+				# .__init__().  therefore we must do it
+				# ourselves.
+				new.__init__(attrs)
+				return new
+		return super().__new__(cls, attrs)
 
 
 	@classmethod
@@ -1334,7 +1356,7 @@ class Table(EmptyElement, list):
 		Example:
 
 		>>> from ligo.lw import lsctables
-		>>> for cls in lsctables.TableByName.values(): cls.reset_next_id()
+		>>> for cls in Table.TableByName.values(): cls.reset_next_id()
 		"""
 		if cls.next_id is not None:
 			cls.set_next_id(0)

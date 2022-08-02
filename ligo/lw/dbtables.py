@@ -503,7 +503,7 @@ def get_xml(connection, table_names = None):
 		# build the table document tree.  copied from
 		# ligolw.Table.new()
 		try:
-			cls = TableByName[table_name]
+			cls = DBTable.TableByName[table_name]
 		except KeyError:
 			cls = DBTable
 		table_elem = cls(AttributesImpl({"Name": "%s:table" % table_name}), connection = connection)
@@ -596,39 +596,85 @@ class DBTable(ligolw.Table):
 			if hasattr(self.parentNode, "connection"):
 				self.parentNode.connection.commit()
 
+
+	#
+	# Table name ---> table type mapping.
+	#
+
+
+	TableByName = {}
+
+
 	def __new__(cls, *args, **kwargs):
-		# does this class already have table-specific metadata?
-		if not hasattr(cls, "tableName"):
-			# no, try to retrieve it from lsctables
-			attrs, = args
-			name = ligolw.Table.TableName(attrs["Name"])
-			if name in lsctables.TableByName:
-				# found metadata in lsctables, construct
-				# custom subclass.  the class from
-				# lsctables is added as a parent class to
-				# allow methods from that class to be used
-				# with this class, however there is no
-				# guarantee that all parent class methods
-				# will be appropriate for use with the
-				# DB-backend object.
-				lsccls = lsctables.TableByName[name]
-				class CustomDBTable(cls, lsccls):
-					tableName = lsccls.tableName
-					validcolumns = lsccls.validcolumns
-					loadcolumns = lsccls.loadcolumns
-					constraints = lsccls.constraints
-					next_id = lsccls.next_id
-					RowType = lsccls.RowType
-					how_to_index = lsccls.how_to_index
+		# NOTE:  in what follows cls.TableByName is the look-up
+		# table defined above, for this class, whereas
+		# ligolw.Table.TableByName is the parent class' version.
 
-				# save for re-use (required for ID
-				# remapping across multiple documents in
-				# ligolw_sqlite)
-				TableByName[name] = CustomDBTable
+		# have we previously constructed a custom table-specific
+		# class for this?
+		attrs, = args
+		name = cls.TableName(attrs["Name"])
+		if name in cls.TableByName:
+			# construct instance of new table-specific class
+			# using the parent class' parent class'
+			# constructor.  the parent class' own constructor
+			# would recognize the table name, and override the
+			# class, turning it into whatever its own look-up
+			# table says it should be.  do not pass additional
+			# keyword arguments to the parent class.
+			new = super(ligolw.Table, ligolw.Table).__new__(cls.TableByName[name], *args)
+			# because new is not an instance of cls, python
+			# will not automatically call .__init__().
+			# therefore we must do it ourselves.  now we pass
+			# the kwargs, which contain the database connection
+			# information.
+			new.__init__(*args, **kwargs)
+			return new
 
-				# replace input argument with new class
-				cls = CustomDBTable
-		return ligolw.Table.__new__(cls, *args)
+		# there is no custom database-backed class for this table.
+		# does the parent class' look-up table provde a class for
+		# this table that can provide us with the metadata needed
+		# to create a custom table-specific class on the fly?
+		if name not in ligolw.Table.TableByName:
+			# no.  fall back to the default constructor.  do
+			# not pass additional keyword arguments to the
+			# parent class.  because we are returning an
+			# instance of cls, python will call .__init__() for
+			# us, so we don't need to
+			return super().__new__(cls, *args)
+
+		# construct custom database-backed subclass on the fly.
+		# the class from lsctables is added as a parent class to
+		# allow methods from that class to be used with this class,
+		# however there is no guarantee that all parent class
+		# methods will be appropriate for use with the
+		# database-backed object.
+		lsccls = ligolw.Table.TableByName[name]
+		class CustomDBTable(cls, lsccls):
+			tableName = lsccls.tableName
+			validcolumns = lsccls.validcolumns
+			loadcolumns = lsccls.loadcolumns
+			constraints = lsccls.constraints
+			next_id = lsccls.next_id
+			RowType = lsccls.RowType
+			how_to_index = lsccls.how_to_index
+
+		# save for re-use (required for ID remapping across
+		# multiple documents in ligolw_sqlite)
+		cls.TableByName[name] = CustomDBTable
+
+		# construct instance of new table-specific class using the
+		# parent class' parent class' constructor.  the parent
+		# class' own constructor would recognize the table name,
+		# and override the class, turning it into whatever its own
+		# look-up table says it should be.
+		new = super(ligolw.Table, ligolw.Table).__new__(CustomDBTable, *args)
+		# because new is not an instance of cls, python will not
+		# automatically call .__init__().  therefore we must do it
+		# ourselves.  now we pass the kwargs, which contain the
+		# database connection information.
+		new.__init__(*args, **kwargs)
+		return new
 
 	def __init__(self, *args, **kwargs):
 		# chain to parent class
@@ -648,6 +694,7 @@ class DBTable(ligolw.Table):
 		raise NotImplementedError
 
 	def _end_of_columns(self):
+		# chain to parent class
 		ligolw.Table._end_of_columns(self)
 		# dbcolumnnames and types have the "not loaded" columns
 		# removed
@@ -774,6 +821,7 @@ class DBTable(ligolw.Table):
 	_row_from_cols = row_from_cols
 
 	def unlink(self):
+		# chain to parent class
 		ligolw.Table.unlink(self)
 		self.connection = None
 		self.cursor = None
@@ -949,10 +997,10 @@ def build_indexes(connection, verbose = False):
 	cursor = connection.cursor()
 	for table_name in get_table_names(connection):
 		# FIXME:  figure out how to do this extensibly
-		if table_name in TableByName:
-			how_to_index = TableByName[table_name].how_to_index
-		elif table_name in lsctables.TableByName:
-			how_to_index = lsctables.TableByName[table_name].how_to_index
+		if table_name in DBTable.TableByName:
+			how_to_index = DBTable.TableByName[table_name].how_to_index
+		elif table_name in ligolw.Table.TableByName:
+			how_to_index = ligolw.Table.TableByName[table_name].how_to_index
 		else:
 			continue
 		if how_to_index is not None:
@@ -973,14 +1021,14 @@ def build_indexes(connection, verbose = False):
 
 
 #
-# Table name ---> table type mapping.
+# add the pre-defined custom tables to the name-to-class mapping
 #
 
 
-TableByName = {
+DBTable.TableByName.update({
 	CoincMapTable.tableName: CoincMapTable,
 	TimeSlideTable.tableName: TimeSlideTable
-}
+})
 
 
 #
@@ -1002,34 +1050,33 @@ def use_in(ContentHandler):
 	Modify ContentHandler, a sub-class of
 	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the DBTable
 	class defined in this module when parsing XML documents.  Instances
-	of the class must provide a connection attribute.  When a document
-	is parsed, the value of this attribute will be passed to the
-	DBTable class' .__init__() method as each table object is created,
-	and thus sets the database connection for all table objects in the
-	document.
+	of the ContentHandler class must have an attribute named
+	.connection.  No specific mechanism is provided for initializing
+	this attribute, it is left as an exercise for the calling code to
+	arrange for it to be set properly before the ContentHandler is used
+	to parse a document.
+
+	When a document is parsed, the value of the .connection attribute
+	will be passed to the DBTable class' .__init__() method as each
+	table object is created, and thus sets the database connection for
+	all table objects in the document.
 
 	Example:
 
 	>>> import sqlite3
 	>>> from ligo.lw import ligolw
-	>>> class MyContentHandler(ligolw.LIGOLWContentHandler):
+	>>> @use_in
+	... class MyContentHandler(ligolw.LIGOLWContentHandler):
 	...	def __init__(self, *args):
 	...		super(MyContentHandler, self).__init__(*args)
 	...		self.connection = sqlite3.connection()
-	...
-	>>> use_in(MyContentHandler)
+	... 
+	>>> 
 
 	Multiple database files can be in use at once by creating a content
 	handler class for each one.
 	"""
-	ContentHandler = lsctables.use_in(ContentHandler)
-
 	def startTable(self, parent, attrs):
-		name = ligolw.Table.TableName(attrs["Name"])
-		if name in TableByName:
-			return TableByName[name](attrs, connection = self.connection)
 		return DBTable(attrs, connection = self.connection)
-
 	ContentHandler.startTable = startTable
-
 	return ContentHandler

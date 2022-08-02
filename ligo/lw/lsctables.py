@@ -134,7 +134,7 @@ def HasNonLSCTables(elem):
 	Return True if the document tree below elem contains non-LSC
 	tables, otherwise return False.
 	"""
-	return any(t.Name not in TableByName for t in elem.getElementsByTagName(ligolw.Table.tagName))
+	return any(t.Name not in ligolw.Table.TableByName for t in elem.getElementsByTagName(ligolw.Table.tagName))
 
 
 class instrumentsproperty(object):
@@ -2491,11 +2491,11 @@ VetoDefTable.RowType = VetoDef
 
 
 #
-# Table name ---> table type mapping.
+# Put all our table definitions into the name ---> table type mapping.
 #
 
 
-TableByName = {
+ligolw.Table.TableByName.update({
 	CoincDefTable.tableName: CoincDefTable,
 	CoincInspiralTable.tableName: CoincInspiralTable,
 	CoincMapTable.tableName: CoincMapTable,
@@ -2518,49 +2518,16 @@ TableByName = {
 	SummValueTable.tableName: SummValueTable,
 	TimeSlideTable.tableName: TimeSlideTable,
 	VetoDefTable.tableName: VetoDefTable
-}
+})
 
+
+# FIXME:  compatibility stubs.  delete when possible
+TableByName = ligolw.Table.TableByName
 
 def reset_next_ids(classes):
 	warnings.warn("ligo.lw.lsctables.reset_next_ids() is deprecated.  the replace with ligolw.Table.reset_next_ids()")
 	ligolw.Table.reset_next_ids(classes)
 
-
-#
-# =============================================================================
-#
-#                               Content Handler
-#
-# =============================================================================
-#
-
-
-#
-# Override portions of a ligolw.LIGOLWContentHandler class
-#
-
-
 def use_in(ContentHandler):
-	"""
-	Modify ContentHandler, a sub-class of
-	ligo.lw.ligolw.LIGOLWContentHandler, to cause it to use the Table
-	classes defined in this module when parsing XML documents.
-
-	Example:
-
-	>>> from ligo.lw import ligolw
-	>>> class MyContentHandler(ligolw.LIGOLWContentHandler):
-	...	pass
-	...
-	>>> use_in(MyContentHandler)
-	<class 'ligo.lw.lsctables.MyContentHandler'>
-	"""
-	def startTable(self, parent, attrs, __orig_startTable = ContentHandler.startTable):
-		name = ligolw.Table.TableName(attrs["Name"])
-		if name in TableByName:
-			return TableByName[name](attrs)
-		return __orig_startTable(self, parent, attrs)
-
-	ContentHandler.startTable = startTable
-
+	warnings.warn("ligo.lw.lsctables.use_in() is deprecated.  simply importing the lsctables module automatically enables the custom table support features it provides.")
 	return ContentHandler

@@ -174,7 +174,7 @@ def insert_from_xmldoc(connection, source_xmldoc, preserve_ids = False, verbose 
 
 			name = tbl.Name
 			try:
-				cls = dbtables.TableByName[name]
+				cls = dbtables.DBTable.TableByName[name]
 			except KeyError:
 				cls = dbtables.DBTable
 			dbtbl = xmldoc.childNodes[-1].appendChild(cls(tbl.attributes, connection = connection))
