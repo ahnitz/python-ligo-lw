@@ -84,7 +84,6 @@ setup(
 	],
 	install_requires = [
 		"ligo-segments",
-		"lscsoft-glue",
 		"numpy",
 		"python-dateutil",
 		"pyyaml",
