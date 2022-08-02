@@ -26,6 +26,12 @@ python-ligo-lw (2.0.0-1) unstable; urgency=medium
   * LigolwSegments.coalesce():  also coalesce the lists
   * LigolwSegmetns:  set "valid" segments in .insert_from_segwizard() .insert_from_segmentlistdict()
   * time_slide.py:  fix progress bar
+  * move TableByName name-->class mapping from lscables to ligolw.Table class attribute
+  * move TableByName name-->class mapping from dbtables to dbtables.DBTable class attribute
+  * move name-specific class instantiation plumbing from lsctables' and dbtables' content handlers to .__new__() methods of respective classes
+  * move lsctables.reset_next_ids() to ligolw.Table class method
+  * with all of the above there is no longer a need for a custom content handler in standard use cases, so set a sensible default on load_fileobj() and remove all related code.
+  * drop support for ilwd:char compatibility mode from remaining programs in bin/ (the API is now too different from glue's to continue using glue to provide that feature)
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
 
