@@ -25,7 +25,6 @@ Depends:
  python3-tqdm,
  python3-yaml
 Recommends:
- python3-glue,
  python3-lal,
  python3-lalburst,
  python3-ligo-lw-bin
@@ -44,7 +43,6 @@ Depends:
  python3-ligo-lw,
  python3-ligo-segments
 Recommends:
- python3-glue,
  python3-lal
 Conflicts:
  python3-glue-ligolw-tools,

@@ -37,7 +37,6 @@ from optparse import OptionParser
 from lal.utils.cache import CacheEntry
 from ligo.lw import __date__, __version__
 from ligo.lw import ligolw
-from ligo.lw import lsctables
 from ligo.lw import types as ligolw_types
 from ligo.lw import utils as ligolw_utils
 from ligo.segments import utils as segmentsUtils
@@ -171,7 +170,7 @@ else:
 			super(ContentHandler, self).__init__(xmldoc, lambda name, attrs: (name in (ligolw.Table.tagName, ligolw.Array.tagName)) and (ligolw.Table.TableName(attrs["Name"]) in options.table or ligolw.Array.ArrayName(attrs["Name"]) in options.array))
 
 if options.constrain_lsc_tables:
-	lsctables.use_in(ContentHandler)
+	import lsctables
 
 
 #

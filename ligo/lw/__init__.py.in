@@ -42,15 +42,9 @@ Example:
 >>> from ligo.lw import lsctables
 >>> from ligo.lw import utils as ligolw_utils
 >>>
->>> # define a content handler
->>> class LIGOLWContentHandler(ligolw.LIGOLWContentHandler):
-... 	pass
-...
->>> lsctables.use_in(LIGOLWContentHandler)
->>>
 >>> # load a document.  several compressed file formats are recognized
 >>> filename = "demo.xml.gz"
->>> xmldoc = ligolw_utils.load_filename(filename, contenthandler = LIGOLWContentHandler, verbose = True)
+>>> xmldoc = ligolw_utils.load_filename(filename, verbose = True)
 >>> 
 >>> # retrieve the process and sngl_inspiral tables.  these are list-like
 >>> # objects of rows.  the row objects' attributes are the column names
@@ -91,20 +85,23 @@ strict specification imposed, but as a consequence high-level features
 could not be implemented because it wasn't possible to ensure input
 documents would comply with the necessary format assumptions.  To implement
 more convenient high-level support for the document contents, for example
-to cause this libray to treat tables as tabular data instead of blocks of
-text, calling codes were required to explicitly enable additional parsing
-rules by constructing a suitable content handler object.  This required
-numerous module imports and cryptic symbol declarations, often for reasons
-that weren't clear to users of the library.  Over time the number of users
-of this file format has dwindled, and with it the motivation for continuing
-to inconvenience the remaining users with the cryptic imports and
-configuration boilerplate required to provide that compatibility.
-Therefore, in version 2.0 that flexibility was removed.  All documents
-processed with this library are now required to comply with the file format
-defined by this library.  Removing the flexibility increases document
-loading speed, and makes calling codes simpler, often reducing the number
-of module imports to a single module.
-"""
+to cause this libray to treat Table elements as containing tabular data
+instead of blocks of text, calling codes were required to explicitly enable
+additional parsing rules by constructing a suitable content handler object
+(the object responsible for translating XML components to the corresponding
+Python objects).  This required numerous module imports and cryptic symbol
+declarations, often for reasons that weren't clear to users of the library.
+Over time the number of users of this file format has dwindled, and since
+the user community that remains works exclusively with documents that
+comply with the high-level format assumptions of this library, the
+motivation has evaporated for continuing to inconvenience those remaining
+users with the cryptic imports and configuration boilerplate required to
+support other hypothetical users working with non-compliant documents.
+Therefore, starting with version 2.0 that flexibility was removed.  All
+documents processed with this library are now required to comply with the
+file format defined by this library.  Removing the flexibility increases
+document loading speed, and makes calling codes simpler, and less sensitive
+to future API changes."""
 
 
 __author__ = "Kipp Cannon <kipp.cannon@ligo.org>"

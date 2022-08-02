@@ -11,7 +11,7 @@ import sys
 from ligo.lw import ligolw
 from ligo.lw import utils as ligolw_utils
 
-xmldoc = ligolw_utils.load_filename("ligo_lw_test_01.xml", contenthandler = ligolw.LIGOLWContentHandler, verbose = True)
+xmldoc = ligolw_utils.load_filename("ligo_lw_test_01.xml", verbose = True)
 ligolw_utils.write_filename(xmldoc, "/dev/null")
 
 t, = xmldoc.getElementsByTagName(ligolw.Time.tagName)

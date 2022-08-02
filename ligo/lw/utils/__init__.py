@@ -426,7 +426,7 @@ class tildefile(object):
 #
 
 
-def load_fileobj(fileobj, compress = None, xmldoc = None, contenthandler = None):
+def load_fileobj(fileobj, compress = None, xmldoc = None, contenthandler = ligolw.LIGOLWContentHandler):
 	"""
 	Parse the contents of the file object fileobj, and return the
 	contents as a LIGO Light Weight document tree.  The file object
@@ -447,22 +447,18 @@ def load_fileobj(fileobj, compress = None, xmldoc = None, contenthandler = None)
 
 	Example:
 
-	>>> from ligo.lw import ligolw
 	>>> from io import BytesIO
 	>>> f = BytesIO(b'<?xml version="1.0" encoding="utf-8" ?><!DOCTYPE LIGO_LW SYSTEM "http://ldas-sw.ligo.caltech.edu/doc/ligolwAPI/html/ligolw_dtd.txt"><LIGO_LW><Table Name="demo:table"><Column Name="name" Type="lstring"/><Column Name="value" Type="real_8"/><Stream Name="demo:table" Type="Local" Delimiter=",">"mass",0.5,"velocity",34</Stream></Table></LIGO_LW>')
-	>>> xmldoc = load_fileobj(f, contenthandler = ligolw.LIGOLWContentHandler)
+	>>> xmldoc = load_fileobj(f)
 
 	The contenthandler argument specifies the SAX content handler to
-	use when parsing the document.  contenthandler is a required
-	argument.  See the ligo.lw package documentation for an explanation
-	of a typical document parsing scenario and the content handler it
-	uses.  See ligo.lw.ligolw.PartialLIGOLWContentHandler and
+	use when parsing the document.  See the ligo.lw package
+	documentation for an explanation of a typical document parsing
+	scenario and the content handler it uses.  See
+	ligo.lw.ligolw.PartialLIGOLWContentHandler and
 	ligo.lw.ligolw.FilteringLIGOLWContentHandler for examples of custom
 	content handlers used to load subsets of documents into memory.
 	"""
-	if contenthandler is None:
-		raise ValueError("missing required keyword argument \"contenthandler\"")
-
 	if compress is None:
 		# select default behaviour
 		compress = "auto"
@@ -525,13 +521,11 @@ def load_filename(filename, verbose = False, **kwargs):
 	the contents as a LIGO Light Weight document tree.  stdin is parsed
 	if filename is None.  Helpful verbosity messages are printed to
 	stderr if verbose is True.  All other keyword arguments are passed
-	to load_fileobj(), see that function for more information.  In
-	particular note that a content handler must be specified.
+	to load_fileobj(), see that function for more information.
 
 	Example:
 
-	>>> from ligo.lw import ligolw
-	>>> xmldoc = load_filename("demo.xml", contenthandler = ligolw.LIGOLWContentHandler, verbose = True)
+	>>> xmldoc = load_filename("demo.xml", verbose = True)
 	"""
 	if verbose:
 		sys.stderr.write("reading %s ...\n" % (("'%s'" % filename) if filename is not None else "stdin"))
@@ -551,14 +545,12 @@ def load_url(url, verbose = False, **kwargs):
 	urllib.request.urlopen() is used to access it, and if the keyword
 	arguments timeout and/or context is set then those arguments are
 	passed to urlopen().  All other keyword arguments are passed to
-	load_fileobj(), see that function for more information.  In
-	particular note that a content handler must be specified.
+	load_fileobj(), see that function for more information.
 
 	Example:
 
 	>>> from os import getcwd
-	>>> from ligo.lw import ligolw
-	>>> xmldoc = load_url("file://localhost/%s/demo.xml" % getcwd(), contenthandler = ligolw.LIGOLWContentHandler, verbose = True)
+	>>> xmldoc = load_url("file://localhost/%s/demo.xml" % getcwd(), verbose = True)
 	"""
 	# separate urlopen()'s kwargs from load_fileobj()'s
 	urlopen_kwargs = dict((kwarg, kwargs.pop(kwarg)) for kwarg in ("context", "timeout") if kwarg in kwargs)
@@ -593,9 +585,7 @@ def write_fileobj(xmldoc, fileobj, compress = None, compresslevel = 3, **kwargs)
 
 	Example:
 
-	>>> import sys
-	>>> from ligo.lw import ligolw
-	>>> xmldoc = load_filename("demo.xml", contenthandler = ligolw.LIGOLWContentHandler)
+	>>> xmldoc = load_filename("demo.xml")
 	>>> write_fileobj(xmldoc, open("/dev/null","wb"))
 	"""
 	if compress is None:

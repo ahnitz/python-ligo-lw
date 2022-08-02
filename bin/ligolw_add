@@ -63,7 +63,6 @@ def parse_command_line():
 		usage = "%prog [options] [url ...]",
 		description = "Combines one or more LIGO Light Weight XML files into a single output file.  The output is written to stdout or to the filename specified by --output.  In addition to regular files, many common URL types can be read such as http:// and ftp://.  Input documents that are gzip-compressed are automatically detected and decompressed.  If the output file's name ends in \".gz\", the output document will be gzip-compressed.  Table elements contained in the document will be merged so that there is not more than one table of any given name in the output.  To accomplish this, any tables in the input documents that share the same name must have compatible columns, meaning the same column names with matching types (but not necessarily in the same order)."
 	)
-	parser.add_option("--ilwdchar-compat", action = "store_true", help = "Use obsolete ilwd:char based table definitions and ID reassignment algorithm (default = use new int_8s based table definitions and ID reassignment algorithm).")
 	parser.add_option("-i", "--input-cache", metavar = "filename", action = "append", default = [], help = "Get input files from the LAL cache named filename.")
 	parser.add_option("--non-lsc-tables-ok", action = "store_true", help = "OK to merge documents containing non-LSC tables.")
 	parser.add_option("-o", "--output", metavar = "filename", help = "Write output to filename (default = stdout).")
@@ -97,29 +96,16 @@ def parse_command_line():
 options, urls = parse_command_line()
 
 
-if options.ilwdchar_compat:
-	from glue.ligolw import ligolw
-	from glue.ligolw import lsctables
-	from glue.ligolw import utils as ligolw_utils
-	from glue.ligolw.utils import ligolw_add
-
-
 #
 # Input
 #
-
-
-@lsctables.use_in
-class ContentHandler(ligolw.LIGOLWContentHandler):
-	pass
 
 
 xmldoc = ligolw_add.ligolw_add(
 	ligolw.Document(),
 	urls,
 	non_lsc_tables_ok = options.non_lsc_tables_ok,
-	verbose = options.verbose,
-	contenthandler = ContentHandler
+	verbose = options.verbose
 )
 
 

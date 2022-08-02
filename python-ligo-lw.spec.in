@@ -30,7 +30,6 @@ Requires:	python%{python3_pkgversion}-dateutil
 # temporarily commented out to break cyclic dependency.  The following are
 # optional dependencies, but the rpm version at CIT is too old for that
 # feature
-#Requires:	python%{python3_pkgversion}-glue
 #Requires:	python%{python3_pkgversion}-lal
 #Requires:	python%{python3_pkgversion}-lalburst
 Requires:	python%{python3_pkgversion}-ligo-segments
@@ -50,7 +49,6 @@ Requires:	python%{python3_pkgversion}
 # temporarily commented out to break cyclic dependency.  The following are
 # optional dependencies, but the rpm version at CIT is too old for that
 # feature
-#Requires:	python%{python3_pkgversion}-glue
 #Requires:	python%{python3_pkgversion}-lal
 Requires:	python%{python3_pkgversion}-ligo-segments
 Conflicts:	glue-ligolw-tools

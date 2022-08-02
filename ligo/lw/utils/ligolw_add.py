@@ -165,26 +165,26 @@ def merge_compatible_tables(elem):
 #
 
 
-@lsctables.use_in
-class DefaultContentHandler(ligolw.LIGOLWContentHandler):
-	"""
-	Default content handler used by ligolw_add().  Not intended for use
-	outside this module.
-	"""
-	pass
+# FIXME: compatibility stub.  delete after initial 2.x release
+DefaultContentHandler = ligolw.LIGOLWContentHandler
 
 
-def ligolw_add(xmldoc, urls, non_lsc_tables_ok = False, verbose = False, contenthandler = DefaultContentHandler):
+def ligolw_add(xmldoc, urls, non_lsc_tables_ok = False, verbose = False, **kwargs):
 	"""
 	An implementation of the LIGO LW add algorithm.  urls is a list of
 	URLs (or filenames) to load, xmldoc is the XML document tree to
-	which they should be added.
+	which they should be added.  If non_lsc_tables_ok is False (the
+	default) then the code will refuse to process documents found to
+	contain tables not recognized by the name-->class mapping in
+	ligolw.Table.TableByName.  If verbose is True then helpful messages
+	are printed to stderr.  All remaining keyword arguments are passed
+	to ligo.lw.utils.load_url().
 	"""
 	# Input
 	for n, url in enumerate(urls, 1):
 		if verbose:
 			sys.stderr.write("%d/%d:" % (n, len(urls)))
-		ligolw_utils.load_url(url, verbose = verbose, xmldoc = xmldoc, contenthandler = contenthandler)
+		ligolw_utils.load_url(url, xmldoc = xmldoc, verbose = verbose, **kwargs)
 
 	# ID reassignment
 	if not non_lsc_tables_ok and lsctables.HasNonLSCTables(xmldoc):

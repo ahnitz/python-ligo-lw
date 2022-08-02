@@ -777,13 +777,8 @@ class LigolwSegments(set):
 #
 
 
-@lsctables.use_in
-class LIGOLWContentHandler(ligolw.LIGOLWContentHandler):
-	"""
-	Minimal content handler suitable for loading documents containg
-	segment tables.
-	"""
-	pass
+# FIXME:  compatibility stub.  delete after initial 2.0 release
+LIGOLWContentHandler = ligolw.LIGOLWContentHandler
 
 
 def has_segment_tables(xmldoc, name = None):

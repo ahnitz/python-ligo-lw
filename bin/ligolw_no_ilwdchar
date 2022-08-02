@@ -73,7 +73,7 @@ else:
 
 
 for filename in filenames or [None]:
-	xmldoc = ligolw_utils.load_filename(filename, verbose = options.verbose, contenthandler = ligolw.LIGOLWContentHandler)
+	xmldoc = ligolw_utils.load_filename(filename, verbose = options.verbose)
 
 	ilwd.strip_ilwdchar(xmldoc)
 

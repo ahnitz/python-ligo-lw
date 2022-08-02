@@ -63,7 +63,6 @@ def parse_command_line():
 		usage = "%prog [options] [url ...]",
 		description = "Utility for manipulating segment lists in LIGO Light Weight XML format.  At the moment, all this can do is insert segment lists into an XML file from segwizard format files and LAL cache files.  If no filenames are given on the command line then a new document is created and written to stdout.  If a filename is given on the command line then the transformations described by the command line options are applied to the contents of that file, and the file replaced with the result.  If multiple filenames are given on the command line, then the same transformation is performed to each one.  If --output is given on the command line then output is written to that file instead of stdout or instead of overwriting the input file (setting --output is not allowed when multiple input files are given).  The filenames can also be many common kinds of URLs like \"http://\" and \"ftp://\", but then --output must be used to redirect the output to another location."
 	)
-	parser.add_option("--ilwdchar-compat", action = "store_true", help = "Use obsolete ilwd:char based table definitions and ID reassignment algorithm (default = use new int_8s based table definitions and ID reassignment algorithm).")
 	parser.add_option("--coalesce", action = "store_true", help = "Coalesce the segment lists (default = don't).")
 	parser.add_option("--name", metavar = "text", help = "When inserting segments from segwizard files, set the name of the segment lists to this (default = None).")
 	parser.add_option("--segments-version", metavar = "integer", type = "int", help = "When inserting new segments, set the version number to this (default = None).")
@@ -102,23 +101,6 @@ options, urls, paramdict = parse_command_line()
 
 
 #
-# Compatibility mode?
-#
-
-
-if options.ilwdchar_compat:
-	from glue.ligolw import ligolw
-	from glue.ligolw import lsctables
-	from glue.ligolw import utils as ligolw_utils
-	from glue.ligolw.utils import segments as ligolw_segments
-
-
-@lsctables.use_in
-class LIGOLWContentHandler(ligolw.LIGOLWContentHandler):
-	pass
-
-
-#
 # Iterate over files to process.  If list == [None], then create a new file
 # and write to --output (or stdout if option not set).
 #
@@ -131,7 +113,7 @@ for url in urls:
 
 
 	if url is not None:
-		xmldoc = ligolw_utils.load_url(url, verbose = options.verbose, contenthandler = LIGOLWContentHandler)
+		xmldoc = ligolw_utils.load_url(url, verbose = options.verbose)
 	else:
 		# create an empty one
 		xmldoc = ligolw.Document()
