@@ -448,6 +448,12 @@ class ProcessTable(ligolw.Table):
 
 class Process(ligolw.Table.RowType):
 	"""
+	NOTE:  for some historical reason, this table records start and end
+	times as integer-valued quantities, only.  GPS time-valued
+	quantities are emulated for convenience, but only the integer part
+	is stored.  Truncation to an integer occurs when assigning a start
+	or end time to the row.
+
 	Example:
 
 	>>> x = Process()
