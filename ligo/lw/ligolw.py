@@ -761,18 +761,52 @@ class Table(EmptyElement, list):
 	Table element that knows about its columns and a provides a
 	list-like interface to its rows.
 
+	Customization
+	=============
+
+	In some cases, applications will want to define custom sub-classes
+	of the Table element tailored to their specific use case.  The
+	lsctables module provides many examples.  The following is a quick
+	summary of how to do this.
+
+	When defining a sub-class, a number of class attributes can be
+	defined and used to convey metadata about the custom Table to other
+	code in the library.  All are optional, but in some cases failing
+	to set them will defeat the purpose of creating a special
+	sub-class.  For example, typically you will want to specify the
+	columns and their types, and indicate which column, if there is
+	one, carries the IDs for rows in this table.  The special class
+	attributes are given below.
+
 	Special Attributes
 	------------------
 
-	These are used by table-specific subclasses to provide information
-	about the Table they define.  Set to None when not used.
+	.tableName:  The name of the table.  This is optional, but failing
+	to set it makes the sub-class indistinguishable from the stock
+	Table element to most of the code in this library.
 
-	.validcolumns:  Dictionary of column name/type pairs defining the
-	set of columns instances of this Table may have.
+	.validcolumns:  Dictionary of column name-->type mappings defining
+	the set of columns that instances of this Table may have, and what
+	their types are.  When loading a document, if a column is
+	encountered that is not in this dictionary or its type does not
+	match what is specified an error will be reported.  Column names
+	must be lower case, and obey the normal rules for C or Python
+	variables:  no spaces, no hyphens, and they cannot start with a
+	numeral.  The recognized types can be found in the types module.
+	NOTE:  the names of columns that contain the IDs of rows in other
+	tables must be named in the form "<table_name>:<column_name>",
+	i.e., the other table's name, a colon, then the column in that
+	other table containing that table's IDs.  For example, a column
+	that contains process IDs referring to rows in the process table
+	must be named "process:process_id".  Failure to ensure this will
+	break the ligolw_add algorithm for reassigning IDs to prevent
+	collisions.
 
 	.loadcolumns:  Sequence of names of columns to be loaded.  If not
 	None, only names appearing in the list will be loaded, the rest
-	will be skipped.  Can be used to reduce memory use.
+	will be skipped.  Can be used to reduce memory use.  Typically this
+	is not initialized in the class itself, but is set by an
+	application at runtime before loading a document.
 
 	.constraints:  Text to be included as constraints in the SQL
 	statement used to construct the Table.
@@ -781,7 +815,53 @@ class Table(EmptyElement, list):
 	of column names over which to construct that index.
 
 	.next_id:  object giving the next ID to assign to a row in this
-	Table, and carrying the ID column name as a .column_name attribute
+	Table, and carrying the ID column name as the .column_name
+	attribute.  Typically the Column.next_id metaclass is used to
+	create a new custom class for this purpose, then the .next_id
+	attribute is initialized to the 0 instance of that new class.
+	NOTE:  when doing this, the column_name used to initialize the new
+	class must be set to the name of the column that will hold the IDs.
+	Failing to ensure this will break the ligolw_add algorithm for
+	merging documents and re-assigning IDs to prevent collisions.
+
+	.RowType:  this attribute provides the class that will be used to
+	store rows for this Table.  A default implementation is provided
+	which will initialize attributes from keyword arguments, and
+	supports pickling, but if any special handling of the data stored
+	in the Table's columns is required then a custom class will be
+	needed.  Typically the class defined here will be sub-classed.  The
+	lsctables module provides helper code to implement a variety of
+	properties, for example sets of instrument names or GPS times
+	broken out into integer and nanosecond parts.
+
+	Document Parsing
+	----------------
+
+	Once a new Table class is defined, the .TableByName class attribute
+	in this class should be updated.  The .TableByName attribute is a
+	mapping used to map table names to corresponding Python classes.
+	This mapping is used when parsing XML documents, when extracting
+	the contents of SQL databases and any other place the conversion
+	from a name to a class definition is required.  Once the mapping is
+	updated, when reading XML documents, Table elements whose names
+	match the custom definition will be converted to instances of that
+	class.  Tables whose names are not recognized are loaded as
+	instances of this generic class.
+
+	Example:
+
+	>>> class MyCustomTable(Table):
+	...	tableName = "my_custom_table"
+	...	validcolumns = {
+	...		"process:process_id": "int_8s",
+	...		"snr": "real_8",
+	...		"event_id": "int_8s"
+	...	}
+	...	next_id = Column.next_id.type("event_id")(0)
+	...	class RowType(Table.RowType):
+	...		pass
+	...
+	>>> Table.TableByName[MyCustomTable.tableName] = MyCustomTable
 	"""
 	tagName = "Table"
 	validchildren = frozenset(["Comment", "Column", "Stream"])
@@ -1712,15 +1792,70 @@ class Column(EmptyElement):
 
 	class next_id(int):
 		"""
-		Type for .next_id attributes of tables with int_8s ID columns.
+		Type for .next_id attributes of tables with int_8s ID
+		columns.  This class is not normally instantiated, itself,
+		instead the .type() class method is used to create a new,
+		custom, class derived from this class, which is then
+		instantiated to create an ID object.
 		"""
 		column_name = None
 
 		def __add__(self, other):
+			"""
+			Override .__add__() to ensure that incrementing an
+			ID yields a new object of the same type (and so
+			that carries the correct .column_name class
+			attribute).
+
+			NOTE:  no other arithmetic operations are
+			customized, and they will return standard Python
+			types.
+
+			Example:
+
+			>>> x = Column.next_id.type("event_id")(0)
+			>>> x
+			0
+			>>> x.column_name
+			'event_id'
+			>>> y = x + 1
+			>>> y
+			1
+			>>> y.column_name
+			'event_id'
+			"""
 			return type(self)(super(Column.next_id, self).__add__(other))
 
 		@classmethod
 		def type(cls, column_name):
+			"""
+			Create a new sub-class derived from this class and
+			whose .column_name class attribute is set to
+			column_name.
+
+			Example:
+
+			>>> MyCustomID = Column.next_id.type("event_id")
+			>>> MyCustomID.column_name
+			'event_id'
+			>>> x = MyCustomID(0)
+			>>> x
+			0
+			>>> x.column_name
+			'event_id'
+			>>> y = x + 1
+			>>> y
+			1
+			>>> y.column_name
+			'event_id'
+			>>> z = y - x
+			>>> z
+			1
+			>>> z.column_name
+			Traceback (most recent call last):
+			    ...
+			AttributeError: 'int' object has no attribute 'column_name'
+			"""
 			return type(str("next_%s" % column_name), (cls,), {"column_name": column_name})
 
 

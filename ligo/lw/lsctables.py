@@ -31,44 +31,16 @@ See the LDAS CVS repository at
 http://www.ldas-sw.ligo.caltech.edu/cgi-bin/cvsweb.cgi/ldas/dbms/db2/sql
 for more information.
 
-
-Customization
--------------
-
-In some cases, applications will need to define sub-classes of the table
-and row classes found here or will need to define their own custom tables
-altogether.  Once the custom classes are defined, the following steps are
-required to incorporate them into this module's document handling
-machinery.
-
-Firstly, if a new Table class is defined, the TableByName mapping defined
-in this module should be updated.  The TableByName mapping is used to map
-table names to corresponding Python classes.  This mapping is used when
-parsing XML documents, when extracting the contents of SQL databases and
-any other place the conversion from a name to a class definition is
-required.  Once the mapping is updated, XML documents containing Table
-elements whose names match the custom definition will be converted to
-instances of that class (Tables whose names are not recognized are loaded
-as instances of the generic ligo.lw.Table class).
+Importing this module has the side effect of updating the
+ligolw.Table.TableByName dictionary to map all of the names of tables
+defined in this module to the classes defined here.  This causes document
+parsing to construct instances of these classes, and use their respective
+row classes, when loading a document, instead of the generic types in
+ligolw.
 
 Example:
 
->>> class MyCustomTable(ligolw.Table):
-...	tableName = "custom"
-...
->>> TableByName[MyCustomTable.tableName] = MyCustomTable
-
-The row type to be used with a table is selected using the .RowType
-attribute of the corresponding Table class.  When parsing an XML document
-the text is converted into row objects, each of which is created by calling
-the .RowType attribute with no arguments.
-
-Example:
-
->>> class MyCustomTableRow(ligolw.Table.RowType):
-...	pass
-...
->>> MyCustomTable.RowType = MyCustomTableRow
+>>> from ligo.lw import lsctables
 """
 
 
