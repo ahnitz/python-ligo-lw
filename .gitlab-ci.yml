@@ -38,6 +38,7 @@ docs:
           --module-first
           --separate
           --full
+          --implicit-namespaces
           --ext-autodoc
           --ext-intersphinx
           --doc-project "python-ligo-lw"
