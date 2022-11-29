@@ -74,10 +74,7 @@ rm -rf %{buildroot}
 
 %files -n python%{python3_pkgversion}-%{shortname}
 %license LICENSE
-%{python3_sitearch}/ligo/lw
-%{python3_sitearch}/python_ligo_lw-*.egg-info
-%exclude %{python3_sitearch}/ligo/__init__.py*
-%exclude %{python3_sitearch}/ligo/__pycache__/__init__.*
+%{python3_sitearch}/*
 
 %files -n python%{python3_pkgversion}-%{shortname}-bin
 %license LICENSE
