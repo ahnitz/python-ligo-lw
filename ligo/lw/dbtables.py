@@ -29,6 +29,19 @@ This module provides an implementation of the Table element that uses a
 database engine for storage.  On top of that it then re-implements a number
 of the tables from the lsctables module to provide versions of their
 methods that work against the SQL database.
+
+NOTE:  this is not an object-relational mapper.  This module's function is
+to facilitate bi-directional format conversion between XML format files and
+SQLite database files, and the merging of LIGO Light-Weight XML style
+databases into single database files.  Some basic object-relational mapper
+features have been implemented where it was found to be trivial to do so,
+in case they come in handy, but applications that wish to interact with the
+contents of an SQLite database file must, for the most part, do so using
+SQL code.  To be clear, an example of what this means:  appending a row
+object to a table only inserts values of the row object's attributes at
+that time into the database;  subsequently, modifying the attributes of
+that row object in the Python calling code only modifies that object, it
+does not update the contents of the databse.
 """
 
 
@@ -100,18 +113,20 @@ class workingcopy(object):
 		None (the default), the system's default location for
 		temporary files is used.  If set to the special value
 		"_CONDOR_SCRATCH_DIR" then the value of the environment
-		variable of that name will be used (to use a directory
+		variable with that name will be used (to use a directory
 		literally named _CONDOR_SCRATCH_DIR set tmp_path to
 		"./_CONDOR_SCRATCH_DIR").
 
 		replace_file:  if True, filename is truncated in place
 		before manipulation;  if False (the default), the file is
 		not modified before use.  This is used when the original
-		file is being over-written with the working copy, and it is
-		necessary to ensure that a malfunction or crash (which
-		might prevent the working copy from over writing the
-		original) does not leave behind the unmodified original,
-		which could subsequently be mistaken for valid output.
+		file, if present, is meant to be replaced with a newly
+		constructed file created in the local scratch space and
+		copied over top of the original file when finished.
+		Truncating the original file is necessary in this scenario
+		to ensure that a malfunction or crash does not leave behind
+		the unmodified original, as that could subsequently be
+		mistaken for valid output.
 
 		discard:  if True the working copy is simply deleted
 		instead of being copied back to the original location;  if
@@ -126,10 +141,14 @@ class workingcopy(object):
 
 		NOTES:
 
-		- When replace_file mode is enabled, any failures that
-		  prevent the original file from being trucated are
-		  ignored.  The inability to truncate the file is
-		  considered non-fatal.
+		- When replace_file mode is enabled, failures that prevent
+		  the original file from being trucated are ignored.  The
+		  inability to truncate the file is considered non-fatal.
+		  If, additionally, some failure later prevents the working
+		  copy from being returned and over-writting the original
+		  then the original is left in place.  Setting replace_file
+		  to True is not a guarantee that old output from a
+		  previous program is removed.
 
 		- If the operation to copy the file to the working path
 		  fails then a working copy is not used, the original file
@@ -193,8 +212,8 @@ class workingcopy(object):
 				# if we get here it worked
 				break
 			except IOError as e:
-				# anything other than out-of-space is a
-				# real error
+				# anything other than permission-denied or
+				# out-of-space is a real error
 				import errno
 				import time
 				if e.errno not in (errno.EPERM, errno.ENOSPC):
@@ -216,9 +235,9 @@ class workingcopy(object):
 		try:
 			# try to preserve permission bits.  according to
 			# the documentation, copy() and copy2() are
-			# supposed preserve them but don't.  maybe they
-			# don't preserve them if the destination file
-			# already exists?
+			# supposed preserve them, but I observe that they
+			# don't.  maybe they don't preserve them if the
+			# destination file already exists?
 			shutil.copystat(srcname, dstname)
 		except Exception as e:
 			if verbose:
@@ -240,10 +259,14 @@ class workingcopy(object):
 			if self.verbose:
 				sys.stderr.write("using '%s' as workspace\n" % self.target)
 
-			# mkstemp() ignores umask, creates all files accessible
-			# only by owner;  we should respect umask.  note that
-			# os.umask() sets it, too, so we have to set it back after
-			# we know what it is
+			# mkstemp() ignores umask, creates all files
+			# accessible only by owner;  we should respect
+			# umask.  note that os.umask() sets it, too, so we
+			# have to set it back after we know what it is.
+			# NOTE:  this is a minor security issue, since the
+			# file is briefly made world-writable.  this is so
+			# stupid this must not be the correct way to do
+			# this, but I don't know what is.
 
 			umsk = os.umask(0o777)
 			os.umask(umsk)
@@ -433,16 +456,16 @@ class idmapper(object):
 
 	def update_ids(self, xmldoc, verbose = False):
 		# NOTE:  it's critical that the xmldoc object be retrieved
-		# *before* the rows whose IDs need to be updated are
-		# inserted (which, of course, is done before before this
-		# method is called).  the xml retrieval resets the "last
-		# max row ID" values inside the table objects, so if
-		# retrieval of the xmldoc is deferred until after the rows
-		# are inserted, nothing will get updated.  therefore, the
-		# xmldoc needs to be retrieved ahead of time and passed
-		# separately to this method, even though it seems this
-		# method could reconstruct the xmldoc itself from the
-		# connection.
+		# *before* the rows whose IDs need to be updated (by
+		# calling this method) are inserted.  the xml retrieval
+		# resets the "last max row ID" values inside the table
+		# objects, so if retrieval of the xmldoc is deferred until
+		# after the rows are inserted, nothing will get updated.
+		# therefore, the xmldoc must be retrieved by the calling
+		# code, held while the rows are inserted, and then that
+		# xmldoc object must be passed to this method, even though
+		# it might seem like this method could simply reconstruct
+		# the xmldoc itself from the connection.
 		table_elems = xmldoc.getElementsByTagName(ligolw.Table.tagName)
 		for i, tbl in enumerate(table_elems):
 			if verbose:
@@ -545,7 +568,7 @@ class DBTable(ligolw.Table):
 	instead the user can use SQL to query the table's contents.
 
 	The constraints attribute can be set to a text string that will be
-	added to the table's CREATE statement where constraints go, for
+	added to the table's CREATE statement where constraints go.  For
 	example you might wish to set this to "PRIMARY KEY (event_id)" for
 	a table with an event_id column.
 
@@ -587,7 +610,6 @@ class DBTable(ligolw.Table):
 	allows the lsctables class' methods to be used with the DBTable
 	instances but not all of the methods will necessarily work with the
 	database-backed version of the class.  Your mileage may vary.
-
 	"""
 	# FIXME:  is this needed?
 	class Stream(ligolw.Table.Stream):
@@ -781,19 +803,19 @@ class DBTable(ligolw.Table):
 
 	def _append(self, row):
 		"""
-		Standard .append() method.  This method is for intended for
+		Standard .append() method.  This method is intended for
 		internal use only.
 		"""
 		self.cursor.execute(self.append_statement, self.append_attrgetter(row))
 
 	def _remapping_append(self, row):
 		"""
-		Replacement for the standard .append() method.  This
-		version performs on the fly row ID reassignment, and so
-		also performs the function of the updateKeyMapping()
-		method.  SQLite does not permit the PRIMARY KEY of a row to
-		be modified, so it needs to be done prior to insertion.
-		This method is intended for internal use only.
+		Version of the .append() method that performs on the fly
+		row ID reassignment, and so also performs the function of
+		the updateKeyMapping() method.  SQLite does not permit the
+		PRIMARY KEY of a row to be modified, so it needs to be done
+		prior to insertion.  This method is intended for internal
+		use only.
 		"""
 		if self.next_id is not None:
 			# assign (and record) a new ID before inserting the
@@ -814,8 +836,8 @@ class DBTable(ligolw.Table):
 		queries into Python objects.
 		"""
 		row = self.RowType()
-		for c, v in zip(self.dbcolumnnames, values):
-			setattr(row, c, v)
+		for attr, value in zip(self.dbcolumnnames, values):
+			setattr(row, attr, value)
 		return row
 	# backwards compatibility
 	_row_from_cols = row_from_cols
@@ -823,8 +845,9 @@ class DBTable(ligolw.Table):
 	def unlink(self):
 		# chain to parent class
 		ligolw.Table.unlink(self)
-		self.connection = None
+		self.cursor.close()
 		self.cursor = None
+		self.connection = None
 
 	def applyKeyMapping(self):
 		"""
