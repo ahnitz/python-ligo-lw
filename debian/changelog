@@ -35,6 +35,12 @@ python-ligo-lw (2.0.0-1) unstable; urgency=medium
 
  -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 16 Feb 2021 18:03:43 +0900
 
+python-ligo-lw (1.8.4-1) unstable; urgency=medium
+
+  * ligolw_run_sqlite:  fix issue where xml files were not being updated when using --tmp-space
+
+ -- Kipp Cannon <kipp.cannon@ligo.org>  Tue, 13 Sep 2022 16:45:00 +0900
+
 python-ligo-lw (1.8.3-1) unstable; urgency=medium
 
   * ligolw_run_sqlite:  update for dbtables API changes
