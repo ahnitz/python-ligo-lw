@@ -1740,6 +1740,368 @@ SimRingdownTable.RowType = SimRingdown
 #
 # =============================================================================
 #
+#                         sim_cbc: new injection table
+#
+# =============================================================================
+#
+
+
+SimCBCID = ligolw.Column.next_id.type("cbc_sim_id")
+
+
+class SimCBCTable(ligolw.Table):
+	tableName = "sim_cbc"
+	validcolumns = {
+		"geocent_end_time": "int_4s",
+		"geocent_end_time_ns": "int_4s",
+		"cbc_model": "lstring",
+		"coa_phase": "real_8",
+		"d_lum": "real_8",
+		"dec": "real_8",
+		"f22_ref_spin": "real_8",
+		"f22_start": "real_8",
+		"inclination": "real_8",
+		"mass1_det": "real_8",
+		"mass2_det": "real_8",
+		"polarization": "real_8",
+		"ra": "real_8",
+		"spin1x": "real_8",
+		"spin1y": "real_8",
+		"spin1z": "real_8",
+		"spin2x": "real_8",
+		"spin2y": "real_8",
+		"spin2z": "real_8",
+		"ampinterpol": "int_4s",
+		"convention": "int_4s",
+		"eobchoosenumoranalhamder": "int_4s",
+		"eobellmaxfornyquistcheck": "int_4s",
+		"expansionorder": "int_4s",
+		"finalspinmod": "int_4s",
+		"getideo": "int_4s",
+		"gmtideo": "int_4s",
+		"insampfitsversion": "int_4s",
+		"insamphmversion": "int_4s",
+		"insampversion": "int_4s",
+		"insphasehmversion": "int_4s",
+		"insphaseversion": "int_4s",
+		"inspiralversion": "int_4s",
+		"intampfitsversion": "int_4s",
+		"intamphmversion": "int_4s",
+		"intampversion": "int_4s",
+		"intphasehmversion": "int_4s",
+		"intphaseversion": "int_4s",
+		"liv_a_sign": "real_8",
+		"mbandprecversion": "int_4s",
+		"mergerversion": "int_4s",
+		"modearray": "lstring",
+		"modearrayjframe": "lstring",
+		"modesl0frame": "int_4s",
+		"phaseref21": "real_8",
+		"precmodes": "int_4s",
+		"precthresholdmband": "real_8",
+		"precversion": "int_4s",
+		"rdampfitsversion": "int_4s",
+		"rdamphmversion": "int_4s",
+		"rdampversion": "int_4s",
+		"rdphasehmversion": "int_4s",
+		"rdphaseversion": "int_4s",
+		"thresholdmband": "real_8",
+		"tidalhexadecapolarlambda1": "real_8",
+		"tidalhexadecapolarlambda2": "real_8",
+		"tidaloctupolarfmode1": "real_8",
+		"tidaloctupolarfmode2": "real_8",
+		"tidaloctupolarlambda1": "real_8",
+		"tidaloctupolarlambda2": "real_8",
+		"tidalquadrupolarfmode1": "real_8",
+		"tidalquadrupolarfmode2": "real_8",
+		"transprecessionmethod": "int_4s",
+		"twistphenomhm": "int_4s",
+		"usemodes": "int_4s",
+		"alphappe": "real_8",
+		"alphappe0": "real_8",
+		"alphappe1": "real_8",
+		"alphappe2": "real_8",
+		"alphappe3": "real_8",
+		"alphappe4": "real_8",
+		"alphappe5": "real_8",
+		"alphappe6": "real_8",
+		"alphappe7": "real_8",
+		"ampo": "int_4s",
+		"axis": "int_4s",
+		"betappe": "real_8",
+		"betappe0": "real_8",
+		"betappe1": "real_8",
+		"betappe2": "real_8",
+		"betappe3": "real_8",
+		"betappe4": "real_8",
+		"betappe5": "real_8",
+		"betappe6": "real_8",
+		"betappe7": "real_8",
+		"cbc_sim_id": "int_8s",
+		"dquadmon1": "real_8",
+		"dquadmon2": "real_8",
+		"dalpha1": "real_8",
+		"dalpha2": "real_8",
+		"dalpha3": "real_8",
+		"dalpha4": "real_8",
+		"dalpha5": "real_8",
+		"dbeta1": "real_8",
+		"dbeta2": "real_8",
+		"dbeta3": "real_8",
+		"dchi0": "real_8",
+		"dchi1": "real_8",
+		"dchi2": "real_8",
+		"dchi3": "real_8",
+		"dchi4": "real_8",
+		"dchi5": "real_8",
+		"dchi5l": "real_8",
+		"dchi6": "real_8",
+		"dchi6l": "real_8",
+		"dchi7": "real_8",
+		"dsigma1": "real_8",
+		"dsigma2": "real_8",
+		"dsigma3": "real_8",
+		"dsigma4": "real_8",
+		"dxi1": "real_8",
+		"dxi2": "real_8",
+		"dxi3": "real_8",
+		"dxi4": "real_8",
+		"dxi5": "real_8",
+		"dxi6": "real_8",
+		"ecco": "int_4s",
+		"eccentricity": "real_8",
+		"f_ecc": "real_8",
+		"fend": "real_8",
+		"lambda1": "real_8",
+		"lambda2": "real_8",
+		"liv": "int_4s",
+		"log10lambda_eff": "real_8",
+		"longascnodes": "real_8",
+		"lscorr": "int_4s",
+		"meanperano": "real_8",
+		"modes": "int_4s",
+		"nltidesa1": "real_8",
+		"nltidesa2": "real_8",
+		"nltidesf1": "real_8",
+		"nltidesf2": "real_8",
+		"nltidesn1": "real_8",
+		"nltidesn2": "real_8",
+		"nongr_alpha": "real_8",
+		"numreldata": "lstring",
+		"phaseo": "int_4s",
+		"phi1": "real_8",
+		"phi2": "real_8",
+		"phi3": "real_8",
+		"phi4": "real_8",
+		"redshift": "real_8",
+		"sideband": "int_4s",
+		"spino": "int_4s",
+		"tideo": "int_4s",
+		"time_slide:time_slide_id": "int_8s",
+		"process:process_id": "int_8s",
+		"h_snr": "real_8",
+		"l_snr": "real_8",
+		"v_snr": "real_8",
+		"k_snr": "real_8",
+	}
+	constraints = "PRIMARY KEY (cbc_sim_id)"
+	next_id = SimCBCID(0)
+
+
+class SimCBC(ligolw.Table.RowType):
+	"""
+	Example:
+	>>>x = SimCBC()
+	>>>x.ra_dec = 0., 0.
+	>>>x.ra_dec
+	(0.0, 0.0)
+	>>>x.ra_dec = None
+	>>>print(x.ra_dec)
+	None
+	>>>x.time_geocent = None
+	>>>print(x.time_geocent)
+	None
+	>>>x.time_geocent = LIGOTimeGPS(6e8)
+	>>>print(x.time_geocent)
+	600000000
+	>>>x.distance = 100e6
+	>>>x.ra_dec = 0., 0.
+	>>>x.inclination = 0.
+	>>>x.coa_phase = 0.
+	>>>x.polarization = 0.
+	>>>x.snr_geometry_factors(("H1",))
+	{'H1': (0.490467233277456-0.4671010853697789j)}
+	>>># NOTE:  complex, abs() is traditional value
+	>>>x.effective_distances(("H1",))
+	{'H1': (106915812.12292896+101822279.85362741j)}
+	>>>x.expected_snrs({"H1": 150e6})
+	{'H1': (5.885606799329472-5.605213024437346j)}
+	"""
+	__slots__ = tuple(map(ligolw.Column.ColumnName, SimCBCTable.validcolumns))
+
+	time_geocent = gpsproperty("geocent_end_time", "geocent_end_time_ns")
+
+	@property
+	def ra_dec(self):
+		if self.ra is None and self.dec is None:
+			return None
+		return self.ra, self.dec
+
+	@ra_dec.setter
+	def ra_dec(self, radec):
+		if radec is None:
+			self.ra = self.dec = None
+		else:
+			self.ra, self.dec = radec
+
+	@property
+	def spin1(self):
+		if self.spin1x is None and self.spin1y is None and self.spin1z is None:
+			return None
+		return numpy.array((self.spin1x, self.spin1y, self.spin1z), dtype = "double")
+
+	@spin1.setter
+	def spin1(self, spin):
+		if spin is None:
+			self.spin1x, self.spin1y, self.spin1z = None, None, None
+		else:
+			self.spin1x, self.spin1y, self.spin1z = spin
+
+	@property
+	def spin2(self):
+		if self.spin2x is None and self.spin2y is None and self.spin2z is None:
+			return None
+		return numpy.array((self.spin2x, self.spin2y, self.spin2z), dtype = "double")
+
+	@spin2.setter
+	def spin2(self, spin):
+		if spin is None:
+			self.spin2x, self.spin2y, self.spin2z = None, None, None
+		else:
+			self.spin2x, self.spin2y, self.spin2z = spin
+
+	def time_at_instrument(self, instrument, offsetvector):
+		"""
+		Return the "time" of the injection, delay corrected for the
+		displacement from the geocentre to the given instrument.
+
+		NOTE:  this method does not account for the rotation of the
+		Earth that occurs during the transit of the plane wave from
+		the detector to the geocentre.  That is, it is assumed the
+		Earth is in the same orientation with respect to the
+		celestial sphere when the wave passes through the detector
+		as when it passes through the geocentre.  The Earth rotates
+		by about 1.5 urad during the 21 ms it takes light to travel
+		the radius of the Earth, which corresponds to 10 m of
+		displacement at the equator, or 33 light-ns.  Therefore,
+		the failure to do a proper retarded time calculation here
+		results in errors as large as 33 ns.  This is insignificant
+		in present applications, but be aware that this
+		approximation is being made if the return value is used in
+		other contexts.
+		"""
+		# the offset is subtracted from the time of the injection.
+		# injections are done this way so that when the triggers
+		# that result from an injection have the offset vector
+		# added to their times the triggers will form a coinc
+		t_geocent = self.time_geocent - offsetvector[instrument]
+		ra, dec = self.ra_dec
+		return t_geocent + lal.TimeDelayFromEarthCenter(lal.cached_detector_by_prefix[instrument].location, ra, dec, t_geocent)
+
+	def snr_geometry_factors(self, instruments):
+		"""
+		Compute and return a dictionary of the ratios of the
+		source's physical distance to its effective distance for
+		each of the given instruments.  NOTE that the quantity
+		returned is complex, where the magnitude of the value is
+		that ratio and the phase is such that the expected complex
+		SNR in a detector is given by
+
+		rho_{0} = 8 * (D_horizon / D) * snr_geometry_factor,
+
+		where D_horizon is the detector's horizon distance for this
+		waveform (computed from the detector's noise spectral
+		density), and D is the source's physical distance.  The
+		geometry factor (what this method computes) depends on the
+		direction to the source with respect to the antenna beam,
+		the inclination of the source's orbital plane, the wave
+		frame's polarization, and the phase of the waveform at the
+		time of coalescence.  The combination
+
+		D / geometry factor
+
+		is called the effective distance.  See Equation (4.3) of
+		arXiv:0705.1514.
+
+		See also .effective_distances(), .expected_snrs().
+		"""
+		cosi = math.cos(self.inclination)
+		cos2i = cosi**2.
+		# don't rely on self.gmst to be set properly
+		gmst = lal.GreenwichMeanSiderealTime(self.time_geocent)
+		snr_geometry_factors = {}
+		for instrument in instruments:
+			fp, fc = lal.ComputeDetAMResponse(
+				lal.cached_detector_by_prefix[instrument].response,
+				self.longitude, self.latitude,
+				self.polarization,
+				gmst
+			)
+			snr_geometry_factors[instrument] = complex(
+				-fc * cosi, fp * (1. + cos2i) / 2.
+			) * cmath.exp(-2.j * self.coa_phase)
+		return snr_geometry_factors
+
+	def effective_distances(self, instruments):
+		"""
+		Compute and return a dictionary of the effective distances
+		for this injection for the given instruments.  The
+		effective distance is the distance at which an optimally
+		oriented and positioned source would be seen with the same
+		SNR as that with which this source will be seen in the
+		given instrument.  Effective distance is related to the
+		physical distance, D, by the geometry factor
+
+		D_effective = D / (geometry factor).
+
+		NOTE that in this implementation the quantity returned is
+		complex such that the expected complex SNR in a detector is
+
+		rho_{0} = 8 * D_horizon / D_effective
+
+		Traditionally the effective distance is a scalar and does
+		not convey information about the phase of the
+		signal-to-noise ratio.  That quantity is the absolute value
+		of the quantity computed by this method.  The extension to
+		complex values is done here to facilitate the use of this
+		code in applications where the expected complex SNR is
+		required.
+
+		See also .snr_geometry_factors(), .expected_snrs().
+		"""
+		return {instrument: self.d_lum / snr_geometry_factor for instrument, snr_geometry_factor in self.snr_geometry_factors(instruments).items()}
+
+	def expected_snrs(self, horizon_distances):
+		"""
+		Compute and return a dictionary of the expected complex
+		SNRs for this injection in the given instruments.
+		horizon_distances is a dictionary giving the horizon
+		distance for each of the detectors for which an expected
+		SNR is to be computed.  The expected SNR in a detector is
+
+		rho_{0} = 8 * D_horizon / D_effective.
+
+		See also .effective_distances().
+		"""
+		return {instrument: 8. * horizon_distances[instrument] / effective_distance for instrument, effective_distance in self.effective_distances(horizon_distances).items()}
+
+
+SimCBCTable.RowType = SimCBC
+
+
+#
+# =============================================================================
+#
 #                               summ_value:table
 #
 # =============================================================================
@@ -2490,6 +2852,7 @@ ligolw.Table.TableByName.update({
 	SimBurstTable.tableName: SimBurstTable,
 	SimInspiralTable.tableName: SimInspiralTable,
 	SimRingdownTable.tableName: SimRingdownTable,
+	SimCBCTable.tableName: SimCBCTable,
 	SnglBurstTable.tableName: SnglBurstTable,
 	SnglInspiralTable.tableName: SnglInspiralTable,
 	SnglRingdownTable.tableName: SnglRingdownTable,
