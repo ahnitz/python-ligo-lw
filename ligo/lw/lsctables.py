@@ -141,7 +141,7 @@ class instrumentsproperty(object):
 		when processing typical documents, this eventually proved
 		to be a significant performance burden.  For this reason,
 		this code now only supports the ","-delimited encoding.
-		For over a decade, the the corresponding encoder in this
+		For over a decade, the corresponding encoder in this
 		library has only generated documents using the
 		","-delimited encoding, so there should no longer be any
 		documents in active use that rely on one of the older
@@ -150,6 +150,10 @@ class instrumentsproperty(object):
 		in the document might not be decoded the way the original
 		tool that wrote the document intended, and you should be
 		aware of the possible need to do some format translation.
+		There will be no warning or error message:  documents using
+		obsolete encodings will appear to be valid documents, the
+		strings will simply be mistaken for unusual instrument
+		names, as shown below in some examples.
 
 		Example:
 
@@ -175,12 +179,13 @@ class instrumentsproperty(object):
 		suitable for storage in the "ifos" or "instruments" columns
 		found in many tables.  This function is mostly for internal
 		use by the .instruments properties of the corresponding row
-		classes.  The input be None or an iterable of zero or more
-		instrument names, none of which may be zero-length, contain
-		whitespace, or contain "," characters.  The output is a
-		single string containing the unique instrument names
-		concatenated using "," as a delimiter.  instruments only be
-		iterated over once and so can be a generator expression.
+		classes.  The input must be None or an iterable of zero or
+		more instrument names, none of which may be zero-length,
+		contain whitespace, or contain "," characters.  The output
+		is a single string containing the unique instrument names
+		concatenated using "," as a delimiter.  instruments will
+		only be iterated over once and so can be a generator
+		expression.
 
 		NOTE:  for performance reasons, because of the large number
 		of times this operation is performed when processing a
