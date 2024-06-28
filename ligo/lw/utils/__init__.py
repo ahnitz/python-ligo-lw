@@ -475,7 +475,7 @@ def load_fileobj(fileobj, compress = None, xmldoc = None, contenthandler = ligol
 		elif magic[:6] == b"\xFD\x37\x7A\x58\x5A\x00":
 			compress = "xz"
 		elif magic[:4] == b"\x28\xB5\x2F\xFD":
-			# NOTE:  only foramt detection is provided.  this
+			# NOTE:  only format detection is provided.  this
 			# compression format is not supported.  will
 			# trigger the unrecognized keyword arg exception
 			# below
@@ -579,7 +579,7 @@ def write_fileobj(xmldoc, fileobj, compress = None, compresslevel = 3, **kwargs)
 	Valid values are:  False to disable compression;  one of "bz2",
 	"gz", or "xz" to select bzip2, gzip, or lzma compression,
 	respectively;  or None to select the default behaviour (which is to
-	disable compression).  When bzip2 or gzip compression is slected,
+	disable compression).  When bzip2 or gzip compression is selected,
 	the compresslevel parameter sets the compression level (the default
 	is 3).
 
@@ -646,10 +646,10 @@ def write_filename(xmldoc, filename, verbose = False, compress = None, with_mv =
 	This function traps the signals in the trap_signals iterable during
 	the write process (see SignalsTrap for the default signals), and it
 	does this by temporarily installing its own signal handlers in
-	place of the current handlers.  This is done to prevent Condor
+	place of the current handlers.  This is done to prevent HTCondor
 	eviction during the write process.  When the file write is
 	concluded the original signal handlers are restored.  Then, if
-	signals were trapped during the write process, the signals are then
+	signals were trapped during the write process, the signals are
 	resent to the current process in the order in which they were
 	received.  The signal.signal() system call cannot be invoked from
 	threads, and trap_signals must be set to None or an empty sequence

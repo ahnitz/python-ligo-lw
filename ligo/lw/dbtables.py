@@ -305,7 +305,7 @@ class workingcopy(object):
 		two are different.
 
 		During the move operation, this function traps the signals
-		used by Condor to evict jobs.  This reduces the risk of
+		used by HTCondor to evict jobs.  This reduces the risk of
 		corrupting a document by the job terminating part-way
 		through the restoration of the file to its original
 		location.  When the move operation is concluded, the

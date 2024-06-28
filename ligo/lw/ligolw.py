@@ -566,7 +566,7 @@ class Comment(Element):
 # FIXME: Params of type string should be quoted in order to correctly
 # delimit their extent.  If that were done, then the pcdata in a Param
 # element could be parsed using the Stream tokenizer (i.e., as though it
-# were a single-token stream), which would guarantee that Stream data and
+# was a single-token stream), which would guarantee that Stream data and
 # Param data is parsed using the exact same rules.  Unfortunately, common
 # practice is to not quote Param string values, so we parse things
 # differently here.  In particular, we strip whitespace from the start and
@@ -1043,7 +1043,7 @@ class Table(EmptyElement, list):
 	def CheckElement(cls, elem):
 		"""
 		Return True if element is a Table element whose Name
-		attribute matches the .tableName attribute of this class ;
+		attribute matches the .tableName attribute of this class;
 		return False otherwise.  See also .CheckProperties().
 		"""
 		return cls.CheckProperties(elem.tagName, elem.attributes)
@@ -2375,7 +2375,7 @@ class Document(EmptyElement):
 		>>> process = xmldoc.register_process("program_name", {"verbose": True})
 		"""
 		# defer import to avoid cyclic import loop
-		# FIXME:  this is a likely a temporary problem.  I don't
+		# FIXME:  this is likely a temporary problem.  I don't
 		# have a specific plan in mind, yet, but at the time of
 		# writing the development goal is to reduce ligo.lw to as
 		# few imports (in application code) as possible, and I
@@ -2466,7 +2466,7 @@ class LIGOLWContentHandler(sax.handler.ContentHandler, object):
 	to use the .load_*() functions in the ligo.lw.utils subpackage to
 	load documents, and the .write_*() functions to write documents.
 	Those functions provide additional features such as support for
-	gzip'ed documents, MD5 hash computation, and Condor eviction
+	gzip'ed documents, MD5 hash computation, and HTCondor eviction
 	trapping to avoid writing broken documents to disk.
 
 	See also:  PartialLIGOLWContentHandler,

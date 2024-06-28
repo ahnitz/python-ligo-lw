@@ -160,7 +160,7 @@ static int add_to_data(ligolw_Tokenizer *tokenizer, PyObject *unicode)
  * remain in the buffer, so the volume of data copied will usually not be
  * more than a few bytes.  It's not worth trying to avoid this by using a
  * circular buffer.  That would complicate token parsing elsewhere since
- * each token's bytes could no longer be trusted to be continguous in
+ * each token's bytes could no longer be trusted to be contiguous in
  * memory.
  */
 
