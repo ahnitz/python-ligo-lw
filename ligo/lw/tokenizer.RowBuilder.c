@@ -228,7 +228,7 @@ static struct PyMethodDef methods[] = {
 
 
 PyTypeObject ligolw_RowBuilder_Type = {
-	PyObject_HEAD_INIT(NULL)
+	PyObject_HEAD_INIT((long int) NULL)
 	.tp_basicsize = sizeof(ligolw_RowBuilder),
 	.tp_dealloc = __del__,
 	.tp_doc =

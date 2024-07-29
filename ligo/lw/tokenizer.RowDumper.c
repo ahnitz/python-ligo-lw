@@ -280,7 +280,7 @@ static struct PyMethodDef methods[] = {
 
 
 PyTypeObject ligolw_RowDumper_Type = {
-	PyObject_HEAD_INIT(NULL)
+	PyObject_HEAD_INIT((long int) NULL)
 	.tp_basicsize = sizeof(ligolw_RowDumper),
 	.tp_dealloc = __del__,
 	.tp_doc =

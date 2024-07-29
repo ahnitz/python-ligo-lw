@@ -697,7 +697,7 @@ static struct PyGetSetDef getset[] = {
 
 
 PyTypeObject ligolw_Tokenizer_Type = {
-	PyObject_HEAD_INIT(NULL)
+	PyObject_HEAD_INIT((long int) NULL)
 	.tp_basicsize = sizeof(ligolw_Tokenizer),
 	.tp_dealloc = __del__,
 	.tp_doc =
